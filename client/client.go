@@ -3,23 +3,44 @@ package client
 import (
 	"fmt"
 	"net/http"
-	"net/url"
+
+	"github.com/gorilla/mux"
+	pocket "github.com/omgitsotis/pocket-stats/pocket"
 )
 
-type Client struct{}
+type Client struct {
+	Pocket *pocket.Pocket
+}
 
 func (c *Client) Retrieve(w http.ResponseWriter, r *http.Request) {
-	// client := &http.Client{}
-	r, err := http.NewRequest("POST", "https://getpocket.com/v3/oauth/request", nil)
+	code, err := c.Pocket.GetAuth("http://localhost:8080/auth/recieved")
 	if err != nil {
-		fmt.Fprintln(w, err.Error())
+		WriteErrorResponse(w, err.Error())
 		return
 	}
 
-	data := url.Values{}
-	data.Set("consumer_key", "74935-9d486f66d2999047b61328f3")
-	data.Set("redirect_uri", "localhost:8080/oauth")
+	u := fmt.Sprintf(
+		"https://getpocket.com/auth/authorize?request_token=%s&redirect_uri=%s",
+		code,
+		"http://localhost:8080/auth/recieved",
+	)
+	fmt.Fprintln(w, u)
+}
 
-	r.Header.Set("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
+func (c *Client) Healthcheck(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "pocket-app healthy")
+	return
+}
 
+func NewClient() *Client {
+	p := pocket.NewPocket("74935-9d486f66d2999047b61328f3")
+	return &Client{p}
+}
+
+func ServeAPI() error {
+	c := NewClient()
+	r := mux.NewRouter()
+	r.Methods("GET").Path("/").HandlerFunc(c.Healthcheck)
+	r.Methods("GET").Path("/auth").HandlerFunc(c.Retrieve)
+	return http.ListenAndServe(":8080", r)
 }
