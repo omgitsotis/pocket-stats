@@ -37,7 +37,7 @@ class App extends Component {
                     return;
                 } else {
                     console.log("wait for connection...")
-                    this.waitForSocketConnection(socket, callback);
+                    this.waitForSocketConnection(accessToken);
                 }
             }, 5);
     }

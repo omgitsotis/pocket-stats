@@ -3,6 +3,7 @@ package client
 import (
 	"fmt"
 	"time"
+
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -37,14 +38,14 @@ func sendAuth(client *Client, data interface{}) {
 }
 
 func getData(client *Client, data interface{}) {
-	since := time.Now().AddDate(0, 0, -7).Unix()
-	data, err := client.Pocket.GetData(client.AccessToken, since)
+	since, _ := time.Parse("02/01/2006", "15/02/2018")
+	_, err := client.Pocket.GetData(client.AccessToken, since)
 	if err != nil {
 		client.send <- Message{"error", err.Error()}
 		return
 	}
 
-	client.send <- Message{"data get", data}
+	// client.send <- Message{"data get", data}
 }
 
 func saveToken(client *Client, data interface{}) {
@@ -53,11 +54,11 @@ func saveToken(client *Client, data interface{}) {
 	}
 
 	var token AccessToken
-  	err := mapstructure.Decode(data, &token)
-  	if err != nil {
-    	client.send <- Message{"error", err.Error()}
-    	return
-  	}
+	err := mapstructure.Decode(data, &token)
+	if err != nil {
+		client.send <- Message{"error", err.Error()}
+		return
+	}
 
 	fmt.Println(data)
 	fmt.Println(token)

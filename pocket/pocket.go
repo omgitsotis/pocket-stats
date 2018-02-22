@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"sort"
+	"time"
 )
 
 type Pocket struct {
@@ -36,20 +38,64 @@ func (p *Pocket) ReceieveAuth(key string) (*User, error) {
 	return &user, nil
 }
 
-func (p *Pocket) GetData(token string, since int64) (*DataList, error) {
-	param := DataParam{
-		ConsumerKey: p.ConsumerID,
-		AccessToken: token,
-		Since:       since,
-		State:       "all",
+func (p *Pocket) GetData(token string, until time.Time) (*DataList, error) {
+	year, month, day := time.Now().Date()
+	midnight := time.Date(year, month, day, 0, 0, 0, 0, time.UTC)
+	d := midnight.Sub(until)
+
+	days := int(d.Hours() / 24)
+	fmt.Printf("Current date: %s\n", midnight.Format("02/01/2006"))
+	fmt.Printf("Until date: %s\n", until.Format("02/01/2006"))
+	fmt.Printf("Days to go back to: %d\n", days)
+
+	seen := make(map[string]bool)
+	// data
+
+	for i := 0; i < 2; i++ {
+		t := midnight.AddDate(0, 0, i*-1)
+		param := DataParam{
+			ConsumerKey: p.ConsumerID,
+			AccessToken: token,
+			Since:       t.Unix(),
+			State:       "all",
+			Sort:        "oldest",
+		}
+
+		var dl DataList
+		if err := p.Call("/get", param, &dl); err != nil {
+			return nil, err
+		}
+
+		count := 0
+		s := make([]string, 0)
+		for key, _ := range dl.Values {
+			fmt.Printf("ID: %s\n", key)
+			if seen[key] {
+				continue
+			}
+			s = append(s, key)
+			seen[key] = true
+			count++
+		}
+
+		sort.Strings(s)
+		fmt.Println(s)
 	}
 
-	var d DataList
-	if err := p.Call("/get", param, &d); err != nil {
-		return nil, err
-	}
-
-	return &d, nil
+	// param := DataParam{
+	// 	ConsumerKey: p.ConsumerID,
+	// 	AccessToken: token,
+	// 	Since:       until,
+	// 	State:       "all",
+	// 	Sort:        "oldest",
+	// }
+	//
+	var dl DataList
+	// if err := p.Call("/get", param, &dl); err != nil {
+	// 	return nil, err
+	// }
+	//
+	return &dl, nil
 }
 
 func (p *Pocket) Call(uri string, body, t interface{}) error {
