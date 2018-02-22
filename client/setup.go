@@ -1,7 +1,10 @@
 package client
 
 import (
+	"log"
 	"net/http"
+
+	r "github.com/dancannon/gorethink"
 )
 
 // func NewClient() *Client {
@@ -21,8 +24,19 @@ func ServeAPI() error {
 	//
 	// fmt.Println("Created router")
 	// return http.ListenAndServe(":8082", handlers.CORS(corsObj)(r))
-	r := NewRouter()
+	session, err := r.Connect(r.ConnectOpts{
+		Address:  "localhost:28015",
+		Database: "chat",
+	})
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	r := NewRouter(session)
 	r.Handle("send auth", sendAuth)
+	r.Handle("data get", getData)
+	r.Handle("auth cached", saveToken)
 
 	http.Handle("/", r)
 	http.HandleFunc("/auth/recieved", r.RecievedAuth)

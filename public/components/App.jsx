@@ -1,12 +1,14 @@
 import React, {Component} from 'react';
 import Login from './login/Login.jsx';
 import Socket from './socket.js';
+import { instanceOf } from 'prop-types';
+import { withCookies, Cookies } from 'react-cookie';
 
 class App extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            authorised : false
+            authorised : false,
         };
     }
 
@@ -15,6 +17,29 @@ class App extends Component {
         let socket = this.socket = new Socket(ws);
         socket.on('send auth', this.onAuth.bind(this));
         socket.on('subscribe auth', this.onRecievedAuth.bind(this));
+        socket.on('data get', this.onDataGet.bind(this));
+        socket.on('auth cached', this.onAuthCached.bind(this));
+
+        const { cookies } = this.props;
+        const accessToken = cookies.get('accessToken');
+        if (typeof  accessToken !== "undefined") {
+            console.log(accessToken);
+            this.waitForSocketConnection(accessToken);
+        }
+    }
+
+    waitForSocketConnection(accessToken) {
+        setTimeout(
+            () => {
+                if (this.ws.readyState === 1) {
+                    console.log("Connection is made")
+                    this.socket.emit('auth cached', {token: accessToken});
+                    return;
+                } else {
+                    console.log("wait for connection...")
+                    this.waitForSocketConnection(socket, callback);
+                }
+            }, 5);
     }
 
     onClick(e) {
@@ -26,8 +51,23 @@ class App extends Component {
         window.open(auth.url, "myWindow", 'width=800,height=600');
     }
 
-    onRecievedAuth() {
+    onAuthCached() {
         this.setState({authorised: true});
+    }
+
+    onRecievedAuth(accessToken) {
+        const { cookies } = this.props;
+        const token = cookies.get('accessToken');
+        if (typeof  token === "undefined") {
+            cookies.set('accessToken', accessToken, { path: '/' });
+        }
+
+        this.setState({authorised: true});
+        this.socket.emit('data get');
+    }
+
+    onDataGet(data) {
+        console.log(data);
     }
 
     render() {
@@ -45,4 +85,4 @@ class App extends Component {
     }
 }
 
-export default App
+export default withCookies(App);

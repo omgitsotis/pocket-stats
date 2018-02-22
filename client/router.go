@@ -4,12 +4,14 @@ import (
     "github.com/gorilla/websocket"
     "net/http"
     "fmt"
+    r "github.com/dancannon/gorethink"
 )
 
 type Handler func(*Client, interface{})
 
 type Router struct {
     rules map[string]Handler
+    session *r.Session
     client *Client
 }
 
@@ -19,9 +21,10 @@ var upgrader = websocket.Upgrader{
     CheckOrigin: func (r *http.Request) bool {return true},
 }
 
-func NewRouter() *Router {
+func NewRouter(session *r.Session) *Router {
     return &Router {
         rules : make(map[string]Handler),
+        session: session,
     }
 }
 
@@ -33,7 +36,7 @@ func (e *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    c := NewClient(socket, e.FindHandler)
+    c := NewClient(socket, e.FindHandler, e.session)
     e.client = c
     defer e.client.Close()
     go e.client.Write()
@@ -56,5 +59,12 @@ func (e *Router) RecievedAuth(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    e.client.send <- Message{"subscribe auth", "authorised"}
+    user, err := e.client.Pocket.ReceieveAuth(e.client.Code)
+	if err != nil {
+		WriteErrorResponse(w, err.Error())
+		return
+	}
+
+    e.client.AccessToken = user.AccessToken
+    e.client.send <- Message{"subscribe auth", user.AccessToken}
 }

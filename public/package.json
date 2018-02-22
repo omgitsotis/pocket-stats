@@ -1,5 +1,5 @@
 {
-  "name": "Pocket Stats",
+  "name": "pocket stats",
   "version": "1.0.0",
   "description": "Load stats about my reading",
   "main": "index.js",
@@ -14,6 +14,7 @@
     "babel-preset-react": "^6.24.1",
     "prop-types": "^15.6.0",
     "react": "^16.2.0",
+    "react-cookie": "^2.1.2",
     "react-dom": "^16.2.0",
     "webpack": "^3.11.0",
     "webpack-dev-server": "^2.11.1"
