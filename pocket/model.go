@@ -1,5 +1,9 @@
 package pocket
 
+const Archived string = "1"
+const Added string = "0"
+const Deleted string "2"
+
 type Request struct {
 	ConsumerKey string `json:"consumer_key"`
 	RedirectURI string `json:"redirect_uri"`
@@ -37,4 +41,12 @@ type Data struct {
 	ResolvedID string `json:"resolved_id"`
 	Status     string `json:"status"`
 	WordCount  string `json:"word_count"`
+}
+
+type Row struct {
+	Date int
+	ArticlesAdded int
+	ArticlesRead int
+	WordsAdded int
+	WordsRemoved int
 }

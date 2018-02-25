@@ -49,10 +49,16 @@ func (p *Pocket) GetData(token string, until time.Time) (*DataList, error) {
 	fmt.Printf("Days to go back to: %d\n", days)
 
 	seen := make(map[string]bool)
-	// data
+	rows := make([]Row, 0)
 
 	for i := 0; i < 2; i++ {
+		var wAdded int
+		var wRead int
+		var aAdded int
+		var aRead int
+
 		t := midnight.AddDate(0, 0, i*-1)
+
 		param := DataParam{
 			ConsumerKey: p.ConsumerID,
 			AccessToken: token,
@@ -66,21 +72,42 @@ func (p *Pocket) GetData(token string, until time.Time) (*DataList, error) {
 			return nil, err
 		}
 
-		count := 0
-		s := make([]string, 0)
-		for key, _ := range dl.Values {
+		
+		for k, v := range dl.Values {
 			fmt.Printf("ID: %s\n", key)
 			if seen[key] {
 				continue
 			}
-			s = append(s, key)
+			
 			seen[key] = true
-			count++
+
+			if v.Status == Deleted {
+				continue
+			}
+
+			if v.Status == Archived {
+				aRead++
+				wRead += v.WordCount
+			}
+
+			if v.Status == Added {
+				aAdded++
+				wRead += v.WordCount
+			}
 		}
 
-		sort.Strings(s)
-		fmt.Println(s)
+		row := Row {
+			Date: t.Unix(),
+			ArticlesAdded: aAdded,
+			ArticlesRead: aRead,
+			WordsAdded: wAdded,
+			WordsRead: wRead,
+		}
+
+		rows = append(rows, row)		
 	}
+
+	fmt.Printf("%#v\n", rows)
 
 	// param := DataParam{
 	// 	ConsumerKey: p.ConsumerID,
@@ -90,7 +117,7 @@ func (p *Pocket) GetData(token string, until time.Time) (*DataList, error) {
 	// 	Sort:        "oldest",
 	// }
 	//
-	var dl DataList
+	// var dl DataList
 	// if err := p.Call("/get", param, &dl); err != nil {
 	// 	return nil, err
 	// }
