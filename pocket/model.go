@@ -1,8 +1,8 @@
 package pocket
 
-const Archived string = "1"
-const Added string = "0"
-const Deleted string "2"
+const Added = "0"
+const Archived = "1"
+const Deleted = "2"
 
 type Request struct {
 	ConsumerKey string `json:"consumer_key"`
@@ -44,9 +44,9 @@ type Data struct {
 }
 
 type Row struct {
-	Date int
+	Date          int64
 	ArticlesAdded int
-	ArticlesRead int
-	WordsAdded int
-	WordsRemoved int
+	ArticlesRead  int
+	WordsAdded    int
+	WordsRead     int
 }

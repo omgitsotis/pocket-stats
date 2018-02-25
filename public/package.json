@@ -1,5 +1,5 @@
 {
-  "name": "pocket stats",
+  "name": "pocket-stats",
   "version": "1.0.0",
   "description": "Load stats about my reading",
   "main": "index.js",
@@ -16,7 +16,11 @@
     "react": "^16.2.0",
     "react-cookie": "^2.1.2",
     "react-dom": "^16.2.0",
-    "webpack": "^3.11.0",
+    "webpack": "^3.0.0",
+    "webpack-cli": "^2.0.9",
     "webpack-dev-server": "^2.11.1"
+  },
+  "dependencies": {
+    "webpack-dev-middleware": "^1.12.2"
   }
 }

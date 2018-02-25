@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"sort"
+	"strconv"
 	"time"
 )
 
@@ -72,14 +72,13 @@ func (p *Pocket) GetData(token string, until time.Time) (*DataList, error) {
 			return nil, err
 		}
 
-		
 		for k, v := range dl.Values {
-			fmt.Printf("ID: %s\n", key)
-			if seen[key] {
+			fmt.Printf("ID: %s\n", k)
+			if seen[k] {
 				continue
 			}
-			
-			seen[key] = true
+
+			seen[k] = true
 
 			if v.Status == Deleted {
 				continue
@@ -87,24 +86,36 @@ func (p *Pocket) GetData(token string, until time.Time) (*DataList, error) {
 
 			if v.Status == Archived {
 				aRead++
-				wRead += v.WordCount
+				wc, err := strconv.Atoi(v.WordCount)
+				if err != nil {
+					fmt.Printf("Error getting word count %s\n", err.Error())
+					continue
+				}
+
+				wRead += wc
 			}
 
 			if v.Status == Added {
 				aAdded++
-				wRead += v.WordCount
+				wc, err := strconv.Atoi(v.WordCount)
+				if err != nil {
+					fmt.Printf("Error getting word count %s\n", err.Error())
+					continue
+				}
+
+				wAdded += wc
 			}
 		}
 
-		row := Row {
-			Date: t.Unix(),
+		row := Row{
+			Date:          t.Unix(),
 			ArticlesAdded: aAdded,
-			ArticlesRead: aRead,
-			WordsAdded: wAdded,
-			WordsRead: wRead,
+			ArticlesRead:  aRead,
+			WordsAdded:    wAdded,
+			WordsRead:     wRead,
 		}
 
-		rows = append(rows, row)		
+		rows = append(rows, row)
 	}
 
 	fmt.Printf("%#v\n", rows)
@@ -117,7 +128,7 @@ func (p *Pocket) GetData(token string, until time.Time) (*DataList, error) {
 	// 	Sort:        "oldest",
 	// }
 	//
-	// var dl DataList
+	var dl DataList
 	// if err := p.Call("/get", param, &dl); err != nil {
 	// 	return nil, err
 	// }

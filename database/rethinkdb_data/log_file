@@ -1,0 +1,31 @@
+2018-02-25T17:17:09.576614100 0.021167s notice: In recursion: removing file 'C:\\Users\\otis\\Documents\\Workspace\\src\\github.com\\omgitsotis\\pocket-stats\\database\\rethinkdb_data\\tmp'
+2018-02-25T17:17:09.578615100 0.023312s warn: Trying to delete non-existent file 'C:\\Users\\otis\\Documents\\Workspace\\src\\github.com\\omgitsotis\\pocket-stats\\database\\rethinkdb_data\\tmp'
+2018-02-25T17:17:09.587622800 0.032719s notice: Initializing directory C:\\Users\\otis\\Documents\\Workspace\\src\\github.com\\omgitsotis\\pocket-stats\\database\\rethinkdb_data
+2018-02-25T17:17:09.591626100 0.036334s info: Creating a default database for your convenience. (This is because you ran 'rethinkdb' without 'create', 'serve', or '--join', and the directory 'C:\\Users\\otis\\Documents\\Workspace\\src\\github.com\\omgitsotis\\pocket-stats\\database\\rethinkdb_data' did not already exist or is empty.)
+2018-02-25T17:17:09.591626101 0.036696s notice: Running rethinkdb 2.3.6-windows (MSC 190024215)...
+2018-02-25T17:17:09.592625900 0.036935s notice: Running on 6.2.9200 (Windows 8, Server 2012)
+2018-02-25T17:17:09.592625901 0.037088s notice: Loading data from directory C:\\Users\\otis\\Documents\\Workspace\\src\\github.com\\omgitsotis\\pocket-stats\\database\\rethinkdb_data
+2018-02-25T17:17:10.431693400 0.876857s info: Automatically using cache size of 1379 MB
+2018-02-25T17:17:10.446697200 0.891156s notice: Listening for intracluster connections on port 29015
+2018-02-25T17:17:10.453702600 0.898630s notice: Listening for client driver connections on port 28015
+2018-02-25T17:17:10.454703300 0.899166s warn: bind failed: Only one usage of each socket address (protocol/network address/port) is normally permitted.
+2018-02-25T17:17:10.507742600 0.952798s error: Could not bind to http port: The address at localhost:8080 is reserved or already in use.
+2018-02-25T17:18:15.366873500 0.024585s notice: Running rethinkdb 2.3.6-windows (MSC 190024215)...
+2018-02-25T17:18:15.368878700 0.025965s notice: Running on 6.2.9200 (Windows 8, Server 2012)
+2018-02-25T17:18:15.368878701 0.026501s notice: Loading data from directory C:\\Users\\otis\\Documents\\Workspace\\src\\github.com\\omgitsotis\\pocket-stats\\database\\rethinkdb_data
+2018-02-25T17:18:15.491307000 0.149018s info: Automatically using cache size of 1334 MB
+2018-02-25T17:18:15.501314600 0.158367s notice: Listening for intracluster connections on port 29015
+2018-02-25T17:18:15.503319400 0.160888s notice: Listening for client driver connections on port 28015
+2018-02-25T17:18:15.504317100 0.161216s notice: Listening for administrative HTTP connections on port 8080
+2018-02-25T17:18:15.504317101 0.161220s notice: Listening on cluster address: 127.0.0.1
+2018-02-25T17:18:15.504317102 0.161224s notice: Listening on driver address: 127.0.0.1
+2018-02-25T17:18:15.504317103 0.161226s notice: Listening on http address: 127.0.0.1
+2018-02-25T17:18:15.504317104 0.161230s notice: To fully expose RethinkDB on the network, bind to all addresses by running rethinkdb with the `--bind all` command line option.
+2018-02-25T17:18:15.504317105 0.161234s notice: Server ready, "Otis_PC_9ct" 3f3bb575-2c5a-4ef2-9563-5fc0049a6c73
+2018-02-25T17:18:26.654699900 11.312467s notice: Someone asked for the nonwhitelisted file "/sockjs-node/info".  If this should be accessible, add it to the static web assets.
+2018-02-25T17:19:02.653657700 47.311212s notice: Someone asked for the nonwhitelisted file "/sockjs-node/info".  If this should be accessible, add it to the static web assets.
+2018-02-25T17:22:00.338278000 224.995447s notice: Server got Control-C; shutting down...
+2018-02-25T17:22:00.338278001 224.995725s notice: Shutting down client connections...
+2018-02-25T17:22:00.338278002 224.996067s notice: All client connections closed.
+2018-02-25T17:22:00.338278003 224.996074s notice: Shutting down storage engine... (This may take a while if you had a lot of unflushed data in the writeback cache.)
+2018-02-25T17:22:00.340279400 224.997425s notice: Storage engine shut down.
