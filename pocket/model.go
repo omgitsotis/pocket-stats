@@ -21,6 +21,7 @@ type Authorise struct {
 type User struct {
 	AccessToken string `json:"access_token"`
 	Username    string `json:"username"`
+	ID          int    `json:"id"`
 }
 
 type DataParam struct {
@@ -29,6 +30,7 @@ type DataParam struct {
 	Since       int64  `json:"since"`
 	State       string `json:"state"`
 	Sort        string `json:"sort"`
+	Type        string `json:"detailType"`
 }
 
 type DataList struct {
@@ -41,12 +43,13 @@ type Data struct {
 	ResolvedID string `json:"resolved_id"`
 	Status     string `json:"status"`
 	WordCount  string `json:"word_count"`
+	Title      string `json:"given_title"`
 }
 
 type Row struct {
-	Date          int64
-	ArticlesAdded int
-	ArticlesRead  int
-	WordsAdded    int
-	WordsRead     int
+	ID        string
+	DateAdded int64
+	DateRead  int64
+	WordCount int
+	Status    string
 }

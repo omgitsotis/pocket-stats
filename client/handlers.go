@@ -7,6 +7,12 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
+type InitParams struct {
+	ID    int    `json:id`
+	Token string `json:token`
+	Date  int64  `json:"date"`
+}
+
 func sendAuth(client *Client, data interface{}) {
 	if client.Code != "" {
 		client.send <- Message{"subscribe auth", "authorised"}
@@ -37,9 +43,16 @@ func sendAuth(client *Client, data interface{}) {
 	client.send <- Message{"send auth", link}
 }
 
-func getData(client *Client, data interface{}) {
-	since, _ := time.Parse("02/01/2006", "15/02/2018")
-	_, err := client.Pocket.GetData(client.AccessToken, since)
+func initDB(client *Client, data interface{}) {
+	var params InitParams
+	err := mapstructure.Decode(data, &params)
+	if err != nil {
+		client.send <- Message{"error", err.Error()}
+		return
+	}
+
+	since = time.Unix(params.Date, 0)
+	_, err := client.Pocket.InitDB(client.AccessToken, since)
 	if err != nil {
 		client.send <- Message{"error", err.Error()}
 		return

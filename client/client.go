@@ -5,8 +5,6 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/omgitsotis/pocket-stats/pocket"
-
-	r "github.com/dancannon/gorethink"
 )
 
 type Message struct {
@@ -24,7 +22,6 @@ type Client struct {
 	Pocket       *pocket.Pocket
 	Code         string
 	AccessToken  string
-	session      *r.Session
 }
 
 func (c *Client) NewStopChannel(stopKey int) chan bool {
@@ -73,13 +70,12 @@ func (c *Client) Close() {
 	close(c.send)
 }
 
-func NewClient(conn *websocket.Conn, fn FindHandler, session *r.Session) *Client {
+func NewClient(conn *websocket.Conn, fn FindHandler) *Client {
 	return &Client{
 		send:         make(chan Message),
 		socket:       conn,
 		findHandler:  fn,
 		stopChannels: make(map[int]chan bool),
 		Pocket:       pocket.NewPocket("74935-9d486f66d2999047b61328f3"),
-		session:      session,
 	}
 }

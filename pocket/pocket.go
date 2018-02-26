@@ -35,10 +35,16 @@ func (p *Pocket) ReceieveAuth(key string) (*User, error) {
 		return nil, err
 	}
 
+	id, err := AddUser(user.Username)
+	if err != nil {
+		return nil, err
+	}
+
+	user.ID = id
 	return &user, nil
 }
 
-func (p *Pocket) GetData(token string, until time.Time) (*DataList, error) {
+func (p *Pocket) InitDB(token string, until time.Time) (*DataList, error) {
 	year, month, day := time.Now().Date()
 	midnight := time.Date(year, month, day, 0, 0, 0, 0, time.UTC)
 	d := midnight.Sub(until)
@@ -49,14 +55,8 @@ func (p *Pocket) GetData(token string, until time.Time) (*DataList, error) {
 	fmt.Printf("Days to go back to: %d\n", days)
 
 	seen := make(map[string]bool)
-	rows := make([]Row, 0)
 
-	for i := 0; i < 2; i++ {
-		var wAdded int
-		var wRead int
-		var aAdded int
-		var aRead int
-
+	for i := 0; i < days; i++ {
 		t := midnight.AddDate(0, 0, i*-1)
 
 		param := DataParam{
@@ -65,6 +65,7 @@ func (p *Pocket) GetData(token string, until time.Time) (*DataList, error) {
 			Since:       t.Unix(),
 			State:       "all",
 			Sort:        "oldest",
+			Type:        "simple",
 		}
 
 		var dl DataList
@@ -85,40 +86,42 @@ func (p *Pocket) GetData(token string, until time.Time) (*DataList, error) {
 			}
 
 			if v.Status == Archived {
-				aRead++
 				wc, err := strconv.Atoi(v.WordCount)
 				if err != nil {
 					fmt.Printf("Error getting word count %s\n", err.Error())
 					continue
 				}
 
-				wRead += wc
+				r := Row{
+					ID:        v.ItemID,
+					WordCount: wc,
+					DateRead:  t.Unix(),
+					Status:    Archived,
+				}
+
+				AddRow(r)
+				continue
 			}
 
 			if v.Status == Added {
-				aAdded++
 				wc, err := strconv.Atoi(v.WordCount)
 				if err != nil {
 					fmt.Printf("Error getting word count %s\n", err.Error())
 					continue
 				}
 
-				wAdded += wc
+				r := Row{
+					ID:        v.ItemID,
+					WordCount: wc,
+					DateAdded: t.Unix(),
+					Status:    Added,
+				}
+
+				AddRow(r)
+				continue
 			}
 		}
-
-		row := Row{
-			Date:          t.Unix(),
-			ArticlesAdded: aAdded,
-			ArticlesRead:  aRead,
-			WordsAdded:    wAdded,
-			WordsRead:     wRead,
-		}
-
-		rows = append(rows, row)
 	}
-
-	fmt.Printf("%#v\n", rows)
 
 	// param := DataParam{
 	// 	ConsumerKey: p.ConsumerID,

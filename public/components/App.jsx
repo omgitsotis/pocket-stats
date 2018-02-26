@@ -55,15 +55,21 @@ class App extends Component {
         this.setState({authorised: true});
     }
 
-    onRecievedAuth(accessToken) {
+    onRecievedAuth(user) {
         const { cookies } = this.props;
         const token = cookies.get('accessToken');
-        if (typeof  token === "undefined") {
-            cookies.set('accessToken', accessToken, { path: '/' });
+        if (typeof token === "undefined") {
+            cookies.set('accessToken', user.access_token, { path: '/' });
+            cookies.set('userID', user.id, { path: '/' });
         }
 
         this.setState({authorised: true});
-        this.socket.emit('data get');
+
+        const username = cookies.get('userID');
+        this.socket.emit('data get', {
+            token: user.access_token,
+            id: user.id
+        });
     }
 
     onDataGet(data) {
