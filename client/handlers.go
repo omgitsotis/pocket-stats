@@ -2,16 +2,10 @@ package client
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/mitchellh/mapstructure"
+	"github.com/omgitsotis/pocket-stats/pocket"
 )
-
-type InitParams struct {
-	ID    int    `json:id`
-	Token string `json:token`
-	Date  int64  `json:"date"`
-}
 
 func sendAuth(client *Client, data interface{}) {
 	if client.Code != "" {
@@ -44,19 +38,18 @@ func sendAuth(client *Client, data interface{}) {
 }
 
 func initDB(client *Client, data interface{}) {
-	var params InitParams
+	var params pocket.InitParams
 	err := mapstructure.Decode(data, &params)
 	if err != nil {
 		client.send <- Message{"error", err.Error()}
 		return
 	}
 
-	since = time.Unix(params.Date, 0)
-	_, err := client.Pocket.InitDB(client.AccessToken, since)
-	if err != nil {
-		client.send <- Message{"error", err.Error()}
-		return
-	}
+	// _, err = client.Pocket.InitDB(params)
+	// if err != nil {
+	// 	client.send <- Message{"error", err.Error()}
+	// 	return
+	// }
 
 	// client.send <- Message{"data get", data}
 }

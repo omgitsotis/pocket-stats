@@ -24,7 +24,7 @@ func ServeAPI() error {
 
 	r := NewRouter()
 	r.Handle("send auth", sendAuth)
-	r.Handle("data get", getData)
+	r.Handle("data init", initDB)
 	r.Handle("auth cached", saveToken)
 
 	http.Handle("/", r)

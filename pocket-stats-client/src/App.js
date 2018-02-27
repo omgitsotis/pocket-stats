@@ -1,8 +1,8 @@
 import React, {Component} from 'react';
-import Login from './login/Login.jsx';
+import Login from './components/login/Login.jsx';
 import Socket from './socket.js';
-import { instanceOf } from 'prop-types';
 import { withCookies, Cookies } from 'react-cookie';
+import Menu from './components/menu/Menu.jsx';
 
 class App extends Component {
     constructor(props) {
@@ -19,6 +19,7 @@ class App extends Component {
         socket.on('subscribe auth', this.onRecievedAuth.bind(this));
         socket.on('data get', this.onDataGet.bind(this));
         socket.on('auth cached', this.onAuthCached.bind(this));
+        socket.on('error', this.onError.bind(this));
 
         const { cookies } = this.props;
         const accessToken = cookies.get('accessToken');
@@ -57,18 +58,22 @@ class App extends Component {
 
     onRecievedAuth(user) {
         const { cookies } = this.props;
-        const token = cookies.get('accessToken');
+        let token = cookies.get('accessToken');
+        let userID = cookies.get('userID');
         if (typeof token === "undefined") {
             cookies.set('accessToken', user.access_token, { path: '/' });
             cookies.set('userID', user.id, { path: '/' });
+
+            token = user.access_token;
+            userID = user.id;
         }
 
         this.setState({authorised: true});
 
-        const username = cookies.get('userID');
-        this.socket.emit('data get', {
-            token: user.access_token,
-            id: user.id
+        this.socket.emit('data init', {
+            token: token,
+            id: parseInt(userID, 10),
+            date: 1519603200
         });
     }
 
@@ -76,13 +81,16 @@ class App extends Component {
         console.log(data);
     }
 
+    onError(err) {
+        console.log("there was an error:", err);
+    }
+
     render() {
         return (
             <div className='app container'>
-                <div>Text here</div>
                 {this.state.authorised ?
                     (
-                        <div>Authed</div>
+                        <Menu />
                     ) : (
                     <Login onClick={this.onClick.bind(this)} />
                 )}

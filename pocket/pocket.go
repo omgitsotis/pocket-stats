@@ -44,7 +44,18 @@ func (p *Pocket) ReceieveAuth(key string) (*User, error) {
 	return &user, nil
 }
 
-func (p *Pocket) InitDB(token string, until time.Time) (*DataList, error) {
+func (p *Pocket) InitDB(ip InitParams) (*DataList, error) {
+	ok, err := HasID(ip.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	if !ok {
+		return nil, errors.New("No user id found")
+	}
+
+	until := time.Unix(ip.Date, 0)
+
 	year, month, day := time.Now().Date()
 	midnight := time.Date(year, month, day, 0, 0, 0, 0, time.UTC)
 	d := midnight.Sub(until)
@@ -61,7 +72,7 @@ func (p *Pocket) InitDB(token string, until time.Time) (*DataList, error) {
 
 		param := DataParam{
 			ConsumerKey: p.ConsumerID,
-			AccessToken: token,
+			AccessToken: ip.Token,
 			Since:       t.Unix(),
 			State:       "all",
 			Sort:        "oldest",
@@ -85,6 +96,7 @@ func (p *Pocket) InitDB(token string, until time.Time) (*DataList, error) {
 				continue
 			}
 
+			fmt.Printf("Got article %#v\n", v)
 			if v.Status == Archived {
 				wc, err := strconv.Atoi(v.WordCount)
 				if err != nil {
@@ -97,6 +109,7 @@ func (p *Pocket) InitDB(token string, until time.Time) (*DataList, error) {
 					WordCount: wc,
 					DateRead:  t.Unix(),
 					Status:    Archived,
+					UserID:    ip.ID,
 				}
 
 				AddRow(r)
@@ -115,6 +128,7 @@ func (p *Pocket) InitDB(token string, until time.Time) (*DataList, error) {
 					WordCount: wc,
 					DateAdded: t.Unix(),
 					Status:    Added,
+					UserID:    ip.ID,
 				}
 
 				AddRow(r)

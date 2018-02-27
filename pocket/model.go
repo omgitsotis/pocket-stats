@@ -21,7 +21,7 @@ type Authorise struct {
 type User struct {
 	AccessToken string `json:"access_token"`
 	Username    string `json:"username"`
-	ID          int    `json:"id"`
+	ID          int64  `json:"id"`
 }
 
 type DataParam struct {
@@ -52,4 +52,11 @@ type Row struct {
 	DateRead  int64
 	WordCount int
 	Status    string
+	UserID    int64
+}
+
+type InitParams struct {
+	ID    int64  `json:"id"`
+	Token string `json:"token"`
+	Date  int64  `json:"date"`
 }
