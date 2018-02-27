@@ -9,6 +9,7 @@ class App extends Component {
         super(props);
         this.state = {
             authorised : false,
+            initState: ''
         };
     }
 
@@ -55,6 +56,21 @@ class App extends Component {
     onAuthCached() {
         this.setState({authorised: true});
     }
+    
+    onInitClick = (date) => {
+        const { cookies } = this.props;
+        const token = cookies.get('accessToken');
+        const userID = cookies.get('userID');
+        
+        console.log(date);
+        this.setState({initState: 'started'});
+        
+        // this.socket.emit('data init', {
+        //     token: token,
+        //     id: parseInt(userID, 10),
+        //     date: date
+        // });
+    }
 
     onRecievedAuth(user) {
         const { cookies } = this.props;
@@ -69,16 +85,11 @@ class App extends Component {
         }
 
         this.setState({authorised: true});
-
-        this.socket.emit('data init', {
-            token: token,
-            id: parseInt(userID, 10),
-            date: 1519603200
-        });
     }
 
     onDataGet(data) {
         console.log(data);
+        this.setState({authorised: true});
     }
 
     onError(err) {
@@ -86,11 +97,14 @@ class App extends Component {
     }
 
     render() {
+        console.log(this.state.initState);
         return (
             <div className='app container'>
                 {this.state.authorised ?
                     (
-                        <Menu />
+                        <Menu 
+                            onInitClick={ this.onInitClick }
+                            initState={this.state.initState} />
                     ) : (
                     <Login onClick={this.onClick.bind(this)} />
                 )}
