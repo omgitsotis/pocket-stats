@@ -45,13 +45,13 @@ func initDB(client *Client, data interface{}) {
 		return
 	}
 
-	// _, err = client.Pocket.InitDB(params)
-	// if err != nil {
-	// 	client.send <- Message{"error", err.Error()}
-	// 	return
-	// }
+	_, err = client.Pocket.InitDB(params)
+	if err != nil {
+		client.send <- Message{"error", err.Error()}
+		return
+	}
 
-	// client.send <- Message{"data get", data}
+	client.send <- Message{"data get", "Complete"}
 }
 
 func saveToken(client *Client, data interface{}) {

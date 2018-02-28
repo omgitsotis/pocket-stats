@@ -65,11 +65,11 @@ class App extends Component {
         console.log(date);
         this.setState({initState: 'started'});
         
-        // this.socket.emit('data init', {
-        //     token: token,
-        //     id: parseInt(userID, 10),
-        //     date: date
-        // });
+        this.socket.emit('data init', {
+            token: token,
+            id: parseInt(userID, 10),
+            date: date
+        });
     }
 
     onRecievedAuth(user) {
