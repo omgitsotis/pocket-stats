@@ -5,12 +5,14 @@ import (
 	"net/http"
 
 	"github.com/gorilla/websocket"
+	"github.com/omgitsotis/pocket-stats/pocket"
 )
 
 type Handler func(*Client, interface{})
 
 type Router struct {
 	rules  map[string]Handler
+	pocket *pocket.Pocket
 	client *Client
 }
 
@@ -20,9 +22,10 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin:     func(r *http.Request) bool { return true },
 }
 
-func NewRouter() *Router {
+func NewRouter(p *pocket.Pocket) *Router {
 	return &Router{
-		rules: make(map[string]Handler),
+		rules:  make(map[string]Handler),
+		pocket: p,
 	}
 }
 
@@ -34,8 +37,7 @@ func (e *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c := NewClient(socket, e.FindHandler)
-	e.client = c
+	e.client = NewClient(socket, e.FindHandler, e.pocket)
 	defer e.client.Close()
 	go e.client.Write()
 	e.client.Read()

@@ -70,12 +70,12 @@ func (c *Client) Close() {
 	close(c.send)
 }
 
-func NewClient(conn *websocket.Conn, fn FindHandler) *Client {
+func NewClient(conn *websocket.Conn, fn FindHandler, p *pocket.Pocket) *Client {
 	return &Client{
 		send:         make(chan Message),
 		socket:       conn,
 		findHandler:  fn,
 		stopChannels: make(map[int]chan bool),
-		Pocket:       pocket.NewPocket("74935-9d486f66d2999047b61328f3"),
+		Pocket:       p,
 	}
 }

@@ -1,4 +1,4 @@
-package pocket
+package model
 
 const Added = "0"
 const Archived = "1"

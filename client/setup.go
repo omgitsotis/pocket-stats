@@ -2,6 +2,9 @@ package client
 
 import (
 	"net/http"
+
+	"github.com/omgitsotis/pocket-stats/pocket"
+	"github.com/omgitsotis/pocket-stats/pocket/dao/sqlite"
 )
 
 // func NewClient() *Client {
@@ -22,7 +25,18 @@ func ServeAPI() error {
 	// fmt.Println("Created router")
 	// return http.ListenAndServe(":8082", handlers.CORS(corsObj)(r))
 
-	r := NewRouter()
+	sqlite, err := sqlite.NewSQLiteDAO("./database/pocket.db")
+	if err != nil {
+		return err
+	}
+
+	p := pocket.NewPocket(
+		"74935-9d486f66d2999047b61328f3",
+		&http.Client{},
+		sqlite,
+	)
+
+	r := NewRouter(p)
 	r.Handle("send auth", sendAuth)
 	r.Handle("data init", initDB)
 	r.Handle("auth cached", saveToken)

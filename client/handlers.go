@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/mitchellh/mapstructure"
-	"github.com/omgitsotis/pocket-stats/pocket"
+	"github.com/omgitsotis/pocket-stats/pocket/model"
 )
 
 func sendAuth(client *Client, data interface{}) {
@@ -38,7 +38,7 @@ func sendAuth(client *Client, data interface{}) {
 }
 
 func initDB(client *Client, data interface{}) {
-	var params pocket.InitParams
+	var params model.InitParams
 	err := mapstructure.Decode(data, &params)
 	if err != nil {
 		client.send <- Message{"error", err.Error()}

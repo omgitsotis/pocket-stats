@@ -9,16 +9,20 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/omgitsotis/pocket-stats/pocket/dao"
+	"github.com/omgitsotis/pocket-stats/pocket/model"
 )
 
 type Pocket struct {
 	ConsumerID string
 	Client     *http.Client
+	dao        dao.DAO
 }
 
 func (p *Pocket) GetAuth(uri string) (string, error) {
-	r := Request{p.ConsumerID, uri}
-	var rt RequestToken
+	r := model.Request{p.ConsumerID, uri}
+	var rt model.RequestToken
 	if err := p.Call("/oauth/request", r, &rt); err != nil {
 		return "", err
 	}
@@ -27,15 +31,15 @@ func (p *Pocket) GetAuth(uri string) (string, error) {
 	return rt.Code, nil
 }
 
-func (p *Pocket) ReceieveAuth(key string) (*User, error) {
-	a := Authorise{p.ConsumerID, key}
-	var user User
+func (p *Pocket) ReceieveAuth(key string) (*model.User, error) {
+	a := model.Authorise{p.ConsumerID, key}
+	var user model.User
 
 	if err := p.Call("/oauth/authorize", a, &user); err != nil {
 		return nil, err
 	}
 
-	id, err := AddUser(user.Username)
+	id, err := p.dao.AddUser(user.Username)
 	if err != nil {
 		return nil, err
 	}
@@ -44,8 +48,8 @@ func (p *Pocket) ReceieveAuth(key string) (*User, error) {
 	return &user, nil
 }
 
-func (p *Pocket) InitDB(ip InitParams) (*DataList, error) {
-	ok, err := HasID(ip.ID)
+func (p *Pocket) InitDB(ip model.InitParams) (*model.DataList, error) {
+	ok, err := p.dao.IsUser(ip.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +74,7 @@ func (p *Pocket) InitDB(ip InitParams) (*DataList, error) {
 	for i := 0; i < days; i++ {
 		t := midnight.AddDate(0, 0, i*-1)
 
-		param := DataParam{
+		param := model.DataParam{
 			ConsumerKey: p.ConsumerID,
 			AccessToken: ip.Token,
 			Since:       t.Unix(),
@@ -79,7 +83,7 @@ func (p *Pocket) InitDB(ip InitParams) (*DataList, error) {
 			Type:        "simple",
 		}
 
-		var dl DataList
+		var dl model.DataList
 		if err := p.Call("/get", param, &dl); err != nil {
 			return nil, err
 		}
@@ -92,46 +96,46 @@ func (p *Pocket) InitDB(ip InitParams) (*DataList, error) {
 
 			seen[k] = true
 
-			if v.Status == Deleted {
+			if v.Status == model.Deleted {
 				continue
 			}
 
 			fmt.Printf("Got article %#v\n", v)
-			if v.Status == Archived {
+			if v.Status == model.Archived {
 				wc, err := strconv.Atoi(v.WordCount)
 				if err != nil {
 					fmt.Printf("Error getting word count %s\n", err.Error())
 					continue
 				}
 
-				r := Row{
+				r := model.Row{
 					ID:        v.ItemID,
 					WordCount: wc,
 					DateRead:  t.Unix(),
-					Status:    Archived,
+					Status:    model.Archived,
 					UserID:    ip.ID,
 				}
 
-				AddRow(r)
+				p.dao.AddArticle(r)
 				continue
 			}
 
-			if v.Status == Added {
+			if v.Status == model.Added {
 				wc, err := strconv.Atoi(v.WordCount)
 				if err != nil {
 					fmt.Printf("Error getting word count %s\n", err.Error())
 					continue
 				}
 
-				r := Row{
+				r := model.Row{
 					ID:        v.ItemID,
 					WordCount: wc,
 					DateAdded: t.Unix(),
-					Status:    Added,
+					Status:    model.Added,
 					UserID:    ip.ID,
 				}
 
-				AddRow(r)
+				p.dao.AddArticle(r)
 				continue
 			}
 		}
@@ -145,7 +149,7 @@ func (p *Pocket) InitDB(ip InitParams) (*DataList, error) {
 	// 	Sort:        "oldest",
 	// }
 	//
-	var dl DataList
+	var dl model.DataList
 	// if err := p.Call("/get", param, &dl); err != nil {
 	// 	return nil, err
 	// }
@@ -192,8 +196,8 @@ func (p *Pocket) Call(uri string, body, t interface{}) error {
 	return nil
 }
 
-func NewPocket(id string) *Pocket {
-	return &Pocket{id, &http.Client{}}
+func NewPocket(id string, c *http.Client, d dao.DAO) *Pocket {
+	return &Pocket{id, c, d}
 }
 
 func (p *Pocket) SetClient(c http.Client) {
