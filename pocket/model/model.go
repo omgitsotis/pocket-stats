@@ -60,3 +60,18 @@ type InitParams struct {
 	Token string `json:"token"`
 	Date  int64  `json:"date"`
 }
+
+type CountRow struct {
+	Date      int64 `json:"date"`
+	WordCount int64 `json:"word_count"`
+}
+
+type Stats struct {
+	Added []CountRow `json:"added"`
+	Read  []CountRow `json:"read"`
+}
+
+type StatsParams struct {
+	Start int64 `json:"start_date"`
+	End   int64 `json:"end_date"`
+}

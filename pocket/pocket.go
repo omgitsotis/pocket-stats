@@ -157,6 +157,21 @@ func (p *Pocket) InitDB(ip model.InitParams) (*model.DataList, error) {
 	return &dl, nil
 }
 
+func (p *Pocket) GetStatsForDates(param model.StatsParams) (*model.Stats, error) {
+	added, err := p.dao.GetCountForDates(param.Start, param.End, "date_added")
+	if err != nil {
+		return nil, err
+	}
+
+	read, err := p.dao.GetCountForDates(param.Start, param.End, "date_read")
+	if err != nil {
+		return nil, err
+	}
+
+	stats := model.Stats{added, read}
+	return &stats, nil
+}
+
 func (p *Pocket) Call(uri string, body, t interface{}) error {
 	b, err := json.Marshal(body)
 	if err != nil {

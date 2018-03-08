@@ -2,6 +2,7 @@ package sqlite
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"os"
 
@@ -94,9 +95,41 @@ func (dao *SQLiteDAO) IsUser(id int64) (bool, error) {
 	}
 }
 
-func (dao *SQLiteDAO) GetStatsForDate(int64) error {
-	//TODO This
-	return nil
+func (dao *SQLiteDAO) GetCountForDates(start, end int64, col string) ([]model.CountRow, error) {
+	query := fmt.Sprintf(
+		"SELECT %s, (word_count) FROM articles "+
+			"WHERE %s >= ? AND %s <= ? "+
+			"GROUP BY %s "+
+			"ORDER BY %s DESC",
+		col, col, col, col, col,
+	)
+
+	res := make([]model.CountRow, 0)
+
+	log.Printf("selecting %s between %d and %d", col, start, end)
+
+	rows, err := dao.db.Query(query, start, end)
+	if err != nil {
+		log.Printf("Error executing query: %s", err.Error())
+		return res, err
+	}
+
+	for rows.Next() {
+		var date, count int64
+		if err := rows.Scan(&date, &count); err != nil {
+			log.Printf("Error reading data: %s", err.Error())
+			return res, err
+		}
+
+		res = append(res, model.CountRow{date, count})
+	}
+
+	if err := rows.Err(); err != nil {
+		log.Printf("Error looping results: %s", err.Error())
+		return res, err
+	}
+
+	return res, nil
 }
 
 func (dao *SQLiteDAO) CloseDB() {

@@ -2,6 +2,7 @@ package client
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/omgitsotis/pocket-stats/pocket/model"
@@ -71,4 +72,22 @@ func saveToken(client *Client, data interface{}) {
 	client.AccessToken = token.Token
 
 	client.send <- Message{"subscribe auth", client.AccessToken}
+}
+
+func getStatistics(client *Client, data interface{}) {
+	var params model.StatsParams
+	err := mapstructure.Decode(data, &params)
+	if err != nil {
+		log.Printf("Error decoding params: %s", err.Error())
+		client.send <- Message{"error", err.Error()}
+		return
+	}
+
+	stats, err := client.Pocket.GetStatsForDates(params)
+	if err != nil {
+		client.send <- Message{"error", err.Error()}
+		return
+	}
+
+	client.send <- Message{"data get", stats}
 }
