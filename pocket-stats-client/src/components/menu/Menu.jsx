@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import InitSection from './../initialisation/init.jsx';
+import InitSection from './../initialisation/Init.jsx';
 
 class Menu extends Component {
     constructor(props) {
@@ -23,6 +23,12 @@ class Menu extends Component {
                         onBackClick={ () => this.onClick('menu')}
                         {...this.props}
                     />;
+                break;
+            case 'overview':
+                section =
+                    <div>
+                        <button onClick={ () => this.props.onFetchDataClick() }>Fetch</button>
+                    </div>
                 break;
             default:
                 section =

@@ -67,11 +67,15 @@ type CountRow struct {
 }
 
 type Stats struct {
-	Added []CountRow `json:"added"`
-	Read  []CountRow `json:"read"`
+	Value map[int64]*WordCount `json:"value"`
+}
+
+type WordCount struct {
+	Added int64 `json:"added"`
+	Read  int64 `json:"read"`
 }
 
 type StatsParams struct {
-	Start int64 `json:"start_date"`
-	End   int64 `json:"end_date"`
+	Start int `json:"start"`
+	End   int `json:"end"`
 }

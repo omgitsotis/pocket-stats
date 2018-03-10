@@ -1,6 +1,7 @@
 package client
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/omgitsotis/pocket-stats/pocket"
@@ -40,10 +41,12 @@ func ServeAPI() error {
 	r.Handle("send auth", sendAuth)
 	r.Handle("data init", initDB)
 	r.Handle("auth cached", saveToken)
+	r.Handle("data get", getStatistics)
 
 	http.Handle("/", r)
 	http.HandleFunc("/auth/recieved", r.RecievedAuth)
 
+	log.Println("Serving application")
 	return http.ListenAndServe(":4000", nil)
 
 }

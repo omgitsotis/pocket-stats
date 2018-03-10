@@ -75,15 +75,18 @@ func saveToken(client *Client, data interface{}) {
 }
 
 func getStatistics(client *Client, data interface{}) {
-	var params model.StatsParams
-	err := mapstructure.Decode(data, &params)
+	var p model.StatsParams
+
+	err := mapstructure.Decode(data, &p)
 	if err != nil {
 		log.Printf("Error decoding params: %s", err.Error())
 		client.send <- Message{"error", err.Error()}
 		return
 	}
 
-	stats, err := client.Pocket.GetStatsForDates(params)
+	log.Printf("Get stats from %d to %d", p.Start, p.End)
+
+	stats, err := client.Pocket.GetStatsForDates(p)
 	if err != nil {
 		client.send <- Message{"error", err.Error()}
 		return

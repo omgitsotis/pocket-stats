@@ -2,7 +2,6 @@ package sqlite
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"os"
 
@@ -95,41 +94,72 @@ func (dao *SQLiteDAO) IsUser(id int64) (bool, error) {
 	}
 }
 
-func (dao *SQLiteDAO) GetCountForDates(start, end int64, col string) ([]model.CountRow, error) {
-	query := fmt.Sprintf(
-		"SELECT %s, (word_count) FROM articles "+
-			"WHERE %s >= ? AND %s <= ? "+
-			"GROUP BY %s "+
-			"ORDER BY %s DESC",
-		col, col, col, col, col,
-	)
+func (dao *SQLiteDAO) GetCountForDates(start, end int) (*model.Stats, error) {
+	query := "SELECT date_added, (word_count) FROM articles " +
+		"WHERE date_added >= ? AND date_added <= ? " +
+		"GROUP BY date_added " +
+		"ORDER BY date_added DESC"
 
-	res := make([]model.CountRow, 0)
+	res := make(map[int64]*model.WordCount)
 
-	log.Printf("selecting %s between %d and %d", col, start, end)
+	log.Printf("selecting date_added between %d and %d", start, end)
 
 	rows, err := dao.db.Query(query, start, end)
 	if err != nil {
 		log.Printf("Error executing query: %s", err.Error())
-		return res, err
+		return nil, err
 	}
 
 	for rows.Next() {
 		var date, count int64
 		if err := rows.Scan(&date, &count); err != nil {
 			log.Printf("Error reading data: %s", err.Error())
-			return res, err
+			return nil, err
 		}
 
-		res = append(res, model.CountRow{date, count})
+		res[date] = &model.WordCount{Added: count}
 	}
 
 	if err := rows.Err(); err != nil {
 		log.Printf("Error looping results: %s", err.Error())
-		return res, err
+		return nil, err
 	}
 
-	return res, nil
+	query = "SELECT date_read, (word_count) FROM articles " +
+		"WHERE date_read >= ? AND date_added <= ? " +
+		"GROUP BY date_read " +
+		"ORDER BY date_read DESC"
+
+	log.Printf("selecting date_read between %d and %d", start, end)
+
+	rows, err = dao.db.Query(query, start, end)
+	if err != nil {
+		log.Printf("Error executing query: %s", err.Error())
+		return nil, err
+	}
+
+	for rows.Next() {
+		var date, count int64
+		if err := rows.Scan(&date, &count); err != nil {
+			log.Printf("Error reading data: %s", err.Error())
+			return nil, err
+		}
+
+		v, ok := res[date]
+		if !ok {
+			res[date] = &model.WordCount{Read: count}
+		} else {
+			v.Read = count
+		}
+	}
+
+	if err := rows.Err(); err != nil {
+		log.Printf("Error looping results: %s", err.Error())
+		return nil, err
+	}
+
+	stats := model.Stats{res}
+	return &stats, nil
 }
 
 func (dao *SQLiteDAO) CloseDB() {

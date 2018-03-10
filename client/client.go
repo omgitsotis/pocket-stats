@@ -1,6 +1,7 @@
 package client
 
 import (
+	"encoding/json"
 	"log"
 
 	"github.com/gorilla/websocket"
@@ -41,9 +42,24 @@ func (c *Client) StopForKey(key int) {
 func (c *Client) Read() {
 	var message Message
 	for {
-		if err := c.socket.ReadJSON(&message); err != nil {
+		mType, r, err := c.socket.NextReader()
+		if err != nil {
+			log.Printf("Error getting reader %s", err.Error())
 			break
 		}
+
+		log.Printf("Message type %d", mType)
+		d := json.NewDecoder(r)
+		d.UseNumber()
+		if err := d.Decode(&message); err != nil {
+			log.Fatal(err)
+			break
+		}
+
+		// if err := c.socket.ReadJSON(&message); err != nil {
+		// 	break
+		// }
+
 		if fn, ok := c.findHandler(message.Name); ok {
 			log.Printf("Received request for %s\n", message.Name)
 			fn(c, message.Data)

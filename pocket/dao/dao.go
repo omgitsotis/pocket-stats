@@ -6,5 +6,5 @@ type DAO interface {
 	AddUser(string) (int64, error)
 	AddArticle(model.Row) error
 	IsUser(int64) (bool, error)
-	GetCountForDates(int64, int64, string) ([]model.CountRow, error)
+	GetCountForDates(int, int) (*model.Stats, error)
 }
