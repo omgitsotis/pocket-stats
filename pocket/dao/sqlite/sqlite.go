@@ -162,6 +162,92 @@ func (dao *SQLiteDAO) GetCountForDates(start, end int) (*model.Stats, error) {
 	return &stats, nil
 }
 
+func (dao *SQLiteDAO) GetArticle(id int64) (*model.Row, error) {
+	var r model.Row
+	log.Printf("Getting article [%d]", id)
+	err := dao.db.QueryRow("SELECT * FROM articles WHERE id=?", id).Scan(
+		&r.ID,
+		&r.DateAdded,
+		&r.DateRead,
+		&r.WordCount,
+		&r.Status,
+		&r.UserID,
+	)
+
+	switch {
+	case err == sql.ErrNoRows:
+		log.Printf("No article with id [%d]", id)
+		return nil, nil
+	case err != nil:
+		log.Printf("Error reading article: [%s]", err.Error())
+		return nil, err
+	default:
+		log.Printf("Found article [%d]", id)
+		return &r, nil
+	}
+}
+
+func (dao *SQLiteDAO) UpdateArticle(r *model.Row) error {
+	stmt, err := dao.db.Prepare("UPDATE articles SET date_read = ?, status = ? WHERE id = ?")
+	if err != nil {
+		log.Printf("Error creating statment: %s", err.Error())
+		return err
+	}
+
+	log.Printf(
+		"Updating article [%d] date read [%d] status [%s]",
+		r.ID,
+		r.DateRead,
+		r.Status,
+	)
+
+	res, err := stmt.Exec(
+		r.DateRead,
+		r.Status,
+		r.ID,
+	)
+
+	if err != nil {
+		log.Printf("Error executing database [%s]", err.Error())
+		return err
+	}
+
+	n, err := res.RowsAffected()
+	if err != nil {
+		log.Printf("Error executing database [%s]", err.Error())
+		return err
+	}
+
+	log.Printf("Row(s) updated: [%d]", n)
+	return nil
+}
+
+func (dao *SQLiteDAO) GetLastAdded() (int64, error) {
+	log.Printf("Getting last added")
+	var id, dateAdded, dateRead int64
+	err := dao.db.QueryRow("SELECT MAX(id), date_added, date_read FROM articles ORDER BY ID DESC").Scan(
+		&id,
+		&dateAdded,
+		&dateRead,
+	)
+
+	switch {
+	case err == sql.ErrNoRows:
+		log.Printf("No articles found")
+		return 0, nil
+	case err != nil:
+		log.Printf("Error reading article: [%s]", err.Error())
+		return 0, err
+	default:
+		log.Printf("Found article [%d]", id)
+		if dateAdded > dateRead {
+			return dateAdded, nil
+		}
+
+		return dateRead, nil
+	}
+}
+
 func (dao *SQLiteDAO) CloseDB() {
 	dao.db.Close()
 }

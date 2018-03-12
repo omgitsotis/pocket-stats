@@ -21,6 +21,7 @@ class App extends Component {
         socket.on('data get', this.onDataGet.bind(this));
         socket.on('auth cached', this.onAuthCached.bind(this));
         socket.on('error', this.onError.bind(this));
+        socket.on('data update', this.onDataUpdate)
 
         const { cookies } = this.props;
         const accessToken = cookies.get('accessToken');
@@ -105,6 +106,21 @@ class App extends Component {
         console.log("there was an error:", err);
     }
 
+    onUpdateClick = () => {
+        const { cookies } = this.props;
+        const token = cookies.get('accessToken');
+        const userID = cookies.get('userID');
+
+        this.socket.emit('data update', {
+            token: token,
+            id: parseInt(userID, 10),
+        });
+    }
+
+    onDataUpdate = (data) => {
+        console.log(data)
+    }
+
     render() {
         console.log(this.state.initState);
         return (
@@ -114,7 +130,8 @@ class App extends Component {
                         <Menu
                             onInitClick={ this.onInitClick }
                             initState={this.state.initState}
-                            onFetchDataClick={this.onFetchDataClick}/>
+                            onFetchDataClick={this.onFetchDataClick}
+                            onUpdateClick={this.onUpdateClick}/>
                     ) : (
                     <Login onClick={this.onClick.bind(this)} />
                 )}

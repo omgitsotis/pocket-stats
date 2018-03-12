@@ -30,11 +30,18 @@ class Menu extends Component {
                         <button onClick={ () => this.props.onFetchDataClick() }>Fetch</button>
                     </div>
                 break;
+            case 'update':
+                section =
+                    <div>
+                        <button onClick={ () => this.props.onUpdateClick() }>Update</button>
+                    </div>
+                break;
             default:
                 section =
                     <div>
                         <button onClick={ () => this.onClick('init') }>Initalise</button>
                         <button onClick={ () => this.onClick('overview') }>Overview</button>
+                        <button onClick={ () => this.onClick('update') }>Update</button>
                     </div>;
                 break;
         }

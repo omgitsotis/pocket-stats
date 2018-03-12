@@ -39,7 +39,7 @@ func sendAuth(client *Client, data interface{}) {
 }
 
 func initDB(client *Client, data interface{}) {
-	var params model.InitParams
+	var params model.InputParams
 	err := mapstructure.Decode(data, &params)
 	if err != nil {
 		client.send <- Message{"error", err.Error()}
@@ -67,8 +67,7 @@ func saveToken(client *Client, data interface{}) {
 		return
 	}
 
-	fmt.Println(data)
-	fmt.Println(token)
+	log.Println(token)
 	client.AccessToken = token.Token
 
 	client.send <- Message{"subscribe auth", client.AccessToken}
@@ -93,4 +92,21 @@ func getStatistics(client *Client, data interface{}) {
 	}
 
 	client.send <- Message{"data get", stats}
+}
+
+func updateDB(client *Client, data interface{}) {
+	var params model.InputParams
+	err := mapstructure.Decode(data, &params)
+	if err != nil {
+		client.send <- Message{"error", err.Error()}
+		return
+	}
+
+	date, err := client.Pocket.UpdateDB(params)
+	if err != nil {
+		client.send <- Message{"error", err.Error()}
+		return
+	}
+
+	client.send <- Message{"data update", date}
 }

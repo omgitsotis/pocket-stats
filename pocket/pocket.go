@@ -48,7 +48,7 @@ func (p *Pocket) ReceieveAuth(key string) (*model.User, error) {
 	return &user, nil
 }
 
-func (p *Pocket) InitDB(ip model.InitParams) (*model.DataList, error) {
+func (p *Pocket) InitDB(ip model.InputParams) (*model.DataList, error) {
 	ok, err := p.dao.IsUser(ip.ID)
 	if err != nil {
 		return nil, err
@@ -101,15 +101,22 @@ func (p *Pocket) InitDB(ip model.InitParams) (*model.DataList, error) {
 			}
 
 			fmt.Printf("Got article %#v\n", v)
-			if v.Status == model.Archived {
-				wc, err := strconv.Atoi(v.WordCount)
-				if err != nil {
-					fmt.Printf("Error getting word count %s\n", err.Error())
-					continue
-				}
 
+			id, err := strconv.Atoi(v.ItemID)
+			if err != nil {
+				log.Printf("Error converting ID: %s", err.Error())
+				continue
+			}
+
+			wc, err := strconv.Atoi(v.WordCount)
+			if err != nil {
+				fmt.Printf("Error getting word count %s\n", err.Error())
+				continue
+			}
+
+			if v.Status == model.Archived {
 				r := model.Row{
-					ID:        v.ItemID,
+					ID:        int64(id),
 					WordCount: wc,
 					DateRead:  t.Unix(),
 					Status:    model.Archived,
@@ -121,14 +128,8 @@ func (p *Pocket) InitDB(ip model.InitParams) (*model.DataList, error) {
 			}
 
 			if v.Status == model.Added {
-				wc, err := strconv.Atoi(v.WordCount)
-				if err != nil {
-					fmt.Printf("Error getting word count %s\n", err.Error())
-					continue
-				}
-
 				r := model.Row{
-					ID:        v.ItemID,
+					ID:        int64(id),
 					WordCount: wc,
 					DateAdded: t.Unix(),
 					Status:    model.Added,
@@ -141,19 +142,7 @@ func (p *Pocket) InitDB(ip model.InitParams) (*model.DataList, error) {
 		}
 	}
 
-	// param := DataParam{
-	// 	ConsumerKey: p.ConsumerID,
-	// 	AccessToken: token,
-	// 	Since:       until,
-	// 	State:       "all",
-	// 	Sort:        "oldest",
-	// }
-	//
 	var dl model.DataList
-	// if err := p.Call("/get", param, &dl); err != nil {
-	// 	return nil, err
-	// }
-	//
 	return &dl, nil
 }
 
@@ -164,6 +153,119 @@ func (p *Pocket) GetStatsForDates(param model.StatsParams) (*model.Stats, error)
 	}
 
 	return stats, nil
+}
+
+func (p *Pocket) UpdateDB(ip model.InputParams) (int64, error) {
+	// Get the last updated date
+	date, err := p.dao.GetLastAdded()
+	if err != nil {
+		return 0, err
+	}
+
+	until := time.Unix(date, 0)
+
+	year, month, day := time.Now().Date()
+	midnight := time.Date(year, month, day, 0, 0, 0, 0, time.UTC)
+	d := midnight.Sub(until)
+
+	days := int(d.Hours() / 24)
+	log.Printf("Current date: %s", midnight.Format("02/01/2006"))
+	log.Printf("Until date: %s", until.Format("02/01/2006"))
+	log.Printf("Days to go back to: %d", days)
+
+	seen := make(map[string]bool)
+
+	for i := 0; i < days; i++ {
+		t := midnight.AddDate(0, 0, i*-1)
+
+		log.Printf("Geting info from date %s", t.Format("02/01/2006"))
+
+		param := model.DataParam{
+			ConsumerKey: p.ConsumerID,
+			AccessToken: ip.Token,
+			Since:       t.Unix(),
+			State:       "all",
+			Sort:        "oldest",
+			Type:        "simple",
+		}
+
+		var dl model.DataList
+		if err := p.Call("/get", param, &dl); err != nil {
+			return 0, err
+		}
+
+		for k, v := range dl.Values {
+			if seen[k] {
+				continue
+			}
+
+			seen[k] = true
+
+			if v.Status == model.Deleted {
+				continue
+			}
+
+			log.Printf("Got article %s\n", v.ItemID)
+
+			id, err := strconv.Atoi(v.ItemID)
+			if err != nil {
+				log.Printf("Error converting ID: %s", err.Error())
+				continue
+			}
+
+			row, err := p.dao.GetArticle(int64(id))
+			if err != nil {
+				continue
+			}
+
+			// Insert
+			if row == nil {
+				wc, err := strconv.Atoi(v.WordCount)
+				if err != nil {
+					fmt.Printf("Error getting word count %s\n", err.Error())
+					continue
+				}
+
+				if v.Status == model.Archived {
+					r := model.Row{
+						ID:        int64(id),
+						WordCount: wc,
+						DateRead:  t.Unix(),
+						Status:    model.Archived,
+						UserID:    ip.ID,
+					}
+
+					p.dao.AddArticle(r)
+					continue
+				}
+
+				if v.Status == model.Added {
+					r := model.Row{
+						ID:        int64(id),
+						WordCount: wc,
+						DateAdded: t.Unix(),
+						Status:    model.Added,
+						UserID:    ip.ID,
+					}
+
+					p.dao.AddArticle(r)
+					continue
+				}
+			} else {
+				// Update row
+				if v.Status != row.Status {
+					row.DateRead = t.Unix()
+					row.Status = model.Archived
+					p.dao.UpdateArticle(row)
+				} else {
+					log.Printf("Article %d has same status [%s], skip", id, v.Status)
+				}
+			}
+		}
+	}
+
+	log.Printf("Updated to %d", midnight.Unix())
+	return midnight.Unix(), nil
 }
 
 func (p *Pocket) Call(uri string, body, t interface{}) error {

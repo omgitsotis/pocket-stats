@@ -47,7 +47,7 @@ type Data struct {
 }
 
 type Row struct {
-	ID        string
+	ID        int64
 	DateAdded int64
 	DateRead  int64
 	WordCount int
@@ -55,7 +55,7 @@ type Row struct {
 	UserID    int64
 }
 
-type InitParams struct {
+type InputParams struct {
 	ID    int64  `json:"id"`
 	Token string `json:"token"`
 	Date  int64  `json:"date"`
