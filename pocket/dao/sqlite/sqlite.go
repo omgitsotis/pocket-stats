@@ -94,7 +94,7 @@ func (dao *SQLiteDAO) IsUser(id int64) (bool, error) {
 	}
 }
 
-func (dao *SQLiteDAO) GetCountForDates(start, end int) (*model.Stats, error) {
+func (dao *SQLiteDAO) GetCountForDates(start, end int64) (*model.Stats, error) {
 	query := "SELECT date_added, (word_count) FROM articles " +
 		"WHERE date_added >= ? AND date_added <= ? " +
 		"GROUP BY date_added " +
@@ -158,7 +158,7 @@ func (dao *SQLiteDAO) GetCountForDates(start, end int) (*model.Stats, error) {
 		return nil, err
 	}
 
-	stats := model.Stats{res}
+	stats := model.Stats{Value: res}
 	return &stats, nil
 }
 

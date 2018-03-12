@@ -11,6 +11,10 @@ class App extends Component {
         this.state = {
             authorised : false,
             initState: ''
+            startDate: 0,
+            endDate: 0,
+            loaded: false,
+            statList: {}
         };
     }
 
@@ -24,6 +28,7 @@ class App extends Component {
         socket.on('auth cached', this.onAuthCached.bind(this));
         socket.on('error', this.onError.bind(this));
         socket.on('data update', this.onDataUpdate)
+        socket.on('data load', this.onDataLoad)
 
         const { cookies } = this.props;
         const accessToken = cookies.get('accessToken');
@@ -58,6 +63,10 @@ class App extends Component {
 
     onAuthCached() {
         this.setState({authorised: true});
+        this.socket.emit('data load', {
+            token: token,
+            id: parseInt(userID, 10),
+        });
     }
 
     onInitClick = (date) => {
@@ -123,16 +132,36 @@ class App extends Component {
         console.log(data)
     }
 
-    render() {
-        let section = this.state.authorised ?
-            <Menu
-                onInitClick={ this.onInitClick }
-                initState={this.state.initState}
-                onFetchDataClick={this.onFetchDataClick}
-                onUpdateClick={this.onUpdateClick}
-            /> :
-            <LoginContainer onClick={this.onClick.bind(this)} />;
+    onDataLoad = (data) => {
+        console.log(data);
+        this.setState({
+            loaded: true,
+            startDate: data.start_date,
+            endDate: data.end_date,
+            statList: {}
+        });
+    }
 
+    render() {
+        let component;
+        if (!this.state.authorised) {
+            component = <LoginContainer onClick={this.onClick.bind(this)} />;
+        } else {
+            if(this.state.loading) {
+                component = <i className="fa fa-spinner fa-spin" style={{fontSize: "48px"}}></i>
+            } else {
+                component = <div>COMING SOON</div>
+            }
+        }
+        // let section = this.state.authorised ?
+        //     <Menu
+        //         onInitClick={ this.onInitClick }
+        //         initState={this.state.initState}
+        //         onFetchDataClick={this.onFetchDataClick}
+        //         onUpdateClick={this.onUpdateClick}
+        //     /> :
+        //     <LoginContainer onClick={this.onClick.bind(this)} />;
+        //
         return (
             <div className='app container'>
                 <div className='row'>

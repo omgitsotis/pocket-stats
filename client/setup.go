@@ -43,6 +43,7 @@ func ServeAPI() error {
 	r.Handle("auth cached", saveToken)
 	r.Handle("data get", getStatistics)
 	r.Handle("data update", updateDB)
+	r.Handle("data load", loadData)
 
 	http.Handle("/", r)
 	http.HandleFunc("/auth/recieved", r.RecievedAuth)

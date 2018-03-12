@@ -146,15 +146,6 @@ func (p *Pocket) InitDB(ip model.InputParams) (*model.DataList, error) {
 	return &dl, nil
 }
 
-func (p *Pocket) GetStatsForDates(param model.StatsParams) (*model.Stats, error) {
-	stats, err := p.dao.GetCountForDates(param.Start, param.End)
-	if err != nil {
-		return nil, err
-	}
-
-	return stats, nil
-}
-
 func (p *Pocket) UpdateDB(ip model.InputParams) (int64, error) {
 	// Get the last updated date
 	date, err := p.dao.GetLastAdded()
@@ -266,6 +257,40 @@ func (p *Pocket) UpdateDB(ip model.InputParams) (int64, error) {
 
 	log.Printf("Updated to %d", midnight.Unix())
 	return midnight.Unix(), nil
+}
+
+func (p *Pocket) GetStatsForDates(param model.StatsParams) (*model.Stats, error) {
+	stats, err := p.dao.GetCountForDates(param.Start, param.End)
+	if err != nil {
+		return nil, err
+	}
+
+	stats.Start = param.Start
+	stats.End = param.End
+
+	return stats, nil
+}
+
+func (p *Pocket) LoadData() (*model.Stats, error) {
+	date, err := p.dao.GetLastAdded()
+	if err != nil {
+		return nil, err
+	}
+
+	to := time.Unix(date, 0)
+	from := to.AddDate(0, 0, -7)
+
+	param := model.StatsParams{
+		from.Unix(),
+		date,
+	}
+
+	stats, err := p.GetStatsForDates(param)
+	if err != nil {
+		return nil, err
+	}
+
+	return stats, nil
 }
 
 func (p *Pocket) Call(uri string, body, t interface{}) error {

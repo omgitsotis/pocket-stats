@@ -67,6 +67,8 @@ type CountRow struct {
 }
 
 type Stats struct {
+	Start int64                `json:"start_date"`
+	End   int64                `json:"end_date"`
 	Value map[int64]*WordCount `json:"value"`
 }
 
@@ -76,6 +78,6 @@ type WordCount struct {
 }
 
 type StatsParams struct {
-	Start int `json:"start"`
-	End   int `json:"end"`
+	Start int64 `json:"start"`
+	End   int64 `json:"end"`
 }

@@ -110,3 +110,13 @@ func updateDB(client *Client, data interface{}) {
 
 	client.send <- Message{"data update", date}
 }
+
+func loadData(client *Client, data interface{}) {
+	stats, err := client.Pocket.LoadData()
+	if err != nil {
+		client.send <- Message{"error", err.Error()}
+		return
+	}
+
+	client.send <- Message{"data load", stats}
+}
