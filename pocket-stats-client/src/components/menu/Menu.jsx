@@ -1,53 +1,23 @@
 import React, {Component} from 'react';
-import InitSection from './../initialisation/Init.jsx';
+import './menu.css'
 
 class Menu extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            currentPage: 'menu'
-        };
-    }
-
-    onClick = (page) => {
-        console.log(page);
-        this.setState({currentPage: page});
-    }
-
     render() {
-        let section;
-        switch (this.state.currentPage) {
-            case 'init':
-                section =
-                    <InitSection
-                        onBackClick={ () => this.onClick('menu')}
-                        {...this.props}
-                    />;
-                break;
-            case 'overview':
-                section =
-                    <div>
-                        <button onClick={ () => this.props.onFetchDataClick() }>Fetch</button>
-                    </div>
-                break;
-            case 'update':
-                section =
-                    <div>
-                        <button onClick={ () => this.props.onUpdateClick() }>Update</button>
-                    </div>
-                break;
-            default:
-                section =
-                    <div>
-                        <button onClick={ () => this.onClick('init') }>Initalise</button>
-                        <button onClick={ () => this.onClick('overview') }>Overview</button>
-                        <button onClick={ () => this.onClick('update') }>Update</button>
-                    </div>;
-                break;
-        }
-        return (
-            <div>
-                {section}
+        return(
+            <div className='col-lg-6 offset-lg-3'>
+                <h1>Main Menu</h1>
+                <div className='btn-row'>
+                    <button className='btn btn-primary btn-block'
+                        onClick={this.props.onInitClick}>Initalise</button>
+                </div>
+                <div className='btn-row'>
+                    <button className='btn btn-primary btn-block'
+                        onClick={ () => this.onClick('overview') }>Overview</button>
+                </div>
+                <div className='btn-row'>
+                    <button className='btn btn-primary btn-block'
+                        onClick={ () => this.onClick('update') }>Update</button>
+                </div>
             </div>
         )
     }

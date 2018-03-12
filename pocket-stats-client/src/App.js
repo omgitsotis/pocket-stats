@@ -1,7 +1,8 @@
 import React, {Component} from 'react';
-import Login from './components/login/Login.jsx';
-import Socket from './socket.js';
 import { withCookies, Cookies } from 'react-cookie';
+
+import LoginContainer from './components/login/LoginContainer.js';
+import Socket from './socket.js';
 import Menu from './components/menu/Menu.jsx';
 
 class App extends Component {
@@ -16,6 +17,7 @@ class App extends Component {
     componentDidMount() {
         let ws = this.ws = new WebSocket('ws://localhost:4000')
         let socket = this.socket = new Socket(ws);
+
         socket.on('send auth', this.onAuth.bind(this));
         socket.on('subscribe auth', this.onRecievedAuth.bind(this));
         socket.on('data get', this.onDataGet.bind(this));
@@ -122,21 +124,22 @@ class App extends Component {
     }
 
     render() {
-        console.log(this.state.initState);
+        let section = this.state.authorised ?
+            <Menu
+                onInitClick={ this.onInitClick }
+                initState={this.state.initState}
+                onFetchDataClick={this.onFetchDataClick}
+                onUpdateClick={this.onUpdateClick}
+            /> :
+            <LoginContainer onClick={this.onClick.bind(this)} />;
+
         return (
             <div className='app container'>
-                {this.state.authorised ?
-                    (
-                        <Menu
-                            onInitClick={ this.onInitClick }
-                            initState={this.state.initState}
-                            onFetchDataClick={this.onFetchDataClick}
-                            onUpdateClick={this.onUpdateClick}/>
-                    ) : (
-                    <Login onClick={this.onClick.bind(this)} />
-                )}
+                <div className='row'>
+                    {section}
+                </div>
             </div>
-        )
+        );
     }
 }
 
