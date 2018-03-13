@@ -115,9 +115,9 @@ func (p *Pocket) InitDB(ip model.InputParams) (*model.DataList, error) {
 			}
 
 			if v.Status == model.Archived {
-				r := model.Row{
+				r := model.Article{
 					ID:        int64(id),
-					WordCount: wc,
+					WordCount: int64(wc),
 					DateRead:  t.Unix(),
 					Status:    model.Archived,
 					UserID:    ip.ID,
@@ -128,9 +128,9 @@ func (p *Pocket) InitDB(ip model.InputParams) (*model.DataList, error) {
 			}
 
 			if v.Status == model.Added {
-				r := model.Row{
+				r := model.Article{
 					ID:        int64(id),
-					WordCount: wc,
+					WordCount: int64(wc),
 					DateAdded: t.Unix(),
 					Status:    model.Added,
 					UserID:    ip.ID,
@@ -218,9 +218,9 @@ func (p *Pocket) UpdateDB(ip model.InputParams) (int64, error) {
 				}
 
 				if v.Status == model.Archived {
-					r := model.Row{
+					r := model.Article{
 						ID:        int64(id),
-						WordCount: wc,
+						WordCount: int64(wc),
 						DateRead:  t.Unix(),
 						Status:    model.Archived,
 						UserID:    ip.ID,
@@ -231,9 +231,9 @@ func (p *Pocket) UpdateDB(ip model.InputParams) (int64, error) {
 				}
 
 				if v.Status == model.Added {
-					r := model.Row{
+					r := model.Article{
 						ID:        int64(id),
-						WordCount: wc,
+						WordCount: int64(wc),
 						DateAdded: t.Unix(),
 						Status:    model.Added,
 						UserID:    ip.ID,
@@ -259,15 +259,13 @@ func (p *Pocket) UpdateDB(ip model.InputParams) (int64, error) {
 	return midnight.Unix(), nil
 }
 
-func (p *Pocket) GetStatsForDates(param model.StatsParams) (*model.Stats, error) {
-	stats, err := p.dao.GetCountForDates(param.Start, param.End)
+func (p *Pocket) GetStatsForDates(sp model.StatsParams) (*model.Stats, error) {
+	articles, err := p.dao.GetArticles(sp.Start, sp.End)
 	if err != nil {
 		return nil, err
 	}
 
-	stats.Start = param.Start
-	stats.End = param.End
-
+	stats := p.createStats(sp, articles)
 	return stats, nil
 }
 
@@ -291,6 +289,63 @@ func (p *Pocket) LoadData() (*model.Stats, error) {
 	}
 
 	return stats, nil
+}
+
+func (p *Pocket) createStats(sp model.StatsParams, arts []model.Article) *model.Stats {
+	stats := make(map[int64]*model.Stat)
+	for _, a := range arts {
+		if a.Status == model.Archived {
+			// log.Printf("Read article: words %d | date %d", a.WordCount, a.DateRead)
+			s, ok := stats[a.DateRead]
+			if ok {
+				s.ArticleRead++
+				s.WordRead += a.WordCount
+			} else {
+				newStat := model.Stat{
+					ArticleRead: 1,
+					WordRead:    a.WordCount,
+				}
+
+				stats[a.DateRead] = &newStat
+			}
+
+			if a.DateAdded >= sp.Start && a.DateAdded <= sp.End {
+				s, ok = stats[a.DateAdded]
+				if ok {
+					s.ArticleAdded++
+					s.WordAdded += a.WordCount
+				} else {
+					newStat := model.Stat{
+						ArticleAdded: 1,
+						WordAdded:    a.WordCount,
+					}
+
+					stats[a.DateAdded] = &newStat
+				}
+			}
+
+		} else {
+			// log.Printf("Added article: words %d | date %d", a.WordCount, a.DateRead)
+			s, ok := stats[a.DateAdded]
+			if ok {
+				s.ArticleAdded++
+				s.WordAdded += a.WordCount
+			} else {
+				newStat := model.Stat{
+					ArticleAdded: 1,
+					WordAdded:    a.WordCount,
+				}
+
+				stats[a.DateAdded] = &newStat
+			}
+		}
+	}
+
+	return &model.Stats{
+		Start: sp.Start,
+		End:   sp.End,
+		Value: stats,
+	}
 }
 
 func (p *Pocket) Call(uri string, body, t interface{}) error {
@@ -332,10 +387,10 @@ func (p *Pocket) Call(uri string, body, t interface{}) error {
 	return nil
 }
 
-func NewPocket(id string, c *http.Client, d dao.DAO) *Pocket {
-	return &Pocket{id, c, d}
-}
-
 func (p *Pocket) SetClient(c http.Client) {
 	p.Client = &c
+}
+
+func NewPocket(id string, c *http.Client, d dao.DAO) *Pocket {
+	return &Pocket{id, c, d}
 }

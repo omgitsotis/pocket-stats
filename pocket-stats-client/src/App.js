@@ -1,16 +1,17 @@
 import React, {Component} from 'react';
 import { withCookies, Cookies } from 'react-cookie';
 
-import LoginContainer from './components/login/LoginContainer.js';
 import Socket from './socket.js';
-import Menu from './components/menu/Menu.jsx';
+
+import LoginContainer from './components/login/LoginContainer.js';
+import DashboardContainer from './components/dashboard/Dashboard.jsx';
 
 class App extends Component {
     constructor(props) {
         super(props);
         this.state = {
             authorised : false,
-            initState: ''
+            initState: '',
             startDate: 0,
             endDate: 0,
             loaded: false,
@@ -27,8 +28,8 @@ class App extends Component {
         socket.on('data get', this.onDataGet.bind(this));
         socket.on('auth cached', this.onAuthCached.bind(this));
         socket.on('error', this.onError.bind(this));
-        socket.on('data update', this.onDataUpdate)
-        socket.on('data load', this.onDataLoad)
+        socket.on('data update', this.onDataUpdate);
+        socket.on('data load', this.onDataLoad);
 
         const { cookies } = this.props;
         const accessToken = cookies.get('accessToken');
@@ -63,10 +64,6 @@ class App extends Component {
 
     onAuthCached() {
         this.setState({authorised: true});
-        this.socket.emit('data load', {
-            token: token,
-            id: parseInt(userID, 10),
-        });
     }
 
     onInitClick = (date) => {
@@ -107,6 +104,11 @@ class App extends Component {
         }
 
         this.setState({authorised: true});
+
+        this.socket.emit('data load', {
+            token: token,
+            id: parseInt(userID, 10),
+        });
     }
 
     onDataGet(data) {
@@ -133,7 +135,7 @@ class App extends Component {
     }
 
     onDataLoad = (data) => {
-        console.log(data);
+        console.log("On data load", data);
         this.setState({
             loaded: true,
             startDate: data.start_date,
@@ -147,26 +149,16 @@ class App extends Component {
         if (!this.state.authorised) {
             component = <LoginContainer onClick={this.onClick.bind(this)} />;
         } else {
-            if(this.state.loading) {
-                component = <i className="fa fa-spinner fa-spin" style={{fontSize: "48px"}}></i>
+            if(this.state.loaded === true) {
+                component = <DashboardContainer />
             } else {
-                component = <div>COMING SOON</div>
+                component = <i className="fa fa-spinner fa-spin" style={{fontSize: "48px"}}></i>
             }
         }
-        // let section = this.state.authorised ?
-        //     <Menu
-        //         onInitClick={ this.onInitClick }
-        //         initState={this.state.initState}
-        //         onFetchDataClick={this.onFetchDataClick}
-        //         onUpdateClick={this.onUpdateClick}
-        //     /> :
-        //     <LoginContainer onClick={this.onClick.bind(this)} />;
-        //
+
         return (
             <div className='app container'>
-                <div className='row'>
-                    {section}
-                </div>
+                <DashboardContainer />
             </div>
         );
     }

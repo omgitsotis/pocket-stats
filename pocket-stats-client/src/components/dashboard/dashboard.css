@@ -1,0 +1,18 @@
+.dummy {
+    margin-top: 100%;
+}
+
+.thumbnail {
+    position: absolute;
+    top: 0px;
+    bottom: 0;
+    left: 0px;
+    right: 0;
+    text-align:center;
+    padding-top:calc(50% - 50px);
+    border: solid 2px blue;
+}
+
+.stats-section p{
+    margin-bottom: 0px;
+}

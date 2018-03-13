@@ -46,11 +46,11 @@ type Data struct {
 	Title      string `json:"given_title"`
 }
 
-type Row struct {
+type Article struct {
 	ID        int64
 	DateAdded int64
 	DateRead  int64
-	WordCount int
+	WordCount int64
 	Status    string
 	UserID    int64
 }
@@ -67,14 +67,16 @@ type CountRow struct {
 }
 
 type Stats struct {
-	Start int64                `json:"start_date"`
-	End   int64                `json:"end_date"`
-	Value map[int64]*WordCount `json:"value"`
+	Start int64           `json:"start_date"`
+	End   int64           `json:"end_date"`
+	Value map[int64]*Stat `json:"value"`
 }
 
-type WordCount struct {
-	Added int64 `json:"added"`
-	Read  int64 `json:"read"`
+type Stat struct {
+	ArticleAdded int64 `json:"articles_added"`
+	ArticleRead  int64 `json:"articles_read"`
+	WordAdded    int64 `json:"words_added"`
+	WordRead     int64 `json:"words_read"`
 }
 
 type StatsParams struct {

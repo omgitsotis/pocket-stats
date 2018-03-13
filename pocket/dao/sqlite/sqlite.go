@@ -44,7 +44,7 @@ func (dao *SQLiteDAO) AddUser(name string) (int64, error) {
 	return id, nil
 }
 
-func (dao *SQLiteDAO) AddArticle(r model.Row) error {
+func (dao *SQLiteDAO) AddArticle(r model.Article) error {
 	stmt, err := dao.db.Prepare("INSERT INTO articles VALUES (?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		log.Printf("Error preparing database: [%s]", err.Error())
@@ -94,30 +94,38 @@ func (dao *SQLiteDAO) IsUser(id int64) (bool, error) {
 	}
 }
 
-func (dao *SQLiteDAO) GetCountForDates(start, end int64) (*model.Stats, error) {
-	query := "SELECT date_added, (word_count) FROM articles " +
+func (dao *SQLiteDAO) GetArticles(start, end int64) ([]model.Article, error) {
+	query := "SELECT id, date_added, date_read, word_count, status FROM articles " +
 		"WHERE date_added >= ? AND date_added <= ? " +
-		"GROUP BY date_added " +
-		"ORDER BY date_added DESC"
+		"OR date_read >= ? AND date_read <= ? " +
+		"ORDER BY date_added"
 
-	res := make(map[int64]*model.WordCount)
+	articles := make([]model.Article, 0)
 
-	log.Printf("selecting date_added between %d and %d", start, end)
+	log.Printf("selecting articles between %d and %d", start, end)
 
-	rows, err := dao.db.Query(query, start, end)
+	rows, err := dao.db.Query(query, start, end, start, end)
 	if err != nil {
 		log.Printf("Error executing query: %s", err.Error())
 		return nil, err
 	}
 
 	for rows.Next() {
-		var date, count int64
-		if err := rows.Scan(&date, &count); err != nil {
+		var id, dateRead, dateAdded, count int64
+		var status string
+		if err := rows.Scan(&id, &dateAdded, &dateRead, &count, &status); err != nil {
 			log.Printf("Error reading data: %s", err.Error())
 			return nil, err
 		}
 
-		res[date] = &model.WordCount{Added: count}
+		a := model.Article{
+			ID:        id,
+			DateAdded: dateAdded,
+			DateRead:  dateRead,
+			WordCount: count,
+			Status:    status,
+		}
+		articles = append(articles, a)
 	}
 
 	if err := rows.Err(); err != nil {
@@ -125,45 +133,11 @@ func (dao *SQLiteDAO) GetCountForDates(start, end int64) (*model.Stats, error) {
 		return nil, err
 	}
 
-	query = "SELECT date_read, (word_count) FROM articles " +
-		"WHERE date_read >= ? AND date_added <= ? " +
-		"GROUP BY date_read " +
-		"ORDER BY date_read DESC"
-
-	log.Printf("selecting date_read between %d and %d", start, end)
-
-	rows, err = dao.db.Query(query, start, end)
-	if err != nil {
-		log.Printf("Error executing query: %s", err.Error())
-		return nil, err
-	}
-
-	for rows.Next() {
-		var date, count int64
-		if err := rows.Scan(&date, &count); err != nil {
-			log.Printf("Error reading data: %s", err.Error())
-			return nil, err
-		}
-
-		v, ok := res[date]
-		if !ok {
-			res[date] = &model.WordCount{Read: count}
-		} else {
-			v.Read = count
-		}
-	}
-
-	if err := rows.Err(); err != nil {
-		log.Printf("Error looping results: %s", err.Error())
-		return nil, err
-	}
-
-	stats := model.Stats{Value: res}
-	return &stats, nil
+	return articles, nil
 }
 
-func (dao *SQLiteDAO) GetArticle(id int64) (*model.Row, error) {
-	var r model.Row
+func (dao *SQLiteDAO) GetArticle(id int64) (*model.Article, error) {
+	var r model.Article
 	log.Printf("Getting article [%d]", id)
 	err := dao.db.QueryRow("SELECT * FROM articles WHERE id=?", id).Scan(
 		&r.ID,
@@ -187,7 +161,7 @@ func (dao *SQLiteDAO) GetArticle(id int64) (*model.Row, error) {
 	}
 }
 
-func (dao *SQLiteDAO) UpdateArticle(r *model.Row) error {
+func (dao *SQLiteDAO) UpdateArticle(r *model.Article) error {
 	stmt, err := dao.db.Prepare("UPDATE articles SET date_read = ?, status = ? WHERE id = ?")
 	if err != nil {
 		log.Printf("Error creating statment: %s", err.Error())
