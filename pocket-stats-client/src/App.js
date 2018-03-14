@@ -20,23 +20,23 @@ class App extends Component {
     }
 
     componentDidMount() {
-        let ws = this.ws = new WebSocket('ws://localhost:4000')
-        let socket = this.socket = new Socket(ws);
-
-        socket.on('send auth', this.onAuth.bind(this));
-        socket.on('subscribe auth', this.onRecievedAuth.bind(this));
-        socket.on('data get', this.onDataGet.bind(this));
-        socket.on('auth cached', this.onAuthCached.bind(this));
-        socket.on('error', this.onError.bind(this));
-        socket.on('data update', this.onDataUpdate);
-        socket.on('data load', this.onDataLoad);
-
-        const { cookies } = this.props;
-        const accessToken = cookies.get('accessToken');
-        if (typeof  accessToken !== "undefined") {
-            console.log(accessToken);
-            this.waitForSocketConnection(accessToken);
-        }
+        // let ws = this.ws = new WebSocket('ws://localhost:4000')
+        // let socket = this.socket = new Socket(ws);
+        //
+        // socket.on('send auth', this.onAuth.bind(this));
+        // socket.on('subscribe auth', this.onRecievedAuth.bind(this));
+        // socket.on('data get', this.onDataGet.bind(this));
+        // socket.on('auth cached', this.onAuthCached.bind(this));
+        // socket.on('error', this.onError.bind(this));
+        // socket.on('data update', this.onDataUpdate);
+        // socket.on('data load', this.onDataLoad);
+        //
+        // const { cookies } = this.props;
+        // const accessToken = cookies.get('accessToken');
+        // if (typeof  accessToken !== "undefined") {
+        //     console.log(accessToken);
+        //     this.waitForSocketConnection(accessToken);
+        // }
     }
 
     waitForSocketConnection(accessToken) {
