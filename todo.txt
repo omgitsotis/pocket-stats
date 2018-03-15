@@ -1,0 +1,13 @@
+TODO
+* Create update button
+    * Show last updated date
+* Handle errors
+* Clean up code
+* Create graphs page
+    * Create articles read graph
+    * Create articles added graphs
+    * Create words read graph
+    * Create words added graph
+    * Add calendars
+* Handle design
+* Handle users better

@@ -3,10 +3,13 @@ package client
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/omgitsotis/pocket-stats/pocket"
 	"github.com/omgitsotis/pocket-stats/pocket/dao/sqlite"
 )
+
+var logger = log.New(os.Stdout, "", log.Ldate|log.Ltime|log.Lshortfile)
 
 // func NewClient() *Client {
 // 	p := pocket.NewPocket("74935-9d486f66d2999047b61328f3")
@@ -48,7 +51,7 @@ func ServeAPI() error {
 	http.Handle("/", r)
 	http.HandleFunc("/auth/recieved", r.RecievedAuth)
 
-	log.Println("Serving application")
+	logger.Println("Serving application")
 	return http.ListenAndServe(":4000", nil)
 
 }

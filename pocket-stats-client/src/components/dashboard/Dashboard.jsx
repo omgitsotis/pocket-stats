@@ -1,13 +1,29 @@
 import React, {Component} from 'react';
 import './dashboard.css';
 import {Line} from 'react-chartjs-2';
+import moment from 'moment';
 
 class Dashboard extends Component {
     render() {
+        const totals = this.props.totals;
+        const itemised = this.props.itemised;
+
+        const lastUpdated = moment.unix(this.props.lastUpdated).format("D/MMM");
+
+        let labels = [];
+        let atsRead = [];
+        let atsAdded = [];
+        Object.keys(itemised).forEach(function(key) {
+            let day = moment.unix(key);
+            labels.push(day.format("D/MMM"));
+            atsRead.push(itemised[key].articles_read);
+            atsAdded.push(itemised[key].articles_added);
+        });
+
         const data = {
-            labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+            labels: labels,
             datasets: [{
-                label: 'My First dataset',
+                label: 'Articles Read',
                 fill: false,
                 lineTension: 0.1,
                 backgroundColor: 'rgba(75,192,192,0.4)',
@@ -25,7 +41,28 @@ class Dashboard extends Component {
                 pointHoverBorderWidth: 2,
                 pointRadius: 1,
                 pointHitRadius: 10,
-                data: [65, 59, 80, 81, 56, 55, 40]
+                data: atsRead
+            },
+            {
+                label: 'Articles Added',
+                fill: false,
+                lineTension: 0.1,
+                backgroundColor: 'rgba(128,0,0,0.4)',
+                borderColor: 'rgba(128,0,0,1)',
+                borderCapStyle: 'butt',
+                borderDash: [],
+                borderDashOffset: 0.0,
+                borderJoinStyle: 'miter',
+                pointBorderColor: 'rgba(75,192,192,1)',
+                pointBackgroundColor: '#fff',
+                pointBorderWidth: 1,
+                pointHoverRadius: 5,
+                pointHoverBackgroundColor: 'rgba(128,0,0,1)',
+                pointHoverBorderColor: 'rgba(128,0,0,1)',
+                pointHoverBorderWidth: 2,
+                pointRadius: 1,
+                pointHitRadius: 10,
+                data: atsAdded
             }]
         };
 
@@ -33,8 +70,14 @@ class Dashboard extends Component {
             <div>
                 <div className='row'>
                     <div className='col-lg'>
-                        <nav class="navbar navbar-light bg-light">
-                            <span class="navbar-brand mb-0 h1">Navbar</span>
+                        <nav className="navbar navbar-light bg-light">
+                            <span className="navbar-brand mb-0 h1">Navbar</span>
+                            <div>
+                                <span className="navbar-text">Updated: {lastUpdated}</span>
+                                <button type="button" className="btn btn-outline-primary">
+                                    <i className="fa fa-refresh " aria-hidden="true"></i>
+                                </button>
+                            </div>
                         </nav>
                     </div>
                 </div>
@@ -43,19 +86,19 @@ class Dashboard extends Component {
                         <div className='card-deck'>
                             <div className='card text-center stat-box'>
                                 <h5 className='card-title'>Articles Add</h5>
-                                <p className='card-text'>30</p>
+                                <p className='card-text'>{totals.total_articles_added}</p>
                             </div>
                             <div className='card text-center stat-box'>
                                 <h5 className='card-title'>Articles Read</h5>
-                                <p className='card-text'>15</p>
+                                <p className='card-text'>{totals.total_articles_read}</p>
                             </div>
                             <div className='card text-center stat-box'>
                                 <h5 className='card-title'>Words add</h5>
-                                <p className='card-text'>30</p>
+                                <p className='card-text'>{totals.total_words_added}</p>
                             </div>
                             <div className='card text-center stat-box'>
                                 <h5 className='card-title'>Words Read</h5>
-                                <p className='card-text'>30</p>
+                                <p className='card-text'>{totals.total_words_read}</p>
                             </div>
                         </div>
                     </div>

@@ -14,7 +14,7 @@ func sendAuth(client *Client, data interface{}) {
 		return
 	}
 
-	fmt.Println(client.Code)
+	logger.Println(client.Code)
 
 	code, err := client.Pocket.GetAuth("http://localhost:4000/auth/recieved")
 	if err != nil {
@@ -35,7 +35,31 @@ func sendAuth(client *Client, data interface{}) {
 	}
 
 	link := Link{u}
-	client.send <- Message{"send auth", link}
+	client.send <- Message{"auth link", link}
+}
+
+func saveToken(client *Client, data interface{}) {
+	type AccessToken struct {
+		Token string `json:"token"`
+	}
+
+	var token AccessToken
+	err := mapstructure.Decode(data, &token)
+	if err != nil {
+		client.send <- Message{"error", err.Error()}
+		return
+	}
+
+	user, err := client.Pocket.GetUser()
+	if err != nil {
+		client.send <- Message{"error", err.Error()}
+		return
+	}
+
+	log.Printf("Received token [%s]", token)
+	user.AccessToken = token.Token
+
+	client.send <- Message{"auth cached", user}
 }
 
 func initDB(client *Client, data interface{}) {
@@ -52,25 +76,7 @@ func initDB(client *Client, data interface{}) {
 		return
 	}
 
-	client.send <- Message{"data get", "Complete"}
-}
-
-func saveToken(client *Client, data interface{}) {
-	type AccessToken struct {
-		Token string `json:"token"`
-	}
-
-	var token AccessToken
-	err := mapstructure.Decode(data, &token)
-	if err != nil {
-		client.send <- Message{"error", err.Error()}
-		return
-	}
-
-	log.Println(token)
-	client.AccessToken = token.Token
-
-	client.send <- Message{"subscribe auth", client.AccessToken}
+	client.send <- Message{"data init", "Complete"}
 }
 
 func getStatistics(client *Client, data interface{}) {
@@ -118,5 +124,5 @@ func loadData(client *Client, data interface{}) {
 		return
 	}
 
-	client.send <- Message{"data load", stats}
+	client.send <- Message{"data get", stats}
 }

@@ -7,12 +7,15 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
 	"github.com/omgitsotis/pocket-stats/pocket/dao"
 	"github.com/omgitsotis/pocket-stats/pocket/model"
 )
+
+var logger = log.New(os.Stdout, "Pocket:", log.Ldate|log.Ltime|log.Lshortfile)
 
 type Pocket struct {
 	ConsumerID string
@@ -27,7 +30,7 @@ func (p *Pocket) GetAuth(uri string) (string, error) {
 		return "", err
 	}
 
-	log.Printf("repsone code returned [%s]", rt.Code)
+	logger.Printf("repsone code returned [%s]", rt.Code)
 	return rt.Code, nil
 }
 
@@ -39,12 +42,20 @@ func (p *Pocket) ReceieveAuth(key string) (*model.User, error) {
 		return nil, err
 	}
 
-	id, err := p.dao.AddUser(user.Username)
+	// id, err := p.dao.AddUser(user.Username)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	user.ID = 1
+
+	date, err := p.dao.GetLastAdded()
 	if err != nil {
 		return nil, err
 	}
 
-	user.ID = id
+	user.LastUpdated = date
+
 	return &user, nil
 }
 
@@ -104,7 +115,7 @@ func (p *Pocket) InitDB(ip model.InputParams) (*model.DataList, error) {
 
 			id, err := strconv.Atoi(v.ItemID)
 			if err != nil {
-				log.Printf("Error converting ID: %s", err.Error())
+				logger.Printf("Error converting ID: %s", err.Error())
 				continue
 			}
 
@@ -160,16 +171,16 @@ func (p *Pocket) UpdateDB(ip model.InputParams) (int64, error) {
 	d := midnight.Sub(until)
 
 	days := int(d.Hours() / 24)
-	log.Printf("Current date: %s", midnight.Format("02/01/2006"))
-	log.Printf("Until date: %s", until.Format("02/01/2006"))
-	log.Printf("Days to go back to: %d", days)
+	logger.Printf("Current date: %s", midnight.Format("02/01/2006"))
+	logger.Printf("Until date: %s", until.Format("02/01/2006"))
+	logger.Printf("Days to go back to: %d", days)
 
 	seen := make(map[string]bool)
 
 	for i := 0; i < days; i++ {
 		t := midnight.AddDate(0, 0, i*-1)
 
-		log.Printf("Geting info from date %s", t.Format("02/01/2006"))
+		logger.Printf("Geting info from date %s", t.Format("02/01/2006"))
 
 		param := model.DataParam{
 			ConsumerKey: p.ConsumerID,
@@ -196,11 +207,11 @@ func (p *Pocket) UpdateDB(ip model.InputParams) (int64, error) {
 				continue
 			}
 
-			log.Printf("Got article %s\n", v.ItemID)
+			logger.Printf("Got article %s\n", v.ItemID)
 
 			id, err := strconv.Atoi(v.ItemID)
 			if err != nil {
-				log.Printf("Error converting ID: %s", err.Error())
+				logger.Printf("Error converting ID: %s", err.Error())
 				continue
 			}
 
@@ -249,13 +260,13 @@ func (p *Pocket) UpdateDB(ip model.InputParams) (int64, error) {
 					row.Status = model.Archived
 					p.dao.UpdateArticle(row)
 				} else {
-					log.Printf("Article %d has same status [%s], skip", id, v.Status)
+					logger.Printf("Article %d has same status [%s], skip", id, v.Status)
 				}
 			}
 		}
 	}
 
-	log.Printf("Updated to %d", midnight.Unix())
+	logger.Printf("Updated to %d", midnight.Unix())
 	return midnight.Unix(), nil
 }
 
@@ -291,11 +302,73 @@ func (p *Pocket) LoadData() (*model.Stats, error) {
 	return stats, nil
 }
 
+func (p *Pocket) GetUser() (*model.User, error) {
+	date, err := p.dao.GetLastAdded()
+	if err != nil {
+		return nil, err
+	}
+
+	user := model.User{
+		Username:    "omgitsotis",
+		ID:          1,
+		LastUpdated: date,
+	}
+
+	return &user, nil
+}
+
+func (p *Pocket) Call(uri string, body, t interface{}) error {
+	b, err := json.Marshal(body)
+	if err != nil {
+		logger.Printf("Error marshalling params: %s", err.Error())
+		return err
+	}
+
+	uri = fmt.Sprintf("https://getpocket.com/v3%s", uri)
+	req, err := http.NewRequest("POST", uri, bytes.NewBuffer(b))
+	if err != nil {
+		logger.Printf("Error creating request: %s", err.Error())
+		return err
+	}
+
+	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
+	req.Header.Set("X-Accept", "application/json")
+
+	res, err := p.Client.Do(req)
+	if err != nil {
+		logger.Printf("error performing request: %s", err.Error())
+		return err
+	}
+
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
+		logger.Printf("Status %s", res.Status)
+		return errors.New(res.Status)
+	}
+
+	err = json.NewDecoder(res.Body).Decode(t)
+	if err != nil {
+		logger.Printf("Error decoding body: %s", err.Error())
+		return err
+	}
+
+	return nil
+}
+
+func (p *Pocket) SetClient(c http.Client) {
+	p.Client = &c
+}
+
 func (p *Pocket) createStats(sp model.StatsParams, arts []model.Article) *model.Stats {
 	stats := make(map[int64]*model.Stat)
+	var wAdded, wRead, aAdded, aRead int64
 	for _, a := range arts {
 		if a.Status == model.Archived {
-			// log.Printf("Read article: words %d | date %d", a.WordCount, a.DateRead)
+			// logger.Printf("Read article: words %d | date %d", a.WordCount, a.DateRead)
+			aRead++
+			wRead += a.WordCount
+
 			s, ok := stats[a.DateRead]
 			if ok {
 				s.ArticleRead++
@@ -310,6 +383,9 @@ func (p *Pocket) createStats(sp model.StatsParams, arts []model.Article) *model.
 			}
 
 			if a.DateAdded >= sp.Start && a.DateAdded <= sp.End {
+				aAdded++
+				wAdded += a.WordCount
+
 				s, ok = stats[a.DateAdded]
 				if ok {
 					s.ArticleAdded++
@@ -325,7 +401,10 @@ func (p *Pocket) createStats(sp model.StatsParams, arts []model.Article) *model.
 			}
 
 		} else {
-			// log.Printf("Added article: words %d | date %d", a.WordCount, a.DateRead)
+			// logger.Printf("Added article: words %d | date %d", a.WordCount, a.DateRead)
+			aAdded++
+			wAdded += a.WordCount
+
 			s, ok := stats[a.DateAdded]
 			if ok {
 				s.ArticleAdded++
@@ -341,54 +420,19 @@ func (p *Pocket) createStats(sp model.StatsParams, arts []model.Article) *model.
 		}
 	}
 
+	totals := model.TotalStats{
+		ArticlesAdded: aAdded,
+		ArticlesRead:  aRead,
+		WordsAdded:    wAdded,
+		WordsRead:     wRead,
+	}
+
 	return &model.Stats{
-		Start: sp.Start,
-		End:   sp.End,
-		Value: stats,
+		Start:  sp.Start,
+		End:    sp.End,
+		Value:  stats,
+		Totals: totals,
 	}
-}
-
-func (p *Pocket) Call(uri string, body, t interface{}) error {
-	b, err := json.Marshal(body)
-	if err != nil {
-		log.Printf("Error marshalling params: %s", err.Error())
-		return err
-	}
-
-	uri = fmt.Sprintf("https://getpocket.com/v3%s", uri)
-	req, err := http.NewRequest("POST", uri, bytes.NewBuffer(b))
-	if err != nil {
-		log.Printf("Error creating request: %s", err.Error())
-		return err
-	}
-
-	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
-	req.Header.Set("X-Accept", "application/json")
-
-	res, err := p.Client.Do(req)
-	if err != nil {
-		log.Printf("error performing request: %s", err.Error())
-		return err
-	}
-
-	defer res.Body.Close()
-
-	if res.StatusCode != http.StatusOK {
-		log.Printf("Status %s", res.Status)
-		return errors.New(res.Status)
-	}
-
-	err = json.NewDecoder(res.Body).Decode(t)
-	if err != nil {
-		log.Printf("Error decoding body: %s", err.Error())
-		return err
-	}
-
-	return nil
-}
-
-func (p *Pocket) SetClient(c http.Client) {
-	p.Client = &c
 }
 
 func NewPocket(id string, c *http.Client, d dao.DAO) *Pocket {

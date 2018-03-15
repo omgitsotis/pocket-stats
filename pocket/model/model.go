@@ -22,6 +22,7 @@ type User struct {
 	AccessToken string `json:"access_token"`
 	Username    string `json:"username"`
 	ID          int64  `json:"id"`
+	LastUpdated int64  `json:"last_updated"`
 }
 
 type DataParam struct {
@@ -67,9 +68,10 @@ type CountRow struct {
 }
 
 type Stats struct {
-	Start int64           `json:"start_date"`
-	End   int64           `json:"end_date"`
-	Value map[int64]*Stat `json:"value"`
+	Start  int64           `json:"start_date"`
+	End    int64           `json:"end_date"`
+	Value  map[int64]*Stat `json:"value"`
+	Totals TotalStats      `json:"totals"`
 }
 
 type Stat struct {
@@ -77,6 +79,13 @@ type Stat struct {
 	ArticleRead  int64 `json:"articles_read"`
 	WordAdded    int64 `json:"words_added"`
 	WordRead     int64 `json:"words_read"`
+}
+
+type TotalStats struct {
+	ArticlesAdded int64 `json:"total_articles_added"`
+	ArticlesRead  int64 `json:"total_articles_read"`
+	WordsAdded    int64 `json:"total_words_added"`
+	WordsRead     int64 `json:"total_words_read"`
 }
 
 type StatsParams struct {

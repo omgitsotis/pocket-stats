@@ -11,32 +11,31 @@ class App extends Component {
         super(props);
         this.state = {
             authorised : false,
-            initState: '',
-            startDate: 0,
-            endDate: 0,
             loaded: false,
-            statList: {}
+            lastUpdated: 0,
+            username: "",
+            totals: {},
+            itemised: {}
         };
     }
 
     componentDidMount() {
-        // let ws = this.ws = new WebSocket('ws://localhost:4000')
-        // let socket = this.socket = new Socket(ws);
-        //
-        // socket.on('send auth', this.onAuth.bind(this));
-        // socket.on('subscribe auth', this.onRecievedAuth.bind(this));
-        // socket.on('data get', this.onDataGet.bind(this));
-        // socket.on('auth cached', this.onAuthCached.bind(this));
-        // socket.on('error', this.onError.bind(this));
-        // socket.on('data update', this.onDataUpdate);
-        // socket.on('data load', this.onDataLoad);
-        //
-        // const { cookies } = this.props;
-        // const accessToken = cookies.get('accessToken');
-        // if (typeof  accessToken !== "undefined") {
-        //     console.log(accessToken);
-        //     this.waitForSocketConnection(accessToken);
-        // }
+        let ws = this.ws = new WebSocket('ws://localhost:4000')
+        let socket = this.socket = new Socket(ws);
+
+        socket.on('auth link', this.onAuthLink);
+        socket.on('auth user', this.onAuthUser);
+        socket.on('auth cached', this.onAuthCached);
+        socket.on('data get', this.onDataGet);
+        socket.on('data update', this.onDataUpdate);
+        socket.on('error', this.onError.bind(this));
+
+        const { cookies } = this.props;
+        const accessToken = cookies.get('accessToken');
+        if (typeof  accessToken !== "undefined") {
+            console.log(accessToken);
+            this.waitForSocketConnection(accessToken);
+        }
     }
 
     waitForSocketConnection(accessToken) {
@@ -53,17 +52,30 @@ class App extends Component {
             }, 5);
     }
 
-    onClick(e) {
+    onClick = (e) => {
         this.socket.emit('send auth');
     }
 
-    onAuth(auth) {
+    onAuthLink = (auth) => {
         console.log(auth);
         window.open(auth.url, "myWindow", 'width=800,height=600');
     }
 
-    onAuthCached() {
-        this.setState({authorised: true});
+    onAuthCached = (user) => {
+        this.setState({
+            authorised: true,
+            username: user.username,
+            lastUpdated: user.last_updated
+        });
+
+        const { cookies } = this.props;
+        let token = cookies.get('accessToken');
+        let userID = cookies.get('userID');
+
+        this.socket.emit('data load', {
+            token: token,
+            id: parseInt(userID, 10),
+        });
     }
 
     onInitClick = (date) => {
@@ -91,10 +103,11 @@ class App extends Component {
         });
     }
 
-    onRecievedAuth(user) {
+    onAuthUser = (user) => {
         const { cookies } = this.props;
         let token = cookies.get('accessToken');
         let userID = cookies.get('userID');
+
         if (typeof token === "undefined") {
             cookies.set('accessToken', user.access_token, { path: '/' });
             cookies.set('userID', user.id, { path: '/' });
@@ -111,8 +124,13 @@ class App extends Component {
         });
     }
 
-    onDataGet(data) {
+    onDataGet = (data) => {
         console.log(data);
+        this.setState({
+            loaded: true,
+            totals: data.totals,
+            itemised: data.value,
+        });
     }
 
     onError(err) {
@@ -147,10 +165,15 @@ class App extends Component {
     render() {
         let component;
         if (!this.state.authorised) {
-            component = <LoginContainer onClick={this.onClick.bind(this)} />;
+            component = <LoginContainer onClick={this.onClick} />;
         } else {
             if(this.state.loaded === true) {
-                component = <DashboardContainer />
+                component =
+                    <DashboardContainer
+                        totals={this.state.totals}
+                        itemised={this.state.itemised}
+                        lastUpdated={this.state.lastUpdated}
+                    />
             } else {
                 component = <i className="fa fa-spinner fa-spin" style={{fontSize: "48px"}}></i>
             }
@@ -158,7 +181,7 @@ class App extends Component {
 
         return (
             <div className='app container'>
-                <DashboardContainer />
+                {component}
             </div>
         );
     }

@@ -4,7 +4,11 @@ import Dashboard from './Dashboard.jsx';
 class DashboardContainer extends 'Component'{
     render() {
         return (
-            <Dashboard />
+            <Dashboard
+                totals={this.props.totals}
+                itemised={this.props.itemised}
+                lastUpdated={this.props.lastUpdated}
+            />
         )
     }
 }

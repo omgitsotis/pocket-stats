@@ -18,7 +18,7 @@ type SQLiteDAO struct {
 func (dao *SQLiteDAO) AddUser(name string) (int64, error) {
 	stmt, err := dao.db.Prepare("INSERT INTO users(username) VALUES (?)")
 	if err != nil {
-		log.Printf("Error preparing database: [%s]", err.Error())
+		logger.Printf("Error preparing database: [%s]", err.Error())
 		return 0, err
 	}
 
@@ -29,17 +29,17 @@ func (dao *SQLiteDAO) AddUser(name string) (int64, error) {
 
 	res, err := stmt.Exec(name)
 	if err != nil {
-		log.Printf("Error executing database [%s]", err.Error())
+		logger.Printf("Error executing database [%s]", err.Error())
 		return 0, err
 	}
 
 	id, err := res.LastInsertId()
 	if err != nil {
-		log.Printf("Error executing database: [%s]", err.Error())
+		logger.Printf("Error executing database: [%s]", err.Error())
 		return 0, err
 	}
 
-	log.Printf("Created user [%d]", id)
+	logger.Printf("Created user [%d]", id)
 
 	return id, nil
 }
@@ -47,7 +47,7 @@ func (dao *SQLiteDAO) AddUser(name string) (int64, error) {
 func (dao *SQLiteDAO) AddArticle(r model.Article) error {
 	stmt, err := dao.db.Prepare("INSERT INTO articles VALUES (?, ?, ?, ?, ?, ?)")
 	if err != nil {
-		log.Printf("Error preparing database: [%s]", err.Error())
+		logger.Printf("Error preparing database: [%s]", err.Error())
 		return err
 	}
 
@@ -63,33 +63,33 @@ func (dao *SQLiteDAO) AddArticle(r model.Article) error {
 	)
 
 	if err != nil {
-		log.Printf("Error executing database [%s]", err.Error())
+		logger.Printf("Error executing database [%s]", err.Error())
 		return err
 	}
 
 	n, err := res.RowsAffected()
 	if err != nil {
-		log.Printf("Error executing database [%s]", err.Error())
+		logger.Printf("Error executing database [%s]", err.Error())
 		return err
 	}
 
-	log.Printf("Row(s) added: [%d]", n)
+	logger.Printf("Row(s) added: [%d]", n)
 	return nil
 }
 
 func (dao *SQLiteDAO) IsUser(id int64) (bool, error) {
 	var username string
-	log.Printf("SELECT username FROM users WHERE id=%d", id)
+	logger.Printf("SELECT username FROM users WHERE id=%d", id)
 	err := dao.db.QueryRow("SELECT username FROM users WHERE id=?", id).Scan(&username)
 	switch {
 	case err == sql.ErrNoRows:
-		log.Printf("No user with id [%d]\n", id)
+		logger.Printf("No user with id [%d]\n", id)
 		return false, nil
 	case err != nil:
-		log.Printf("Error reading username: [%s]", err.Error())
+		logger.Printf("Error reading username: [%s]", err.Error())
 		return false, err
 	default:
-		log.Printf("Found user [%s]", username)
+		logger.Printf("Found user [%s]", username)
 		return true, nil
 	}
 }
@@ -102,11 +102,11 @@ func (dao *SQLiteDAO) GetArticles(start, end int64) ([]model.Article, error) {
 
 	articles := make([]model.Article, 0)
 
-	log.Printf("selecting articles between %d and %d", start, end)
+	logger.Printf("selecting articles between %d and %d", start, end)
 
 	rows, err := dao.db.Query(query, start, end, start, end)
 	if err != nil {
-		log.Printf("Error executing query: %s", err.Error())
+		logger.Printf("Error executing query: %s", err.Error())
 		return nil, err
 	}
 
@@ -114,7 +114,7 @@ func (dao *SQLiteDAO) GetArticles(start, end int64) ([]model.Article, error) {
 		var id, dateRead, dateAdded, count int64
 		var status string
 		if err := rows.Scan(&id, &dateAdded, &dateRead, &count, &status); err != nil {
-			log.Printf("Error reading data: %s", err.Error())
+			logger.Printf("Error reading data: %s", err.Error())
 			return nil, err
 		}
 
@@ -129,7 +129,7 @@ func (dao *SQLiteDAO) GetArticles(start, end int64) ([]model.Article, error) {
 	}
 
 	if err := rows.Err(); err != nil {
-		log.Printf("Error looping results: %s", err.Error())
+		logger.Printf("Error looping results: %s", err.Error())
 		return nil, err
 	}
 
@@ -138,7 +138,7 @@ func (dao *SQLiteDAO) GetArticles(start, end int64) ([]model.Article, error) {
 
 func (dao *SQLiteDAO) GetArticle(id int64) (*model.Article, error) {
 	var r model.Article
-	log.Printf("Getting article [%d]", id)
+	logger.Printf("Getting article [%d]", id)
 	err := dao.db.QueryRow("SELECT * FROM articles WHERE id=?", id).Scan(
 		&r.ID,
 		&r.DateAdded,
@@ -150,13 +150,13 @@ func (dao *SQLiteDAO) GetArticle(id int64) (*model.Article, error) {
 
 	switch {
 	case err == sql.ErrNoRows:
-		log.Printf("No article with id [%d]", id)
+		logger.Printf("No article with id [%d]", id)
 		return nil, nil
 	case err != nil:
-		log.Printf("Error reading article: [%s]", err.Error())
+		logger.Printf("Error reading article: [%s]", err.Error())
 		return nil, err
 	default:
-		log.Printf("Found article [%d]", id)
+		logger.Printf("Found article [%d]", id)
 		return &r, nil
 	}
 }
@@ -164,11 +164,11 @@ func (dao *SQLiteDAO) GetArticle(id int64) (*model.Article, error) {
 func (dao *SQLiteDAO) UpdateArticle(r *model.Article) error {
 	stmt, err := dao.db.Prepare("UPDATE articles SET date_read = ?, status = ? WHERE id = ?")
 	if err != nil {
-		log.Printf("Error creating statment: %s", err.Error())
+		logger.Printf("Error creating statment: %s", err.Error())
 		return err
 	}
 
-	log.Printf(
+	logger.Printf(
 		"Updating article [%d] date read [%d] status [%s]",
 		r.ID,
 		r.DateRead,
@@ -182,22 +182,22 @@ func (dao *SQLiteDAO) UpdateArticle(r *model.Article) error {
 	)
 
 	if err != nil {
-		log.Printf("Error executing database [%s]", err.Error())
+		logger.Printf("Error executing database [%s]", err.Error())
 		return err
 	}
 
 	n, err := res.RowsAffected()
 	if err != nil {
-		log.Printf("Error executing database [%s]", err.Error())
+		logger.Printf("Error executing database [%s]", err.Error())
 		return err
 	}
 
-	log.Printf("Row(s) updated: [%d]", n)
+	logger.Printf("Row(s) updated: [%d]", n)
 	return nil
 }
 
 func (dao *SQLiteDAO) GetLastAdded() (int64, error) {
-	log.Printf("Getting last added")
+	logger.Printf("Getting last added")
 	var id, dateAdded, dateRead int64
 	err := dao.db.QueryRow("SELECT MAX(id), date_added, date_read FROM articles ORDER BY ID DESC").Scan(
 		&id,
@@ -207,13 +207,13 @@ func (dao *SQLiteDAO) GetLastAdded() (int64, error) {
 
 	switch {
 	case err == sql.ErrNoRows:
-		log.Printf("No articles found")
+		logger.Printf("No articles found")
 		return 0, nil
 	case err != nil:
-		log.Printf("Error reading article: [%s]", err.Error())
+		logger.Printf("Error reading article: [%s]", err.Error())
 		return 0, err
 	default:
-		log.Printf("Found article [%d]", id)
+		logger.Printf("Found article [%d]", id)
 		if dateAdded > dateRead {
 			return dateAdded, nil
 		}

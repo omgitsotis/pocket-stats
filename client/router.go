@@ -66,5 +66,5 @@ func (e *Router) RecievedAuth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	e.client.AccessToken = user.AccessToken
-	e.client.send <- Message{"subscribe auth", user}
+	e.client.send <- Message{"auth user", user}
 }
