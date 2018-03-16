@@ -12,6 +12,7 @@ class App extends Component {
         this.state = {
             authorised : false,
             loaded: false,
+            updateComplete: false,
             lastUpdated: 0,
             username: "",
             totals: {},
@@ -146,10 +147,18 @@ class App extends Component {
             token: token,
             id: parseInt(userID, 10),
         });
+
+        this.setState({
+            updateComplete: false
+        });
     }
 
     onDataUpdate = (data) => {
         console.log(data)
+        this.setState({
+            updateComplete: true,
+            lastUpdated: data
+        });
     }
 
     onDataLoad = (data) => {
@@ -173,6 +182,8 @@ class App extends Component {
                         totals={this.state.totals}
                         itemised={this.state.itemised}
                         lastUpdated={this.state.lastUpdated}
+                        onUpdateClick={this.onUpdateClick}
+                        updateComplete={this.state.updateComplete}
                     />
             } else {
                 component = <i className="fa fa-spinner fa-spin" style={{fontSize: "48px"}}></i>

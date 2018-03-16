@@ -3,6 +3,8 @@ TODO
     * Show last updated date
 * Handle errors
 * Clean up code
+    * Pass in socket to smart containers(?)
+    * Comments
 * Create graphs page
     * Create articles read graph
     * Create articles added graphs
