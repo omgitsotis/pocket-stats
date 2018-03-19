@@ -9,16 +9,9 @@ import (
 )
 
 func sendAuth(client *Client, data interface{}) {
-	if client.Code != "" {
-		client.send <- Message{"subscribe auth", "authorised"}
-		return
-	}
-
-	logger.Println(client.Code)
-
 	code, err := client.Pocket.GetAuth("http://localhost:4000/auth/recieved")
 	if err != nil {
-		client.send <- Message{"error", err.Error()}
+		client.SendError("auth link", err)
 		return
 	}
 
@@ -46,13 +39,13 @@ func saveToken(client *Client, data interface{}) {
 	var token AccessToken
 	err := mapstructure.Decode(data, &token)
 	if err != nil {
-		client.send <- Message{"error", err.Error()}
+		client.SendError("auth cached", err)
 		return
 	}
 
 	user, err := client.Pocket.GetUser()
 	if err != nil {
-		client.send <- Message{"error", err.Error()}
+		client.SendError("auth cached", err)
 		return
 	}
 
@@ -66,13 +59,14 @@ func initDB(client *Client, data interface{}) {
 	var params model.InputParams
 	err := mapstructure.Decode(data, &params)
 	if err != nil {
-		client.send <- Message{"error", err.Error()}
+		log.Printf("Error decoding params: %s", err.Error())
+		client.SendError("data init", err)
 		return
 	}
 
 	_, err = client.Pocket.InitDB(params)
 	if err != nil {
-		client.send <- Message{"error", err.Error()}
+		client.SendError("auth init", err)
 		return
 	}
 
@@ -85,7 +79,7 @@ func getStatistics(client *Client, data interface{}) {
 	err := mapstructure.Decode(data, &p)
 	if err != nil {
 		log.Printf("Error decoding params: %s", err.Error())
-		client.send <- Message{"error", err.Error()}
+		client.SendError("data get", err)
 		return
 	}
 
@@ -93,7 +87,7 @@ func getStatistics(client *Client, data interface{}) {
 
 	stats, err := client.Pocket.GetStatsForDates(p)
 	if err != nil {
-		client.send <- Message{"error", err.Error()}
+		client.SendError("data get", err)
 		return
 	}
 
@@ -104,13 +98,14 @@ func updateDB(client *Client, data interface{}) {
 	var params model.InputParams
 	err := mapstructure.Decode(data, &params)
 	if err != nil {
-		client.send <- Message{"error", err.Error()}
+		log.Printf("Error decoding params: %s", err.Error())
+		client.SendError("data update", err)
 		return
 	}
 
 	date, err := client.Pocket.UpdateDB(params)
 	if err != nil {
-		client.send <- Message{"error", err.Error()}
+		client.SendError("data update", err)
 		return
 	}
 
@@ -120,7 +115,7 @@ func updateDB(client *Client, data interface{}) {
 func loadData(client *Client, data interface{}) {
 	stats, err := client.Pocket.LoadData()
 	if err != nil {
-		client.send <- Message{"error", err.Error()}
+		client.SendError("data get", err)
 		return
 	}
 

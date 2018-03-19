@@ -4,7 +4,7 @@ import { withCookies, Cookies } from 'react-cookie';
 import Socket from './socket.js';
 
 import LoginContainer from './components/login/LoginContainer.js';
-import DashboardContainer from './components/dashboard/Dashboard.jsx';
+import DashboardContainer from './components/dashboard/DashboardContainer.jsx';
 
 class App extends Component {
     constructor(props) {
@@ -12,6 +12,7 @@ class App extends Component {
         this.state = {
             authorised : false,
             loaded: false,
+            isDataError: false,
             updateComplete: true,
             lastUpdated: 0,
             username: "",
@@ -29,7 +30,7 @@ class App extends Component {
         socket.on('auth cached', this.onAuthCached);
         socket.on('data get', this.onDataGet);
         socket.on('data update', this.onDataUpdate);
-        socket.on('error', this.onError.bind(this));
+        socket.on('error', this.onError);
 
         const { cookies } = this.props;
         const accessToken = cookies.get('accessToken');
@@ -135,8 +136,18 @@ class App extends Component {
         });
     }
 
-    onError(err) {
-        console.log("there was an error:", err);
+    onError = (err) => {
+        console.error("error in", err.hookname, err.msg);
+        switch (err.hookname) {
+            case "data get":
+                this.setState({
+                    isDataError: true,
+                    loaded: true,
+                });
+                break;
+            default:
+
+        }
     }
 
     onUpdateClick = () => {
@@ -183,6 +194,7 @@ class App extends Component {
                         lastUpdated={this.state.lastUpdated}
                         onUpdateClick={this.onUpdateClick}
                         updateComplete={this.state.updateComplete}
+                        isDataError={this.state.isDataError}
                     />
             } else {
                 component = <i className="fa fa-spinner fa-spin" style={{fontSize: "48px"}}></i>

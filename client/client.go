@@ -13,6 +13,11 @@ type Message struct {
 	Data interface{} `json:"data"`
 }
 
+type Error struct {
+	Msg      string `json:"msg"`
+	HookName string `json:"hookname"`
+}
+
 type FindHandler func(string) (Handler, bool)
 
 type Client struct {
@@ -84,6 +89,15 @@ func (c *Client) Close() {
 		ch <- true
 	}
 	close(c.send)
+}
+
+func (c *Client) SendError(name string, err error) {
+	e := Error{
+		HookName: name,
+		Msg:      err.Error(),
+	}
+
+	c.send <- Message{"error", e}
 }
 
 func NewClient(conn *websocket.Conn, fn FindHandler, p *pocket.Pocket) *Client {
