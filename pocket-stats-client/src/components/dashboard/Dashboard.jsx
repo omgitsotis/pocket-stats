@@ -14,6 +14,10 @@ class Dashboard extends Component {
         const currentDate = moment().startOf('day').unix();
 
         const isDisabled = (!this.props.updateComplete || currentDate === this.props.lastUpdated)
+        console.log(currentDate, "===", this.props.lastUpdated);
+        console.log(!this.props.updateComplete);
+        console.log(isDisabled);
+
         const btnClass = classnames({
             'btn': true,
             'btn-primary': !isDisabled,
@@ -23,7 +27,7 @@ class Dashboard extends Component {
         const iconClass = classnames({
             'fa': true,
             'fa-refresh': true,
-            'fa-spin': this.props.updateComplete
+            'fa-spin': !this.props.updateComplete
         });
 
         let labels = [];

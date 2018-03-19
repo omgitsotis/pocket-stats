@@ -1,10 +1,9 @@
 TODO
-* Create update button
-    * Show last updated date
 * Handle errors
 * Clean up code
     * Pass in socket to smart containers(?)
     * Comments
+* Create popup page
 * Create graphs page
     * Create articles read graph
     * Create articles added graphs
@@ -12,4 +11,5 @@ TODO
     * Create words added graph
     * Add calendars
 * Handle design
+* Find a solution to the missing add date
 * Handle users better

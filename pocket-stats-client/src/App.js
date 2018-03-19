@@ -12,7 +12,7 @@ class App extends Component {
         this.state = {
             authorised : false,
             loaded: false,
-            updateComplete: false,
+            updateComplete: true,
             lastUpdated: 0,
             username: "",
             totals: {},
@@ -129,6 +129,7 @@ class App extends Component {
         console.log(data);
         this.setState({
             loaded: true,
+            updateComplete: true,
             totals: data.totals,
             itemised: data.value,
         });
@@ -156,18 +157,16 @@ class App extends Component {
     onDataUpdate = (data) => {
         console.log(data)
         this.setState({
-            updateComplete: true,
             lastUpdated: data
         });
-    }
 
-    onDataLoad = (data) => {
-        console.log("On data load", data);
-        this.setState({
-            loaded: true,
-            startDate: data.start_date,
-            endDate: data.end_date,
-            statList: {}
+        const { cookies } = this.props;
+        let token = cookies.get('accessToken');
+        let userID = cookies.get('userID');
+
+        this.socket.emit('data load', {
+            token: token,
+            id: parseInt(userID, 10),
         });
     }
 

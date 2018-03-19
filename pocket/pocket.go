@@ -55,6 +55,7 @@ func (p *Pocket) ReceieveAuth(key string) (*model.User, error) {
 	}
 
 	user.LastUpdated = date
+	logger.Printf("Last added date: [%d]", date)
 
 	return &user, nil
 }
@@ -307,6 +308,8 @@ func (p *Pocket) GetUser() (*model.User, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	logger.Printf("Last added date: [%d]", date)
 
 	user := model.User{
 		Username:    "omgitsotis",
