@@ -2,56 +2,59 @@ package sqlite
 
 import (
 	"database/sql"
-	"log"
 	"os"
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/omgitsotis/pocket-stats/pocket/model"
+	logging "github.com/op/go-logging"
 )
 
-var logger = log.New(os.Stdout, "SQLite:", log.Ldate|log.Ltime|log.Lshortfile)
+var log = logging.MustGetLogger("sqlite")
 
+// SQLiteDAO is the object that connects to the sqlite database
 type SQLiteDAO struct {
 	db *sql.DB
 }
 
+// AddUser adds a user to the database
 func (dao *SQLiteDAO) AddUser(name string) (int64, error) {
 	stmt, err := dao.db.Prepare("INSERT INTO users(username) VALUES (?)")
 	if err != nil {
-		logger.Printf("Error preparing database: [%s]", err.Error())
+		log.Errorf("Error preparing database: [%s]", err.Error())
 		return 0, err
 	}
 
-	logger.Printf(
+	log.Debugf(
 		"Running statement [INSERT INTO users(username) VALUES (%s)]",
 		name,
 	)
 
 	res, err := stmt.Exec(name)
 	if err != nil {
-		logger.Printf("Error executing database [%s]", err.Error())
+		log.Errorf("Error executing database [%s]", err.Error())
 		return 0, err
 	}
 
 	id, err := res.LastInsertId()
 	if err != nil {
-		logger.Printf("Error executing database: [%s]", err.Error())
+		log.Errorf("Error executing database: [%s]", err.Error())
 		return 0, err
 	}
 
-	logger.Printf("Created user [%d]", id)
+	log.Infof("Created user [%d]", id)
 
 	return id, nil
 }
 
+// AddArticle adds a new row to the article table
 func (dao *SQLiteDAO) AddArticle(r model.Article) error {
 	stmt, err := dao.db.Prepare("INSERT INTO articles VALUES (?, ?, ?, ?, ?, ?)")
 	if err != nil {
-		logger.Printf("Error preparing database: [%s]", err.Error())
+		log.Errorf("Error preparing database: [%s]", err.Error())
 		return err
 	}
 
-	logger.Printf("Inserting into articles values (%#v)", r)
+	log.Debugf("Inserting into articles values (%#v)", r)
 
 	res, err := stmt.Exec(
 		r.ID,
@@ -63,37 +66,39 @@ func (dao *SQLiteDAO) AddArticle(r model.Article) error {
 	)
 
 	if err != nil {
-		logger.Printf("Error executing database [%s]", err.Error())
+		log.Errorf("Error executing database [%s]", err.Error())
 		return err
 	}
 
 	n, err := res.RowsAffected()
 	if err != nil {
-		logger.Printf("Error executing database [%s]", err.Error())
+		log.Errorf("Error executing database [%s]", err.Error())
 		return err
 	}
 
-	logger.Printf("Row(s) added: [%d]", n)
+	log.Debugf("Row(s) added: [%d]", n)
 	return nil
 }
 
+// IsUser checks to see if the user is in the database
 func (dao *SQLiteDAO) IsUser(id int64) (bool, error) {
 	var username string
-	logger.Printf("SELECT username FROM users WHERE id=%d", id)
+	log.Debugf("SELECT username FROM users WHERE id=%d", id)
 	err := dao.db.QueryRow("SELECT username FROM users WHERE id=?", id).Scan(&username)
 	switch {
 	case err == sql.ErrNoRows:
-		logger.Printf("No user with id [%d]\n", id)
+		log.Errorf("No user with id [%d]\n", id)
 		return false, nil
 	case err != nil:
-		logger.Printf("Error reading username: [%s]", err.Error())
+		log.Errorf("Error reading username: [%s]", err.Error())
 		return false, err
 	default:
-		logger.Printf("Found user [%s]", username)
+		log.Infof("Found user [%s]", username)
 		return true, nil
 	}
 }
 
+// GetArticles returns a list of articles between two dates
 func (dao *SQLiteDAO) GetArticles(start, end int64) ([]model.Article, error) {
 	query := "SELECT id, date_added, date_read, word_count, status FROM articles " +
 		"WHERE date_added >= ? AND date_added <= ? " +
@@ -102,11 +107,11 @@ func (dao *SQLiteDAO) GetArticles(start, end int64) ([]model.Article, error) {
 
 	articles := make([]model.Article, 0)
 
-	logger.Printf("selecting articles between %d and %d", start, end)
+	log.Infof("selecting articles between %d and %d", start, end)
 
 	rows, err := dao.db.Query(query, start, end, start, end)
 	if err != nil {
-		logger.Printf("Error executing query: %s", err.Error())
+		log.Errorf("Error executing query: %s", err.Error())
 		return nil, err
 	}
 
@@ -114,7 +119,7 @@ func (dao *SQLiteDAO) GetArticles(start, end int64) ([]model.Article, error) {
 		var id, dateRead, dateAdded, count int64
 		var status string
 		if err := rows.Scan(&id, &dateAdded, &dateRead, &count, &status); err != nil {
-			logger.Printf("Error reading data: %s", err.Error())
+			log.Errorf("Error reading data: %s", err.Error())
 			return nil, err
 		}
 
@@ -129,16 +134,18 @@ func (dao *SQLiteDAO) GetArticles(start, end int64) ([]model.Article, error) {
 	}
 
 	if err := rows.Err(); err != nil {
-		logger.Printf("Error looping results: %s", err.Error())
+		log.Errorf("Error looping results: %s", err.Error())
 		return nil, err
 	}
 
 	return articles, nil
 }
 
+// GetArticle returns an article for a given id
 func (dao *SQLiteDAO) GetArticle(id int64) (*model.Article, error) {
+	log.Debugf("Getting article [%d]", id)
+
 	var r model.Article
-	logger.Printf("Getting article [%d]", id)
 	err := dao.db.QueryRow("SELECT * FROM articles WHERE id=?", id).Scan(
 		&r.ID,
 		&r.DateAdded,
@@ -150,25 +157,26 @@ func (dao *SQLiteDAO) GetArticle(id int64) (*model.Article, error) {
 
 	switch {
 	case err == sql.ErrNoRows:
-		logger.Printf("No article with id [%d]", id)
+		log.Warningf("No article with id [%d]", id)
 		return nil, nil
 	case err != nil:
-		logger.Printf("Error reading article: [%s]", err.Error())
+		log.Errorf("Error reading article: [%s]", err.Error())
 		return nil, err
 	default:
-		logger.Printf("Found article [%d]", id)
+		log.Debugf("Found article [%d]", id)
 		return &r, nil
 	}
 }
 
+// UpdateArticle updates a article in the database
 func (dao *SQLiteDAO) UpdateArticle(r *model.Article) error {
 	stmt, err := dao.db.Prepare("UPDATE articles SET date_read = ?, status = ? WHERE id = ?")
 	if err != nil {
-		logger.Printf("Error creating statment: %s", err.Error())
+		log.Errorf("Error creating statment: %s", err.Error())
 		return err
 	}
 
-	logger.Printf(
+	log.Debugf(
 		"Updating article [%d] date read [%d] status [%s]",
 		r.ID,
 		r.DateRead,
@@ -182,22 +190,23 @@ func (dao *SQLiteDAO) UpdateArticle(r *model.Article) error {
 	)
 
 	if err != nil {
-		logger.Printf("Error executing database [%s]", err.Error())
+		log.Errorf("Error executing database [%s]", err.Error())
 		return err
 	}
 
 	n, err := res.RowsAffected()
 	if err != nil {
-		logger.Printf("Error executing database [%s]", err.Error())
+		log.Errorf("Error executing database [%s]", err.Error())
 		return err
 	}
 
-	logger.Printf("Row(s) updated: [%d]", n)
+	log.Debugf("Row(s) updated: [%d]", n)
 	return nil
 }
 
+// GetLastAdded gets the latest article and returns the most recent date
 func (dao *SQLiteDAO) GetLastAdded() (int64, error) {
-	logger.Printf("Getting last added")
+	log.Debug("Getting last added")
 	var id, dateAdded, dateRead int64
 	err := dao.db.QueryRow("SELECT MAX(id), date_added, date_read FROM articles ORDER BY ID DESC").Scan(
 		&id,
@@ -207,13 +216,13 @@ func (dao *SQLiteDAO) GetLastAdded() (int64, error) {
 
 	switch {
 	case err == sql.ErrNoRows:
-		logger.Printf("No articles found")
+		log.Errorf("No articles found")
 		return 0, nil
 	case err != nil:
-		logger.Printf("Error reading article: [%s]", err.Error())
+		log.Errorf("Error reading article: [%s]", err.Error())
 		return 0, err
 	default:
-		logger.Printf("Found article [%d]", id)
+		log.Debugf("Found article [%d]", id)
 		if dateAdded > dateRead {
 			return dateAdded, nil
 		}
@@ -222,17 +231,30 @@ func (dao *SQLiteDAO) GetLastAdded() (int64, error) {
 	}
 }
 
+// CloseDB closes the connection of the database
 func (dao *SQLiteDAO) CloseDB() {
 	dao.db.Close()
 }
 
+// NewSQLiteDAO creates a new SQLite Client
 func NewSQLiteDAO(file string) (*SQLiteDAO, error) {
+	setupLogging()
 	db, err := sql.Open("sqlite3", file)
 	if err != nil {
-		logger.Printf("Error opening database: [%s]", err.Error())
+		log.Errorf("Error opening database: [%s]", err.Error())
 		return nil, err
 	}
 
 	dao := SQLiteDAO{db}
 	return &dao, nil
+}
+
+func setupLogging() {
+	var format = logging.MustStringFormatter(
+		`%{color}[%{time:Mon 02 Jan 2006 15:04:05.000}] %{level:.5s} %{shortfile} %{color:reset} %{message}`,
+	)
+
+	backend := logging.NewLogBackend(os.Stderr, "", 0)
+	formatter := logging.NewBackendFormatter(backend, format)
+	logging.SetBackend(formatter)
 }

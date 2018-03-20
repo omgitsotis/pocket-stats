@@ -2,12 +2,13 @@ package client
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/omgitsotis/pocket-stats/pocket/model"
 )
 
+// sendAuth gets a request token from Pocket and returns the link required to
+// auth the user.
 func sendAuth(client *Client, data interface{}) {
 	code, err := client.Pocket.GetAuth("http://localhost:4000/auth/recieved")
 	if err != nil {
@@ -31,7 +32,9 @@ func sendAuth(client *Client, data interface{}) {
 	client.send <- Message{"auth link", link}
 }
 
-func saveToken(client *Client, data interface{}) {
+// loadUser gets the user from the data. This method is called when the access
+// token is found in the cookies.
+func loadUser(client *Client, data interface{}) {
 	type AccessToken struct {
 		Token string `json:"token"`
 	}
@@ -49,22 +52,24 @@ func saveToken(client *Client, data interface{}) {
 		return
 	}
 
-	log.Printf("Received token [%s]", token)
+	log.Debugf("Received token [%s]", token)
 	user.AccessToken = token.Token
 
 	client.send <- Message{"auth cached", user}
 }
 
+// initDB loads the database with article information from pocket from a given
+// date.
 func initDB(client *Client, data interface{}) {
 	var params model.InputParams
 	err := mapstructure.Decode(data, &params)
 	if err != nil {
-		log.Printf("Error decoding params: %s", err.Error())
+		log.Errorf("Error decoding params: %s", err.Error())
 		client.SendError("data init", err)
 		return
 	}
 
-	_, err = client.Pocket.InitDB(params)
+	err = client.Pocket.InitDB(params)
 	if err != nil {
 		client.SendError("auth init", err)
 		return
@@ -73,17 +78,18 @@ func initDB(client *Client, data interface{}) {
 	client.send <- Message{"data init", "Complete"}
 }
 
+// getStatistics gets the article statistics between two given dates
 func getStatistics(client *Client, data interface{}) {
 	var p model.StatsParams
 
 	err := mapstructure.Decode(data, &p)
 	if err != nil {
-		log.Printf("Error decoding params: %s", err.Error())
+		log.Errorf("Error decoding params: %s", err.Error())
 		client.SendError("data get", err)
 		return
 	}
 
-	log.Printf("Get stats from %d to %d", p.Start, p.End)
+	log.Infof("Get stats from %d to %d", p.Start, p.End)
 
 	stats, err := client.Pocket.GetStatsForDates(p)
 	if err != nil {
@@ -94,11 +100,12 @@ func getStatistics(client *Client, data interface{}) {
 	client.send <- Message{"data get", stats}
 }
 
+// updateDB will load article information from pocket from the last update date
 func updateDB(client *Client, data interface{}) {
 	var params model.InputParams
 	err := mapstructure.Decode(data, &params)
 	if err != nil {
-		log.Printf("Error decoding params: %s", err.Error())
+		log.Errorf("Error decoding params: %s", err.Error())
 		client.SendError("data update", err)
 		return
 	}
@@ -112,6 +119,7 @@ func updateDB(client *Client, data interface{}) {
 	client.send <- Message{"data update", date}
 }
 
+// loadData loads the last week's worth of statistics
 func loadData(client *Client, data interface{}) {
 	stats, err := client.Pocket.LoadData()
 	if err != nil {

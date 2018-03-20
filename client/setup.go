@@ -1,33 +1,20 @@
 package client
 
 import (
-	"log"
 	"net/http"
 	"os"
 
 	"github.com/omgitsotis/pocket-stats/pocket"
 	"github.com/omgitsotis/pocket-stats/pocket/dao/sqlite"
+	logging "github.com/op/go-logging"
 )
 
-var logger = log.New(os.Stdout, "", log.Ldate|log.Ltime|log.Lshortfile)
+var log = logging.MustGetLogger("client")
 
-// func NewClient() *Client {
-// 	p := pocket.NewPocket("74935-9d486f66d2999047b61328f3")
-// 	return &Client{Pocket: p}
-// }
-
+// Serve API handles the creation of the logging, database and router and then
+// runs the server
 func ServeAPI() error {
-	// c := NewClient()
-	// r := mux.NewRouter()
-	//
-	// corsObj := handlers.AllowedOrigins([]string{"*"})
-	//
-	// r.Methods("GET").Path("/auth").HandlerFunc(c.Retrieve)
-	// r.Methods("GET").Path("/auth/recieved").HandlerFunc(c.Authorise)
-	// r.Methods("GET").Path("/data").HandlerFunc(c.GetData)
-	//
-	// fmt.Println("Created router")
-	// return http.ListenAndServe(":8082", handlers.CORS(corsObj)(r))
+	setupLogging()
 
 	sqlite, err := sqlite.NewSQLiteDAO("./database/pocket.db")
 	if err != nil {
@@ -40,18 +27,39 @@ func ServeAPI() error {
 		sqlite,
 	)
 
+	r := createRouter(p)
+
+	http.Handle("/", r)
+	// Create the end point for pocket to return a response after authenticating
+	http.HandleFunc("/auth/recieved", r.RecievedAuth)
+
+	log.Info("Serving application")
+	return http.ListenAndServe(":4000", nil)
+
+}
+
+// setupLogging handles the creation and format for the logs. Outputs to console
+// for now
+func setupLogging() {
+	var format = logging.MustStringFormatter(
+		`%{color}[%{time:Mon 02 Jan 2006 15:04:05.000}] %{level:.5s} %{shortfile} %{color:reset} %{message}`,
+	)
+
+	backend := logging.NewLogBackend(os.Stderr, "", 0)
+	formatter := logging.NewBackendFormatter(backend, format)
+	logging.SetBackend(formatter)
+}
+
+// createRouter handles the creation of the router and all of the required
+// routes
+func createRouter(p *pocket.Pocket) *Router {
 	r := NewRouter(p)
 	r.Handle("send auth", sendAuth)
 	r.Handle("data init", initDB)
-	r.Handle("auth cached", saveToken)
+	r.Handle("auth cached", loadUser)
 	r.Handle("data get", getStatistics)
 	r.Handle("data update", updateDB)
 	r.Handle("data load", loadData)
 
-	http.Handle("/", r)
-	http.HandleFunc("/auth/recieved", r.RecievedAuth)
-
-	logger.Println("Serving application")
-	return http.ListenAndServe(":4000", nil)
-
+	return r
 }

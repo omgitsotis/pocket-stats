@@ -2,24 +2,30 @@ package client
 
 import (
 	"encoding/json"
-	"log"
+	"errors"
+	"fmt"
 
 	"github.com/gorilla/websocket"
 	"github.com/omgitsotis/pocket-stats/pocket"
 )
 
+// Message is the object that is returned when sending a response via websocket.
 type Message struct {
 	Name string      `json:"name"`
 	Data interface{} `json:"data"`
 }
 
-type Error struct {
+// ErrorMessage is the object that is returned when there is an error via
+// websocket.
+type ErrorMessage struct {
 	Msg      string `json:"msg"`
 	HookName string `json:"hookname"`
 }
 
+// FindHandler is a function used to find a specific handler in the router
 type FindHandler func(string) (Handler, bool)
 
+// Client is the object to handle the websocket connection.
 type Client struct {
 	send         chan Message
 	socket       *websocket.Conn
@@ -30,6 +36,7 @@ type Client struct {
 	AccessToken  string
 }
 
+// NewStopChannel creates a new stop channel for a given websocket conncection
 func (c *Client) NewStopChannel(stopKey int) chan bool {
 	c.StopForKey(stopKey)
 	stop := make(chan bool)
@@ -37,6 +44,7 @@ func (c *Client) NewStopChannel(stopKey int) chan bool {
 	return stop
 }
 
+// StopForKey stops a socket conncection for given name
 func (c *Client) StopForKey(key int) {
 	if ch, found := c.stopChannels[key]; found {
 		ch <- true
@@ -44,29 +52,30 @@ func (c *Client) StopForKey(key int) {
 	}
 }
 
+// Read reads any messages sent to our client
 func (c *Client) Read() {
 	var message Message
 	for {
-		mType, r, err := c.socket.NextReader()
+		_, r, err := c.socket.NextReader()
 		if err != nil {
-			log.Printf("Error getting reader %s", err.Error())
+			msg := fmt.Sprintf("Error getting reader: %s", err.Error())
+			log.Criticalf(msg)
+			// c.SendError("system", errors.New(msg))
 			break
 		}
 
-		log.Printf("Message type %d", mType)
 		d := json.NewDecoder(r)
 		d.UseNumber()
+
 		if err := d.Decode(&message); err != nil {
-			log.Fatal(err)
+			msg := fmt.Sprintf("Error decoding message: %s", err.Error())
+			log.Criticalf(msg)
+			c.SendError("system", errors.New(msg))
 			break
 		}
 
-		// if err := c.socket.ReadJSON(&message); err != nil {
-		// 	break
-		// }
-
 		if fn, ok := c.findHandler(message.Name); ok {
-			log.Printf("Received request for %s\n", message.Name)
+			log.Infof("Received request for %s\n", message.Name)
 			fn(c, message.Data)
 		}
 	}
@@ -74,16 +83,19 @@ func (c *Client) Read() {
 	c.socket.Close()
 }
 
+// Write sends a message back to any websocket that is listening
 func (c *Client) Write() {
 	for msg := range c.send {
 		if err := c.socket.WriteJSON(msg); err != nil {
-			break
+			log.Criticalf("Error writing JSON: %s", err.Error())
+			continue
 		}
 	}
 
 	c.socket.Close()
 }
 
+// Close sends a message to close all open channels.
 func (c *Client) Close() {
 	for _, ch := range c.stopChannels {
 		ch <- true
@@ -91,8 +103,9 @@ func (c *Client) Close() {
 	close(c.send)
 }
 
+// SendError sends a error message back to whomever is listening
 func (c *Client) SendError(name string, err error) {
-	e := Error{
+	e := ErrorMessage{
 		HookName: name,
 		Msg:      err.Error(),
 	}

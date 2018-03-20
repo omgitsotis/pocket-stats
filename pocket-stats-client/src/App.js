@@ -118,7 +118,11 @@ class App extends Component {
             userID = user.id;
         }
 
-        this.setState({authorised: true});
+        //test
+        this.setState({
+            authorised: true,
+            lastUpdated: user.last_updated
+        });
 
         this.socket.emit('data load', {
             token: token,
