@@ -67,4 +67,6 @@ func (e *Router) RecievedAuth(w http.ResponseWriter, r *http.Request) {
 
 	e.client.AccessToken = user.AccessToken
 	e.client.send <- Message{"auth user", user}
+
+	http.ServeFile(w, r, "./response.html")
 }
