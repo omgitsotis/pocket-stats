@@ -1,5 +1,6 @@
 TODO
 * Create popup page
+* Add manual update
 * *Sigh* Tests
 * Add SQL generator
 * Create box score page

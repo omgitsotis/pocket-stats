@@ -146,7 +146,7 @@ func (p *Pocket) UpdateDB(ip model.InputParams) (int64, error) {
 		Type:        "simple",
 	}
 
-	for i := 0; i < days; i++ {
+	for i := 0; i < days+1; i++ {
 		t := midnight.AddDate(0, 0, i*-1)
 		param.Since = t.Unix()
 
