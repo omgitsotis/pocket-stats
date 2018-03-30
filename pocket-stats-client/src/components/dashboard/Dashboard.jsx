@@ -1,7 +1,8 @@
 import React, {Component} from 'react';
 import {Line} from 'react-chartjs-2';
 import moment from 'moment';
-import classnames from 'classnames';
+
+import Navbar from '../navbar/Navbar.jsx';
 import './dashboard.css';
 
 
@@ -9,26 +10,6 @@ class Dashboard extends Component {
     render() {
         const totals = this.props.totals;
         const itemised = this.props.itemised;
-
-        const lastUpdated = moment.unix(this.props.lastUpdated).format("D/MMM");
-        const currentDate = moment().startOf('day').unix();
-
-        const isDisabled = (!this.props.updateComplete || currentDate === this.props.lastUpdated)
-        console.log(currentDate, "===", this.props.lastUpdated);
-        console.log(!this.props.updateComplete);
-        console.log(isDisabled);
-
-        const btnClass = classnames({
-            'btn': true,
-            'btn-primary': !isDisabled,
-            'btn-disabled': isDisabled
-        });
-
-        const iconClass = classnames({
-            'fa': true,
-            'fa-refresh': true,
-            'fa-spin': !this.props.updateComplete
-        });
 
         let labels = [];
         let atsRead = [];
@@ -88,22 +69,11 @@ class Dashboard extends Component {
 
         return(
             <div>
-                <div className='row'>
-                    <div className='col-lg'>
-                        <nav className="navbar navbar-light bg-light">
-                            <span className="navbar-brand mb-0 h1">Navbar</span>
-                            <div>
-                                <span className="navbar-text">Updated: {lastUpdated}</span>
-                                <button type="button"
-                                    className={btnClass}
-                                    disabled={isDisabled}
-                                    onClick={() => this.props.onUpdateClick()}>
-                                    <i className={iconClass} aria-hidden="true"></i>
-                                </button>
-                            </div>
-                        </nav>
-                    </div>
-                </div>
+                <Navbar
+                    updateComplete={this.props.updateComplete}
+                    lastUpdated={this.props.lastUpdated}
+                    onUpdateClick={this.props.onUpdateClick}
+                />
                 <div className='row'>
                     <div className="col-lg">
                         <div className='card-deck'>

@@ -1,3 +1,7 @@
 .stat-box {
     height: 30vh;
 }
+
+#update-btn {
+    margin-left: 10px;
+}

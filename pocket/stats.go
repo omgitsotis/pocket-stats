@@ -1,10 +1,14 @@
 package pocket
 
-import "github.com/omgitsotis/pocket-stats/pocket/model"
+import (
+	"github.com/omgitsotis/pocket-stats/pocket/model"
+)
+
+var readingSpeed int64 = 247
 
 // createStats generates stats based on the list of articles provided
 func createStats(sp model.StatsParams, arts []model.Article) *model.Stats {
-	stats := make(map[int64]*model.Stat)
+	days := make(map[int64]*model.Stat)
 	var wAdded, wRead, aAdded, aRead int64
 	for _, a := range arts {
 		if a.Status == model.Archived {
@@ -12,17 +16,17 @@ func createStats(sp model.StatsParams, arts []model.Article) *model.Stats {
 			aRead++
 			wRead += a.WordCount
 
-			s, ok := stats[a.DateRead]
+			s, ok := days[a.DateRead]
 			if ok {
 				s.ArticleRead++
-				s.WordRead += a.WordCount
+				s.WordsRead += a.WordCount
 			} else {
 				newStat := model.Stat{
 					ArticleRead: 1,
-					WordRead:    a.WordCount,
+					WordsRead:   a.WordCount,
 				}
 
-				stats[a.DateRead] = &newStat
+				days[a.DateRead] = &newStat
 			}
 
 			// If the article was added in the current time frame, update added
@@ -31,17 +35,17 @@ func createStats(sp model.StatsParams, arts []model.Article) *model.Stats {
 				aAdded++
 				wAdded += a.WordCount
 
-				s, ok = stats[a.DateAdded]
+				s, ok = days[a.DateAdded]
 				if ok {
 					s.ArticleAdded++
-					s.WordAdded += a.WordCount
+					s.WordsAdded += a.WordCount
 				} else {
 					newStat := model.Stat{
 						ArticleAdded: 1,
-						WordAdded:    a.WordCount,
+						WordsAdded:   a.WordCount,
 					}
 
-					stats[a.DateAdded] = &newStat
+					days[a.DateAdded] = &newStat
 				}
 			}
 
@@ -50,17 +54,17 @@ func createStats(sp model.StatsParams, arts []model.Article) *model.Stats {
 			aAdded++
 			wAdded += a.WordCount
 
-			s, ok := stats[a.DateAdded]
+			s, ok := days[a.DateAdded]
 			if ok {
 				s.ArticleAdded++
-				s.WordAdded += a.WordCount
+				s.WordsAdded += a.WordCount
 			} else {
 				newStat := model.Stat{
 					ArticleAdded: 1,
-					WordAdded:    a.WordCount,
+					WordsAdded:   a.WordCount,
 				}
 
-				stats[a.DateAdded] = &newStat
+				days[a.DateAdded] = &newStat
 			}
 		}
 	}
@@ -72,10 +76,25 @@ func createStats(sp model.StatsParams, arts []model.Article) *model.Stats {
 		WordsRead:     wRead,
 	}
 
-	return &model.Stats{
+	stats := &model.Stats{
 		Start:  sp.Start,
 		End:    sp.End,
-		Value:  stats,
+		Value:  days,
 		Totals: totals,
+	}
+
+	getTimeReading(stats)
+
+	return stats
+}
+
+// getTimeReading calulates the total time reading as well as time reading for
+// each day
+func getTimeReading(s *model.Stats) {
+	s.Totals.TimeReading = s.Totals.WordsRead / readingSpeed
+	log.Debugf("Total time spend reading [%d]", s.Totals.TimeReading)
+
+	for _, stat := range s.Value {
+		stat.TimeReading = stat.WordsRead / readingSpeed
 	}
 }

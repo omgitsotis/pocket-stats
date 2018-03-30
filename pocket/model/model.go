@@ -77,8 +77,9 @@ type Stats struct {
 type Stat struct {
 	ArticleAdded int64 `json:"articles_added"`
 	ArticleRead  int64 `json:"articles_read"`
-	WordAdded    int64 `json:"words_added"`
-	WordRead     int64 `json:"words_read"`
+	WordsAdded   int64 `json:"words_added"`
+	WordsRead    int64 `json:"words_read"`
+	TimeReading  int64 `json:"time_reading"`
 }
 
 type TotalStats struct {
@@ -86,6 +87,7 @@ type TotalStats struct {
 	ArticlesRead  int64 `json:"total_articles_read"`
 	WordsAdded    int64 `json:"total_words_added"`
 	WordsRead     int64 `json:"total_words_read"`
+	TimeReading   int64 `json:"total_time_reading"`
 }
 
 type StatsParams struct {
