@@ -2,6 +2,8 @@
 
 *.exe
 
+/database/pocket.db
+
 # testing
 /coverage
 
