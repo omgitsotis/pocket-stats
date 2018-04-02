@@ -2,11 +2,9 @@ import React, {Component} from 'react';
 import {Line} from 'react-chartjs-2';
 import moment from 'moment';
 
-import Navbar from '../navbar/Navbar.jsx';
-import './dashboard.css';
+import './homepage.css';
 
-
-class Dashboard extends Component {
+class Homepage extends Component {
     render() {
         const totals = this.props.totals;
         const itemised = this.props.itemised;
@@ -69,11 +67,6 @@ class Dashboard extends Component {
 
         return(
             <div>
-                <Navbar
-                    updateComplete={this.props.updateComplete}
-                    lastUpdated={this.props.lastUpdated}
-                    onUpdateClick={this.props.onUpdateClick}
-                />
                 <div className='row'>
                     <div className="col-lg">
                         <div className='card-deck'>
@@ -106,4 +99,4 @@ class Dashboard extends Component {
     }
 }
 
-export default Dashboard;
+export default Homepage;

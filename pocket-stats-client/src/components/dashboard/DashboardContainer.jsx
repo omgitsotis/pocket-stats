@@ -1,5 +1,8 @@
 import React, {Component} from 'react';
-import Dashboard from './Dashboard.jsx';
+
+import Homepage from '../homepage/Homepage.jsx';
+import Navbar from '../navbar/Navbar.jsx';
+import BoxScoreContainer from '../boxscore/BoxScoreContainer.jsx';
 
 class DashboardContainer extends Component {
     constructor(props) {
@@ -9,13 +12,37 @@ class DashboardContainer extends Component {
         };
     }
 
+    onNavbarClick(state) {
+        this.setState({currentPage: state});
+    }
+
     render() {
-        let component = this.props.isDataError ?
-            <div>There was an error</div> :
-            <Dashboard {...this.props} />;
+        let component;
+        switch (this.state.currentPage) {
+            case 'home':
+                component = <Homepage {...this.props} />;
+                break;
+            case 'boxscore':
+                component =
+                    <BoxScoreContainer
+                        totals={this.props.totals}/>;
+                break;
+            default:
+                break;
+        }
+
+        // let component = this.props.isDataError ?
+        //     <div>There was an error</div> :
 
         return (
             <div>
+                <Navbar
+                    updateComplete={this.props.updateComplete}
+                    lastUpdated={this.props.lastUpdated}
+                    onUpdateClick={this.props.onUpdateClick}
+                    currentPage={this.state.currentPage}
+                    onNavbarClick={(state) => this.onNavbarClick(state)}
+                />
                 {component}
             </div>
         );

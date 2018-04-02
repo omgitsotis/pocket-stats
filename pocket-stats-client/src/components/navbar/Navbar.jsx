@@ -30,27 +30,33 @@ class Navbar extends Component {
                     <nav className="navbar navbar-expand-lg navbar-light bg-light">
                         <span className="navbar-brand mb-0 h1">Navbar</span>
                         <ul className="navbar-nav mr-auto">
-                            <li className="nav-item">
+                            <li className="nav-item active">
                                 <button
                                     type="button"
+                                    id="home"
                                     class="btn btn-light nav-link"
-                                    disabled={state === 'home'}>
+                                    disabled={this.props.currentPage === 'home'}
+                                    onClick={() => this.props.onNavbarClick('home')}>
                                     Home
                                 </button>
                             </li>
                             <li className="nav-item active">
                                 <button
                                     type="button"
+                                    id="boxscore"
                                     class="btn btn-light nav-link"
-                                    disabled={state === 'box-score'}>
+                                    disabled={this.props.currentPage === 'boxscore'}
+                                    onClick={() => this.props.onNavbarClick('boxscore')}>
                                     Box Score
                                 </button>
                             </li>
                             <li className="nav-item active">
                                 <button
                                     type="button"
+                                    id="graph"
                                     class="btn btn-light nav-link"
-                                    disabled={state == 'graph'}>
+                                    disabled={this.props.currentPage === 'graph'}
+                                    onClick={() => this.props.onNavbarClick('graph')}>
                                     Graphs
                                 </button>
                             </li>
