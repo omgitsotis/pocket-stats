@@ -36,13 +36,14 @@ function DatePickers(props) {
         </div>
         <div className="col-md-4 date-picker">
           <DatePicker
-            selected={moment.unix(props.startDate)}
-            onChange={props.onStartDateChange} />
+            selected={moment.unix(props.endDate)}
+            onChange={(date) => props.onDateChange("endDate", date)} />
         </div>
         <div className="col-md-3">
         <button
             type="button"
-            className="btn btn-light get-bttn">
+            className="btn btn-light get-bttn"
+            onClick={props.onCustomRequest}>
             Update
         </button>
         </div>

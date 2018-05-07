@@ -95,13 +95,12 @@ class App extends Component {
         });
     }
 
-    onFetchDataClick = () => {
+    onFetchDataClick = (start, end) => {
         const { cookies } = this.props;
         const userID = cookies.get('userID');
         this.socket.emit('data get', {
-            // id: parseInt(userID, 10),
-            start: 1519084800,
-            end: 1519776000
+            start: start,
+            end: end
         });
     }
 
@@ -197,6 +196,7 @@ class App extends Component {
                         itemised={this.state.itemised}
                         lastUpdated={this.state.lastUpdated}
                         onUpdateClick={this.onUpdateClick}
+                        onFetchDataClick={this.onFetchDataClick}
                         updateComplete={this.state.updateComplete}
                         isDataError={this.state.isDataError}
                     />

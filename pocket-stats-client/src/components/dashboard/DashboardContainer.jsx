@@ -23,10 +23,11 @@ class DashboardContainer extends Component {
                 component = <Homepage {...this.props} />;
                 break;
             case 'boxscore':
-                component =
-                    <BoxScoreContainer
-                        totals={this.props.totals}/>;
-                break;
+              component =
+                <BoxScoreContainer
+                  totals={this.props.totals}
+                  onFetchDataClick={this.props.onFetchDataClick} />;
+              break;
             default:
                 break;
         }
