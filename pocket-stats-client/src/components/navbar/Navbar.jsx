@@ -34,7 +34,7 @@ class Navbar extends Component {
                                 <button
                                     type="button"
                                     id="home"
-                                    class="btn btn-light nav-link"
+                                    className="btn btn-light nav-link"
                                     disabled={this.props.currentPage === 'home'}
                                     onClick={() => this.props.onNavbarClick('home')}>
                                     Home
@@ -44,7 +44,7 @@ class Navbar extends Component {
                                 <button
                                     type="button"
                                     id="boxscore"
-                                    class="btn btn-light nav-link"
+                                    className="btn btn-light nav-link"
                                     disabled={this.props.currentPage === 'boxscore'}
                                     onClick={() => this.props.onNavbarClick('boxscore')}>
                                     Box Score
@@ -54,7 +54,7 @@ class Navbar extends Component {
                                 <button
                                     type="button"
                                     id="graph"
-                                    class="btn btn-light nav-link"
+                                    className="btn btn-light nav-link"
                                     disabled={this.props.currentPage === 'graph'}
                                     onClick={() => this.props.onNavbarClick('graph')}>
                                     Graphs

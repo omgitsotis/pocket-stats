@@ -2,3 +2,19 @@
     text-align: center;
     margin: 20px 0px;
 }
+
+.timeframe {
+    margin: 15px 0px;
+}
+
+.get-bttn, .date-picker {
+    float: right;
+}
+
+.interval {
+    margin-top: 10px;
+}
+
+.date-picker {
+    margin-top: 5px;
+}
