@@ -1,10 +1,7 @@
 package pocket
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -28,7 +25,7 @@ func (p *Pocket) GetAuth(uri string) (string, error) {
 		return "", err
 	}
 
-	log.Debugf("repsone code returned [%s]", rt.Code)
+	logger.Debugf("repsone code returned [%s]", rt.Code)
 	return rt.Code, nil
 }
 
@@ -50,7 +47,7 @@ func (p *Pocket) ReceieveAuth(key string) (*model.User, error) {
 	}
 
 	user.LastUpdated = date
-	log.Infof("Last added date: [%d]", date)
+	logger.Infof("Last added date: [%d]", date)
 
 	return &user, nil
 }
@@ -64,7 +61,7 @@ func (p *Pocket) InitDB(ip model.InputParams) error {
 	}
 
 	if !ok {
-		log.Error("No user found to init DB")
+		logger.Error("No user found to init DB")
 		return errors.New("No user id found")
 	}
 
@@ -75,9 +72,9 @@ func (p *Pocket) InitDB(ip model.InputParams) error {
 	d := midnight.Sub(until)
 
 	days := int(d.Hours() / 24)
-	log.Debugf("Current date: %s", midnight.Format("02/01/2006"))
-	log.Debugf("Until date: %s", until.Format("02/01/2006"))
-	log.Debugf("Days to go back to: %d", days)
+	logger.Debugf("Current date: %s", midnight.Format("02/01/2006"))
+	logger.Debugf("Until date: %s", until.Format("02/01/2006"))
+	logger.Debugf("Days to go back to: %d", days)
 
 	seen := make(map[string]bool)
 	var dl model.DataList
@@ -113,7 +110,7 @@ func (p *Pocket) InitDB(ip model.InputParams) error {
 		}
 	}
 
-	log.Info("Finished init")
+	logger.Info("Finished init")
 	return nil
 }
 
@@ -132,9 +129,9 @@ func (p *Pocket) UpdateDB(ip model.InputParams) (int64, error) {
 	d := midnight.Sub(until)
 
 	days := int(d.Hours() / 24)
-	log.Debugf("Current date: %s", midnight.Format("02/01/2006"))
-	log.Debugf("Until date: %s", until.Format("02/01/2006"))
-	log.Debugf("Days to go back to: %d", days)
+	logger.Debugf("Current date: %s", midnight.Format("02/01/2006"))
+	logger.Debugf("Until date: %s", until.Format("02/01/2006"))
+	logger.Debugf("Days to go back to: %d", days)
 
 	seen := make(map[string]bool)
 
@@ -143,14 +140,14 @@ func (p *Pocket) UpdateDB(ip model.InputParams) (int64, error) {
 		AccessToken: ip.Token,
 		State:       "all",
 		Sort:        "oldest",
-		Type:        "simple",
+		Type:        "complete",
 	}
 
 	for i := 0; i < days+1; i++ {
 		t := midnight.AddDate(0, 0, i*-1)
 		param.Since = t.Unix()
 
-		log.Debugf("Geting info from date %s", t.Format("02/01/2006"))
+		logger.Debugf("Geting info from date %s", t.Format("02/01/2006"))
 
 		var dl model.DataList
 		if err := p.call("/get", param, &dl); err != nil {
@@ -170,7 +167,7 @@ func (p *Pocket) UpdateDB(ip model.InputParams) (int64, error) {
 
 			id, err := strconv.Atoi(v.ItemID)
 			if err != nil {
-				log.Errorf("Error converting ID: %s", err.Error())
+				logger.Errorf("Error converting ID: %s", err.Error())
 				continue
 			}
 
@@ -183,7 +180,7 @@ func (p *Pocket) UpdateDB(ip model.InputParams) (int64, error) {
 			if row == nil {
 				wc, err := strconv.Atoi(v.WordCount)
 				if err != nil {
-					log.Errorf("Error getting word count %s", err.Error())
+					logger.Errorf("Error getting word count %s", err.Error())
 					continue
 				}
 
@@ -196,12 +193,13 @@ func (p *Pocket) UpdateDB(ip model.InputParams) (int64, error) {
 
 				if v.Status == model.Archived {
 					r.DateRead = t.Unix()
-					log.Debugf("Adding read article %d", id)
+					r.Tag = getTag(v.Tags)
+					logger.Debugf("Adding read article %d", id)
 				}
 
 				if v.Status == model.Added {
 					r.DateAdded = t.Unix()
-					log.Debugf("Adding read article %d", id)
+					logger.Debugf("Adding read article %d", id)
 				}
 
 				p.dao.AddArticle(r)
@@ -209,14 +207,15 @@ func (p *Pocket) UpdateDB(ip model.InputParams) (int64, error) {
 				if v.Status != row.Status {
 					row.DateRead = t.Unix()
 					row.Status = model.Archived
-					log.Debugf("Marking article %d as read", id)
+					row.Tag = getTag(v.Tags)
+					logger.Debugf("Marking article %d as read", id)
 					p.dao.UpdateArticle(row)
 				}
 			}
 		}
 	}
 
-	log.Infof("Updated to %d", midnight.Unix())
+	logger.Infof("Updated to %d", midnight.Unix())
 	return midnight.Unix(), nil
 }
 
@@ -262,7 +261,7 @@ func (p *Pocket) GetUser() (*model.User, error) {
 		return nil, err
 	}
 
-	log.Infof("Last added date: [%d]", date)
+	logger.Infof("Last added date: [%d]", date)
 
 	user := model.User{
 		Username:    "omgitsotis",
@@ -271,80 +270,6 @@ func (p *Pocket) GetUser() (*model.User, error) {
 	}
 
 	return &user, nil
-}
-
-// addArticle adds an article to the database
-func (p *Pocket) addArticle(d model.Data, userID, date int64) {
-	id, err := strconv.Atoi(d.ItemID)
-	if err != nil {
-		log.Warningf("Error converting ID: %s", err.Error())
-		return
-	}
-
-	wc, err := strconv.Atoi(d.WordCount)
-	if err != nil {
-		log.Warningf("Error getting word count %s", err.Error())
-		return
-	}
-
-	article := model.Article{
-		ID:        int64(id),
-		WordCount: int64(wc),
-		Status:    d.Status,
-		UserID:    userID,
-	}
-
-	if d.Status == model.Archived {
-		article.DateRead = date
-		log.Debugf("Adding read article %d", id)
-	}
-
-	if d.Status == model.Added {
-		article.DateAdded = date
-		log.Debugf("Adding unread article %d", id)
-	}
-
-	p.dao.AddArticle(article)
-}
-
-// call makes api requests to the Pocket api and marshal the results.
-func (p *Pocket) call(uri string, body, t interface{}) error {
-	b, err := json.Marshal(body)
-	if err != nil {
-		log.Errorf("Error marshalling params: %s", err.Error())
-		return err
-	}
-
-	uri = fmt.Sprintf("https://getpocket.com/v3%s", uri)
-	req, err := http.NewRequest("POST", uri, bytes.NewBuffer(b))
-	if err != nil {
-		log.Errorf("Error creating request: %s", err.Error())
-		return err
-	}
-
-	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
-	req.Header.Set("X-Accept", "application/json")
-
-	res, err := p.Client.Do(req)
-	if err != nil {
-		log.Errorf("error performing request: %s", err.Error())
-		return err
-	}
-
-	defer res.Body.Close()
-
-	if res.StatusCode != http.StatusOK {
-		log.Debugf("Status %s", res.Status)
-		return errors.New(res.Status)
-	}
-
-	err = json.NewDecoder(res.Body).Decode(t)
-	if err != nil {
-		log.Errorf("Error decoding body: %s", err.Error())
-		return err
-	}
-
-	return nil
 }
 
 // SetClient sets the client used to connect to pocket

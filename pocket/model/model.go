@@ -34,17 +34,25 @@ type DataParam struct {
 	Type        string `json:"detailType"`
 }
 
+// DataList is the list of articles retrieved from the Pocket API
 type DataList struct {
 	Status int             `json:"status"`
 	Values map[string]Data `json:"list"`
 }
 
+// Data is each pocket item saved
 type Data struct {
-	ItemID     string `json:"item_id"`
-	ResolvedID string `json:"resolved_id"`
-	Status     string `json:"status"`
-	WordCount  string `json:"word_count"`
-	Title      string `json:"given_title"`
+	ItemID     string         `json:"item_id"`
+	ResolvedID string         `json:"resolved_id"`
+	Status     string         `json:"status"`
+	WordCount  string         `json:"word_count"`
+	Title      string         `json:"given_title"`
+	Tags       map[string]Tag `json:"tags"`
+}
+
+type Tag struct {
+	ItemID string `json:"item_id"`
+	Tag    string `json:"tag"`
 }
 
 type Article struct {
@@ -54,6 +62,7 @@ type Article struct {
 	WordCount int64
 	Status    string
 	UserID    int64
+	Tag       string
 }
 
 type InputParams struct {

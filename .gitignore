@@ -2,8 +2,6 @@
 
 *.exe
 
-database
-
 # testing
 /coverage
 

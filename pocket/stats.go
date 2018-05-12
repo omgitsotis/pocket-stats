@@ -92,7 +92,7 @@ func createStats(sp model.StatsParams, arts []model.Article) *model.Stats {
 // each day
 func getTimeReading(s *model.Stats) {
 	s.Totals.TimeReading = s.Totals.WordsRead / readingSpeed
-	log.Debugf("Total time spend reading [%d]", s.Totals.TimeReading)
+	logger.Debugf("Total time spend reading [%d]", s.Totals.TimeReading)
 
 	for _, stat := range s.Value {
 		stat.TimeReading = stat.WordsRead / readingSpeed
