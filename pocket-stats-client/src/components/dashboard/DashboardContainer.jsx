@@ -3,6 +3,7 @@ import React, {Component} from 'react';
 import Homepage from '../homepage/Homepage.jsx';
 import Navbar from '../navbar/Navbar.jsx';
 import BoxScoreContainer from '../boxscore/BoxScoreContainer.jsx';
+import GraphContainer from '../graphs/GraphContainer.js'
 
 class DashboardContainer extends Component {
     constructor(props) {
@@ -27,6 +28,12 @@ class DashboardContainer extends Component {
                 <BoxScoreContainer
                   totals={this.props.totals}
                   onFetchDataClick={this.props.onFetchDataClick} />;
+              break;
+            case 'graph':
+              component =
+                <GraphContainer
+                  totals={this.props.totals}
+                  itemised={this.props.itemised} />
               break;
             default:
                 break;

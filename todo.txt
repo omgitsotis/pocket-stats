@@ -1,16 +1,14 @@
 TODO
 * Create popup page
 * Add manual update
-* *Sigh* Tests
 * Add SQL generator
-* Create box score page
 * Create graphs page
     * Create articles read graph
     * Create articles added graphs
     * Create words read graph
     * Create words added graph
-    * Add calendars
 * Handle design
 * Find a solution to the missing add date
 * Handle users better
 * Pass in socket to smart containers(?)
+* Add stats for reading over time
