@@ -77,12 +77,14 @@ type CountRow struct {
 }
 
 type Stats struct {
-	Start  int64           `json:"start_date"`
-	End    int64           `json:"end_date"`
-	Value  map[int64]*Stat `json:"value"`
-	Totals TotalStats      `json:"totals"`
+	Start      int64            `json:"start_date"`
+	End        int64            `json:"end_date"`
+	DateValues map[int64]*Stat  `json:"date_values"`
+	TagValues  map[string]*Stat `json:"tag_values"`
+	Totals     TotalStats       `json:"totals"`
 }
 
+// Stat is the struct that holds the statistics for either a date or a tag
 type Stat struct {
 	ArticleAdded int64 `json:"articles_added"`
 	ArticleRead  int64 `json:"articles_read"`

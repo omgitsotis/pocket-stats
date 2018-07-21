@@ -1,53 +1,61 @@
 import React, {Component} from 'react';
 import moment from 'moment';
 import Graph from './Graph.js';
-import GraphMenu from './GraphMenu.js'
-import GraphTypes from '../../constants/graphTypes.js'
+import GraphMenu from './GraphMenu.js';
+import { GraphTypes, ChartType } from '../../constants/graphTypes.js';
+import { LineGraphData } from '../../constants/graphData';
+import { GraphColours } from '../../constants/colours';
 
 class GraphContainer extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      currentGraph: GraphTypes.ARTICLES_READ
+      currentGraph: GraphTypes.ARTICLES_READ.name,
+      currentChartType: ChartType.LINE
     }
   }
 
   onMenuItemClicked = (graphType) => {
-    this.setState({currentGraph: graphType})
+    this.setState({
+      currentGraph: graphType.name,
+      currentChartType: graphType.type,
+    });
   }
 
   getGraphData() {
-    const {totals, itemised} = this.props;
+    const {itemisedDate} = this.props;
 
     let graphData = [];
 
     // Create the date labels
-    const labels = Object.keys(itemised).map((key) => (
+    const labels = Object.keys(itemisedDate).map((key) => (
       moment.unix(key).format("D/MMM")
     ));
 
+    console.log(GraphTypes.ARTICLES_ADDED.name)
     switch (this.state.currentGraph) {
-      case GraphTypes.ARTICLES_READ:
-        graphData = Object.keys(itemised).map((key) => (
-          itemised[key].articles_read
+      case GraphTypes.ARTICLES_READ.name:
+        graphData = Object.keys(itemisedDate).map((key) => (
+          itemisedDate[key].articles_read
         ))
         break;
-      case GraphTypes.ARTICLES_ADDED:
-        graphData = Object.keys(itemised).map((key) => (
-          itemised[key].articles_added
+      case GraphTypes.ARTICLES_ADDED.name:
+        graphData = Object.keys(itemisedDate).map((key) => (
+          itemisedDate[key].articles_added
         ))
         break;
-      case GraphTypes.WORDS_READ:
-        graphData = Object.keys(itemised).map((key) => (
-          itemised[key].words_read
+      case GraphTypes.WORDS_READ.name:
+        graphData = Object.keys(itemisedDate).map((key) => (
+          itemisedDate[key].words_read
         ))
         break;
-      case GraphTypes.ARTICLES_ADDED:
-        graphData = Object.keys(itemised).map((key) => (
-          itemised[key].words_added
+      case GraphTypes.WORDS_ADDED.name:
+        graphData = Object.keys(itemisedDate).map((key) => (
+          itemisedDate[key].words_added
         ))
         break;
       default:
+        console.log("Nani")
         break;
     }
 
@@ -57,34 +65,48 @@ class GraphContainer extends Component {
     };
   }
 
-  render() {
-    const d3Data = this.getGraphData()
+  getDonutGraphData() {
+    const {itemisedTags} = this.props;
 
-    // TODO: Move this data somewhere
+    let graphData = [];
+    let colours = [];
+
+    const labels = Object.keys(itemisedTags);
+    const noTags = labels.length;
+
+    // Loop through the 5 colours we have and assign them to a tag
+    for (let i=0; i < noTags; i++) {
+      colours.push(GraphColours[i%5]);
+    }
+
+    graphData = Object.keys(itemisedTags).map((key) => (
+      itemisedTags[key].articles_read
+    ))
+
     const data = {
-      labels: d3Data.labels,
-      datasets: [{
-        label: this.state.currentGraph,
-        fill: false,
-        lineTension: 0.1,
-        backgroundColor: 'rgba(75,192,192,0.4)',
-        borderColor: 'rgba(75,192,192,1)',
-        borderCapStyle: 'butt',
-        borderDash: [],
-        borderDashOffset: 0.0,
-        borderJoinStyle: 'miter',
-        pointBorderColor: 'rgba(75,192,192,1)',
-        pointBackgroundColor: '#fff',
-        pointBorderWidth: 1,
-        pointHoverRadius: 5,
-        pointHoverBackgroundColor: 'rgba(75,192,192,1)',
-        pointHoverBorderColor: 'rgba(220,220,220,1)',
-        pointHoverBorderWidth: 2,
-        pointRadius: 1,
-        pointHitRadius: 10,
-        data: d3Data.data
-      }]
+    	labels: labels,
+    	datasets: [{
+    		data: graphData,
+    		backgroundColor: colours,
+    		hoverBackgroundColor: colours
+    	}]
     };
+
+    return data;
+  }
+
+  render() {
+    let data;
+    if (this.state.currentGraph === GraphTypes.TAGS_READ.name) {
+      data = this.getDonutGraphData();
+    } else {
+      const d3Data = this.getGraphData();
+      data = LineGraphData;
+      data.labels = d3Data.labels;
+      data.datasets[0].label = this.state.currentGraph;
+      data.datasets[0].data = d3Data.data;
+      console.log(d3Data);
+    }
 
     return(
       <div>
@@ -93,7 +115,7 @@ class GraphContainer extends Component {
             <GraphMenu onClick={this.onMenuItemClicked} />
           </div>
           <div className='col-lg-10'>
-            <Graph data={data} />
+            <Graph data={data} graphType={this.state.currentChartType}/>
           </div>
         </div>
       </div>

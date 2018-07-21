@@ -17,7 +17,8 @@ class App extends Component {
             lastUpdated: 0,
             username: "",
             totals: {},
-            itemised: {}
+            itemisedDate: {},
+            itemisedTags: {},
         };
     }
 
@@ -135,7 +136,8 @@ class App extends Component {
             loaded: true,
             updateComplete: true,
             totals: data.totals,
-            itemised: data.value,
+            itemisedDate: data.date_values,
+            itemisedTags: data.tag_values
         });
     }
 
@@ -193,7 +195,8 @@ class App extends Component {
                 component =
                     <DashboardContainer
                         totals={this.state.totals}
-                        itemised={this.state.itemised}
+                        itemisedDate={this.state.itemisedDate}
+                        itemisedTags={this.state.itemisedTags}
                         lastUpdated={this.state.lastUpdated}
                         onUpdateClick={this.onUpdateClick}
                         onFetchDataClick={this.onFetchDataClick}

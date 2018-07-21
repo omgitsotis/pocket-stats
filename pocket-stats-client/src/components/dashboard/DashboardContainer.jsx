@@ -33,7 +33,8 @@ class DashboardContainer extends Component {
               component =
                 <GraphContainer
                   totals={this.props.totals}
-                  itemised={this.props.itemised} />
+                  itemisedTags={this.props.itemisedTags}
+                  itemisedDate={this.props.itemisedDate} />
               break;
             default:
                 break;

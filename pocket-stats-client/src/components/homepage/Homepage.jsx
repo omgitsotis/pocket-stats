@@ -6,17 +6,16 @@ import './homepage.css';
 
 class Homepage extends Component {
     render() {
-        const totals = this.props.totals;
-        const itemised = this.props.itemised;
+        const {totals, itemisedDate} = this.props;
 
         let labels = [];
         let atsRead = [];
         let atsAdded = [];
-        Object.keys(itemised).forEach(function(key) {
+        Object.keys(itemisedDate).forEach(function(key) {
             let day = moment.unix(key);
             labels.push(day.format("D/MMM"));
-            atsRead.push(itemised[key].articles_read);
-            atsAdded.push(itemised[key].articles_added);
+            atsRead.push(itemisedDate[key].articles_read);
+            atsAdded.push(itemisedDate[key].articles_added);
         });
 
         const data = {

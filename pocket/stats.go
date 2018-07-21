@@ -7,10 +7,12 @@ import (
 var readingSpeed int64 = 247
 
 // createStats generates stats based on the list of articles provided
-func createStats(sp model.StatsParams, arts []model.Article) *model.Stats {
+func createStats(sp model.StatsParams, articles []model.Article) *model.Stats {
 	days := make(map[int64]*model.Stat)
+	tags := make(map[string]*model.Stat)
+
 	var wAdded, wRead, aAdded, aRead int64
-	for _, a := range arts {
+	for _, a := range articles {
 		if a.Status == model.Archived {
 			// Update article read counts
 			aRead++
@@ -27,6 +29,19 @@ func createStats(sp model.StatsParams, arts []model.Article) *model.Stats {
 				}
 
 				days[a.DateRead] = &newStat
+			}
+
+			// Update tag read counts. We only update reads for tags
+			tag, ok := tags[a.Tag]
+			if ok {
+				tag.ArticleRead++
+				tag.WordsRead += a.WordCount
+			} else {
+				newStat := model.Stat{
+					ArticleRead: 1,
+					WordsRead:   a.WordCount,
+				}
+				tags[a.Tag] = &newStat
 			}
 
 			// If the article was added in the current time frame, update added
@@ -77,10 +92,11 @@ func createStats(sp model.StatsParams, arts []model.Article) *model.Stats {
 	}
 
 	stats := &model.Stats{
-		Start:  sp.Start,
-		End:    sp.End,
-		Value:  days,
-		Totals: totals,
+		Start:      sp.Start,
+		End:        sp.End,
+		DateValues: days,
+		TagValues:  tags,
+		Totals:     totals,
 	}
 
 	getTimeReading(stats)
@@ -94,7 +110,11 @@ func getTimeReading(s *model.Stats) {
 	s.Totals.TimeReading = s.Totals.WordsRead / readingSpeed
 	logger.Debugf("Total time spend reading [%d]", s.Totals.TimeReading)
 
-	for _, stat := range s.Value {
+	for _, stat := range s.DateValues {
+		stat.TimeReading = stat.WordsRead / readingSpeed
+	}
+
+	for _, stat := range s.TagValues {
 		stat.TimeReading = stat.WordsRead / readingSpeed
 	}
 }

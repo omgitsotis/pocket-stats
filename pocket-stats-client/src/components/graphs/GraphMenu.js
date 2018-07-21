@@ -1,9 +1,9 @@
 import React from 'react'
-import GraphTypes from '../../constants/graphTypes.js'
+import { GraphTypes } from '../../constants/graphTypes.js'
 
 function GraphMenuItem({graphType, onClick}) {
   return (
-    <li onClick={() => onClick(graphType)}>{graphType}</li>
+    <li onClick={() => onClick(graphType)}>{graphType.name}</li>
   )
 }
 
