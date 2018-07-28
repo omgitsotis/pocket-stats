@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/mitchellh/mapstructure"
-	"github.com/omgitsotis/pocket-stats/pocket/model"
+	"github.com/omgitsotis/pocket-stats/server/pocket/model"
 )
 
 // sendAuth gets a request token from Pocket and returns the link required to
@@ -52,7 +52,7 @@ func loadUser(client *Client, data interface{}) {
 		return
 	}
 
-	log.Debugf("Received token [%s]", token)
+	clientLog.Debugf("Received token [%s]", token)
 	user.AccessToken = token.Token
 
 	client.send <- Message{"auth cached", user}
@@ -64,7 +64,7 @@ func initDB(client *Client, data interface{}) {
 	var params model.InputParams
 	err := mapstructure.Decode(data, &params)
 	if err != nil {
-		log.Errorf("Error decoding params: %s", err.Error())
+		clientLog.Errorf("Error decoding params: %s", err.Error())
 		client.SendError("data init", err)
 		return
 	}
@@ -84,12 +84,12 @@ func getStatistics(client *Client, data interface{}) {
 
 	err := mapstructure.Decode(data, &p)
 	if err != nil {
-		log.Errorf("Error decoding params: %s", err.Error())
+		clientLog.Errorf("Error decoding params: %s", err.Error())
 		client.SendError("data get", err)
 		return
 	}
 
-	log.Infof("Get stats from %d to %d", p.Start, p.End)
+	clientLog.Infof("Get stats from %d to %d", p.Start, p.End)
 
 	stats, err := client.Pocket.GetStatsForDates(p)
 	if err != nil {
@@ -105,7 +105,7 @@ func updateDB(client *Client, data interface{}) {
 	var params model.InputParams
 	err := mapstructure.Decode(data, &params)
 	if err != nil {
-		log.Errorf("Error decoding params: %s", err.Error())
+		clientLog.Errorf("Error decoding params: %s", err.Error())
 		client.SendError("data update", err)
 		return
 	}

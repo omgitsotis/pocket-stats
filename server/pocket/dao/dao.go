@@ -1,6 +1,6 @@
 package dao
 
-import "github.com/omgitsotis/pocket-stats/pocket/model"
+import "github.com/omgitsotis/pocket-stats/server/pocket/model"
 
 // DAO is the interface for any database connecting to the pocket client
 type DAO interface {

@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	client "github.com/omgitsotis/pocket-stats/client"
+	client "github.com/omgitsotis/pocket-stats/server/client"
 )
 
 func main() {

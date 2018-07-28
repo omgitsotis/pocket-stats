@@ -1,7 +1,7 @@
 package pocket
 
 import (
-	"github.com/omgitsotis/pocket-stats/pocket/model"
+	"github.com/omgitsotis/pocket-stats/server/pocket/model"
 )
 
 var readingSpeed int64 = 247

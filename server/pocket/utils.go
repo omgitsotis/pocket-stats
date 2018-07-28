@@ -9,8 +9,8 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/omgitsotis/pocket-stats/pocket/dao"
-	"github.com/omgitsotis/pocket-stats/pocket/model"
+	"github.com/omgitsotis/pocket-stats/server/pocket/dao"
+	"github.com/omgitsotis/pocket-stats/server/pocket/model"
 	logging "github.com/op/go-logging"
 )
 

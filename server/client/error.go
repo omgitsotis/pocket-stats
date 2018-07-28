@@ -18,7 +18,7 @@ func WriteErrorResponse(w http.ResponseWriter, msg string) {
 	er := ErrorResponse{msg}
 	b, err := json.Marshal(er)
 	if err != nil {
-		log.Errorf("Error Marshaling JSON: %v", err)
+		clientLog.Errorf("Error Marshaling JSON: %v", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}

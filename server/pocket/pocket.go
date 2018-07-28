@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/omgitsotis/pocket-stats/pocket/dao"
-	"github.com/omgitsotis/pocket-stats/pocket/model"
+	"github.com/omgitsotis/pocket-stats/server/pocket/dao"
+	"github.com/omgitsotis/pocket-stats/server/pocket/model"
 )
 
 // Pocket is the client to the pocket api

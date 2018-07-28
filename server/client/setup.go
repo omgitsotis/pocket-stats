@@ -4,12 +4,12 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/omgitsotis/pocket-stats/pocket"
-	"github.com/omgitsotis/pocket-stats/pocket/dao/sqlite"
+	"github.com/omgitsotis/pocket-stats/server/pocket"
+	"github.com/omgitsotis/pocket-stats/server/pocket/dao/sqlite"
 	logging "github.com/op/go-logging"
 )
 
-var log = logging.MustGetLogger("client")
+var clientLog = logging.MustGetLogger("client")
 
 // Serve API handles the creation of the logging, database and router and then
 // runs the server
@@ -33,7 +33,7 @@ func ServeAPI() error {
 	// Create the end point for pocket to return a response after authenticating
 	http.HandleFunc("/auth/recieved", r.RecievedAuth)
 
-	log.Info("Serving application")
+	clientLog.Info("Serving application")
 	return http.ListenAndServe(":4000", nil)
 
 }

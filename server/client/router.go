@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/websocket"
-	"github.com/omgitsotis/pocket-stats/pocket"
+	"github.com/omgitsotis/pocket-stats/server/pocket"
 )
 
 type Handler func(*Client, interface{})

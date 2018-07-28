@@ -5,7 +5,7 @@ import (
 	"os"
 
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/omgitsotis/pocket-stats/pocket/model"
+	"github.com/omgitsotis/pocket-stats/server/pocket/model"
 	logging "github.com/op/go-logging"
 )
 

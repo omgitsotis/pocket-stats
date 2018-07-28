@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/gorilla/websocket"
-	"github.com/omgitsotis/pocket-stats/pocket"
+	"github.com/omgitsotis/pocket-stats/server/pocket"
 )
 
 // Message is the object that is returned when sending a response via websocket.
@@ -59,7 +59,7 @@ func (c *Client) Read() {
 		_, r, err := c.socket.NextReader()
 		if err != nil {
 			msg := fmt.Sprintf("Error getting reader: %s", err.Error())
-			log.Criticalf(msg)
+			clientLog.Criticalf(msg)
 			// c.SendError("system", errors.New(msg))
 			break
 		}
@@ -69,13 +69,13 @@ func (c *Client) Read() {
 
 		if err := d.Decode(&message); err != nil {
 			msg := fmt.Sprintf("Error decoding message: %s", err.Error())
-			log.Criticalf(msg)
+			clientLog.Criticalf(msg)
 			c.SendError("system", errors.New(msg))
 			break
 		}
 
 		if fn, ok := c.findHandler(message.Name); ok {
-			log.Infof("Received request for %s\n", message.Name)
+			clientLog.Infof("Received request for %s\n", message.Name)
 			fn(c, message.Data)
 		}
 	}
@@ -87,7 +87,7 @@ func (c *Client) Read() {
 func (c *Client) Write() {
 	for msg := range c.send {
 		if err := c.socket.WriteJSON(msg); err != nil {
-			log.Criticalf("Error writing JSON: %s", err.Error())
+			clientLog.Criticalf("Error writing JSON: %s", err.Error())
 			continue
 		}
 	}
