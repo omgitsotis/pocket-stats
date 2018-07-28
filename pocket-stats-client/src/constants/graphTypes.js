@@ -23,6 +23,10 @@ const GraphTypes = {
   TAGS_READ: {
     name: "Tags Read",
     type: ChartType.PIE
+  },
+  TAGS_TIME: {
+    name: "Reading time by tag",
+    type: ChartType.PIE
   }
 };
 

@@ -65,23 +65,52 @@ class GraphContainer extends Component {
     };
   }
 
-  getDonutGraphData() {
-    const {itemisedTags} = this.props;
+  // getAndSortTags gets the relevant stat for the current graph type and sorts
+  // the data from largest to smallest
+  getAndSortTags(itemisedTags) {
+    let tags = [];
+    switch (this.state.currentGraph) {
+      case GraphTypes.TAGS_READ.name:
+      tags = Object.keys(itemisedTags).map((key) => ({
+        name: key,
+        value: itemisedTags[key].articles_read
+      }));
+      break;
 
-    let graphData = [];
-    let colours = [];
+      case GraphTypes.TAGS_TIME.name:
+      console.log(itemisedTags)
+      tags = Object.keys(itemisedTags).map((key) => ({
+        name: key,
+        value: itemisedTags[key].time_reading
+      }));
+      break;
 
-    const labels = Object.keys(itemisedTags);
-    const noTags = labels.length;
-
-    // Loop through the 5 colours we have and assign them to a tag
-    for (let i=0; i < noTags; i++) {
-      colours.push(GraphColours[i%5]);
+      default:
+      console.error("How did we get an unknown graph type?")
+      return;
     }
 
-    graphData = Object.keys(itemisedTags).map((key) => (
-      itemisedTags[key].articles_read
-    ))
+    return tags.sort((a, b) => b.value - a.value);
+  }
+
+  // getDonutGraphData creates the data structure needed to create a donut (pie)
+  // chart
+  getDonutGraphData() {
+    const { itemisedTags } = this.props;
+
+    // We need to sort the tags, as it looks better
+    const tagArray = this.getAndSortTags(itemisedTags);
+
+    // Get the names and values from the sorted array
+    const labels = tagArray.map(t => t.name);
+    const graphData = tagArray.map(t => t.value);
+
+    // Loop through the 5 colours we have and assign them to a tag
+    let colours = [];
+    const noTags = labels.length;
+    for (let i=0; i < noTags; i++) {
+      colours.push(GraphColours[i%15]);
+    }
 
     const data = {
     	labels: labels,
@@ -97,7 +126,7 @@ class GraphContainer extends Component {
 
   render() {
     let data;
-    if (this.state.currentGraph === GraphTypes.TAGS_READ.name) {
+    if (this.state.currentChartType === ChartType.PIE) {
       data = this.getDonutGraphData();
     } else {
       const d3Data = this.getGraphData();
