@@ -6,7 +6,7 @@
         "install": [
             "./..."
         ],
-        "goVersion": "go1.6"
+        "goVersion": "go1.10"
     },
     "package": [
         {
