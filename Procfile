@@ -1,1 +1,1 @@
-api: cmd/pocket-stats
+api: pocket-stats
