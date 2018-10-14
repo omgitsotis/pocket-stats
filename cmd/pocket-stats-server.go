@@ -27,7 +27,7 @@ func main() {
 		})
 
 		router := mux.NewRouter()
-		router.NewRoute().Path("/").HandlerFunc(
+		router.NewRoute().Path("/api/stats").HandlerFunc(
 			func(w http.ResponseWriter, r *http.Request) {
 				w.Write([]byte("Hit app"))
 			},
