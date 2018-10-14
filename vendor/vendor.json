@@ -1,115 +1,121 @@
 {
-	"comment": "",
-	"ignore": "test",
-	"package": [
-		{
-			"checksumSHA1": "STQSdSj2FcpCf0NLfdsKhNutQT0=",
-			"path": "github.com/gorilla/mux",
-			"revision": "962c5bed0721b50f2ba42684e9600dfde174770f",
-			"revisionTime": "2018-08-30T14:23:24Z"
-		},
-		{
-			"checksumSHA1": "+1LsRRZKa06yTFg/Tu5NCsyHxOA=",
-			"path": "github.com/gorilla/websocket",
-			"revision": "eb925808374e5ca90c83401a40d711dc08c0c0f6",
-			"revisionTime": "2018-03-06T18:15:48Z"
-		},
-		{
-			"checksumSHA1": "gG0cnlNicre1mOCSk2UriUweXeo=",
-			"path": "github.com/jawher/mow.cli",
-			"revision": "123c8a60ff2f69b8c55b3e19b1383233321b316f",
-			"revisionTime": "2018-06-03T09:53:41Z"
-		},
-		{
-			"checksumSHA1": "uwnJHm8Gd1eHtNSpUGdSk5BlxfU=",
-			"path": "github.com/jawher/mow.cli/internal/container",
-			"revision": "123c8a60ff2f69b8c55b3e19b1383233321b316f",
-			"revisionTime": "2018-06-03T09:53:41Z"
-		},
-		{
-			"checksumSHA1": "qOpDoI5EiHFjKS8ViJo51HiLPCg=",
-			"path": "github.com/jawher/mow.cli/internal/flow",
-			"revision": "123c8a60ff2f69b8c55b3e19b1383233321b316f",
-			"revisionTime": "2018-06-03T09:53:41Z"
-		},
-		{
-			"checksumSHA1": "72Uqy51AQymJlWzn/9vYWhqhW04=",
-			"path": "github.com/jawher/mow.cli/internal/fsm",
-			"revision": "123c8a60ff2f69b8c55b3e19b1383233321b316f",
-			"revisionTime": "2018-06-03T09:53:41Z"
-		},
-		{
-			"checksumSHA1": "XBG8fzCX/uXW92Euctkvaj1Eq1g=",
-			"path": "github.com/jawher/mow.cli/internal/lexer",
-			"revision": "123c8a60ff2f69b8c55b3e19b1383233321b316f",
-			"revisionTime": "2018-06-03T09:53:41Z"
-		},
-		{
-			"checksumSHA1": "U+GOzDlE0QA9qOYc8mtyRXyj4lc=",
-			"path": "github.com/jawher/mow.cli/internal/matcher",
-			"revision": "123c8a60ff2f69b8c55b3e19b1383233321b316f",
-			"revisionTime": "2018-06-03T09:53:41Z"
-		},
-		{
-			"checksumSHA1": "DvUiOG6lUYXPhHGHhD7RqNxnX3E=",
-			"path": "github.com/jawher/mow.cli/internal/parser",
-			"revision": "123c8a60ff2f69b8c55b3e19b1383233321b316f",
-			"revisionTime": "2018-06-03T09:53:41Z"
-		},
-		{
-			"checksumSHA1": "Y8x+qE1O695IlBJ/ObBjXS+wzSs=",
-			"path": "github.com/jawher/mow.cli/internal/values",
-			"revision": "123c8a60ff2f69b8c55b3e19b1383233321b316f",
-			"revisionTime": "2018-06-03T09:53:41Z"
-		},
-		{
-			"checksumSHA1": "UXD6iorzeLXDBmLaOGYsAJ/Ls3w=",
-			"path": "github.com/mattn/go-sqlite3",
-			"revision": "d896508f87298565da02ed92730e7065c3de10b8",
-			"revisionTime": "2018-04-04T14:27:34Z"
-		},
-		{
-			"checksumSHA1": "Yvzge1YQcD/wSDXLD5qNHqmI/0s=",
-			"path": "github.com/mitchellh/mapstructure",
-			"revision": "00c29f56e2386353d58c599509e8dc3801b0d716",
-			"revisionTime": "2018-02-20T23:01:11Z"
-		},
-		{
-			"checksumSHA1": "BL54kuHKISgF9CueETL/AkydXvo=",
-			"path": "github.com/omgitsotis/pocket-stats/cmd",
-			"revision": "ced76d6a5d29573ca7f750ee6b06330c0a225e40",
-			"revisionTime": "2018-10-14T17:28:05Z"
-		},
-		{
-			"checksumSHA1": "BoXdUBWB8UnSlFlbnuTQaPqfCGk=",
-			"path": "github.com/op/go-logging",
-			"revision": "970db520ece77730c7e4724c61121037378659d9",
-			"revisionTime": "2016-03-15T20:05:05Z"
-		},
-		{
-			"checksumSHA1": "tICW9WtACqNYYw14mOulb1GJaSs=",
-			"path": "github.com/sirupsen/logrus",
-			"revision": "78fa2915c1fa231f62e0438da493688c21ca678e",
-			"revisionTime": "2018-08-30T20:11:51Z"
-		},
-		{
-			"checksumSHA1": "BGm8lKZmvJbf/YOJLeL1rw2WVjA=",
-			"path": "golang.org/x/crypto/ssh/terminal",
-			"revision": "182538f80094b6a8efaade63a8fd8e0d9d5843dd",
-			"revisionTime": "2018-08-30T18:34:03Z"
-		},
-		{
-			"checksumSHA1": "5eIKkzDE3MRgbhlo8E67+sO5yZo=",
-			"path": "golang.org/x/sys/unix",
-			"revision": "fa5fdf94c78965f1aa8423f0cc50b8b8d728b05a",
-			"revisionTime": "2018-08-31T08:14:39Z"
-		},
-		{
-			"checksumSHA1": "DssjltU28TeBlMe16egT15lW0VA=",
-			"path": "golang.org/x/sys/windows",
-			"revision": "fa5fdf94c78965f1aa8423f0cc50b8b8d728b05a",
-			"revisionTime": "2018-08-31T08:14:39Z"
-		}
-	],
-	"rootPath": "github.com/omgitsotis/pocket-stats"
+    "comment": "",
+    "ignore": "test",
+    "rootPath": "github.com/omgitsotis/pocket-stats",
+    "heroku": {
+        "install": [
+            "./..."
+        ],
+        "goVersion": "go1.6"
+    },
+    "package": [
+        {
+            "checksumSHA1": "STQSdSj2FcpCf0NLfdsKhNutQT0=",
+            "path": "github.com/gorilla/mux",
+            "revision": "962c5bed0721b50f2ba42684e9600dfde174770f",
+            "revisionTime": "2018-08-30T14:23:24Z"
+        },
+        {
+            "checksumSHA1": "+1LsRRZKa06yTFg/Tu5NCsyHxOA=",
+            "path": "github.com/gorilla/websocket",
+            "revision": "eb925808374e5ca90c83401a40d711dc08c0c0f6",
+            "revisionTime": "2018-03-06T18:15:48Z"
+        },
+        {
+            "checksumSHA1": "gG0cnlNicre1mOCSk2UriUweXeo=",
+            "path": "github.com/jawher/mow.cli",
+            "revision": "123c8a60ff2f69b8c55b3e19b1383233321b316f",
+            "revisionTime": "2018-06-03T09:53:41Z"
+        },
+        {
+            "checksumSHA1": "uwnJHm8Gd1eHtNSpUGdSk5BlxfU=",
+            "path": "github.com/jawher/mow.cli/internal/container",
+            "revision": "123c8a60ff2f69b8c55b3e19b1383233321b316f",
+            "revisionTime": "2018-06-03T09:53:41Z"
+        },
+        {
+            "checksumSHA1": "qOpDoI5EiHFjKS8ViJo51HiLPCg=",
+            "path": "github.com/jawher/mow.cli/internal/flow",
+            "revision": "123c8a60ff2f69b8c55b3e19b1383233321b316f",
+            "revisionTime": "2018-06-03T09:53:41Z"
+        },
+        {
+            "checksumSHA1": "72Uqy51AQymJlWzn/9vYWhqhW04=",
+            "path": "github.com/jawher/mow.cli/internal/fsm",
+            "revision": "123c8a60ff2f69b8c55b3e19b1383233321b316f",
+            "revisionTime": "2018-06-03T09:53:41Z"
+        },
+        {
+            "checksumSHA1": "XBG8fzCX/uXW92Euctkvaj1Eq1g=",
+            "path": "github.com/jawher/mow.cli/internal/lexer",
+            "revision": "123c8a60ff2f69b8c55b3e19b1383233321b316f",
+            "revisionTime": "2018-06-03T09:53:41Z"
+        },
+        {
+            "checksumSHA1": "U+GOzDlE0QA9qOYc8mtyRXyj4lc=",
+            "path": "github.com/jawher/mow.cli/internal/matcher",
+            "revision": "123c8a60ff2f69b8c55b3e19b1383233321b316f",
+            "revisionTime": "2018-06-03T09:53:41Z"
+        },
+        {
+            "checksumSHA1": "DvUiOG6lUYXPhHGHhD7RqNxnX3E=",
+            "path": "github.com/jawher/mow.cli/internal/parser",
+            "revision": "123c8a60ff2f69b8c55b3e19b1383233321b316f",
+            "revisionTime": "2018-06-03T09:53:41Z"
+        },
+        {
+            "checksumSHA1": "Y8x+qE1O695IlBJ/ObBjXS+wzSs=",
+            "path": "github.com/jawher/mow.cli/internal/values",
+            "revision": "123c8a60ff2f69b8c55b3e19b1383233321b316f",
+            "revisionTime": "2018-06-03T09:53:41Z"
+        },
+        {
+            "checksumSHA1": "UXD6iorzeLXDBmLaOGYsAJ/Ls3w=",
+            "path": "github.com/mattn/go-sqlite3",
+            "revision": "d896508f87298565da02ed92730e7065c3de10b8",
+            "revisionTime": "2018-04-04T14:27:34Z"
+        },
+        {
+            "checksumSHA1": "Yvzge1YQcD/wSDXLD5qNHqmI/0s=",
+            "path": "github.com/mitchellh/mapstructure",
+            "revision": "00c29f56e2386353d58c599509e8dc3801b0d716",
+            "revisionTime": "2018-02-20T23:01:11Z"
+        },
+        {
+            "checksumSHA1": "BL54kuHKISgF9CueETL/AkydXvo=",
+            "path": "github.com/omgitsotis/pocket-stats/cmd",
+            "revision": "ced76d6a5d29573ca7f750ee6b06330c0a225e40",
+            "revisionTime": "2018-10-14T17:28:05Z"
+        },
+        {
+            "checksumSHA1": "BoXdUBWB8UnSlFlbnuTQaPqfCGk=",
+            "path": "github.com/op/go-logging",
+            "revision": "970db520ece77730c7e4724c61121037378659d9",
+            "revisionTime": "2016-03-15T20:05:05Z"
+        },
+        {
+            "checksumSHA1": "tICW9WtACqNYYw14mOulb1GJaSs=",
+            "path": "github.com/sirupsen/logrus",
+            "revision": "78fa2915c1fa231f62e0438da493688c21ca678e",
+            "revisionTime": "2018-08-30T20:11:51Z"
+        },
+        {
+            "checksumSHA1": "BGm8lKZmvJbf/YOJLeL1rw2WVjA=",
+            "path": "golang.org/x/crypto/ssh/terminal",
+            "revision": "182538f80094b6a8efaade63a8fd8e0d9d5843dd",
+            "revisionTime": "2018-08-30T18:34:03Z"
+        },
+        {
+            "checksumSHA1": "5eIKkzDE3MRgbhlo8E67+sO5yZo=",
+            "path": "golang.org/x/sys/unix",
+            "revision": "fa5fdf94c78965f1aa8423f0cc50b8b8d728b05a",
+            "revisionTime": "2018-08-31T08:14:39Z"
+        },
+        {
+            "checksumSHA1": "DssjltU28TeBlMe16egT15lW0VA=",
+            "path": "golang.org/x/sys/windows",
+            "revision": "fa5fdf94c78965f1aa8423f0cc50b8b8d728b05a",
+            "revisionTime": "2018-08-31T08:14:39Z"
+        }
+    ]
 }
