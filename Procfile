@@ -1,1 +1,1 @@
-api: cmd/pocket-stats-server.go
+api: cmd/pocket-stats
