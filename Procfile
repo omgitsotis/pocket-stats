@@ -1,1 +1,1 @@
-api: pocket-stats
+web: pocket-stats
