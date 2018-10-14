@@ -1,2 +1,1 @@
-api: server/cmd/pocket-stats-server.go
-web: npm start --prefix ./client
+web: cmd/pocket-stats-server.go
