@@ -42,12 +42,19 @@ func main() {
 			EnvVar: "PORT",
 		})
 
+		callbackURL := app.String(cli.StringOpt{
+			Name:   "callback_url",
+			Desc:   "The url used for pocket to call back on validation",
+			Value:  "http://localhost",
+			EnvVar: "CALLBACK_URL",
+		})
+
 		p := pocket.New(
 			"74935-9d486f66d2999047b61328f3",
 			&http.Client{},
 		)
 
-		redirect := fmt.Sprintf("http://localhost:%d/api/pocket/auth/received", *port)
+		redirect := fmt.Sprintf("%s:%d/api/pocket/auth/received", *callbackURL, *port)
 		s := server.New(p, redirect)
 
 		r := router.CreateRouter(s)
