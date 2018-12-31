@@ -54,7 +54,7 @@ func main() {
 			&http.Client{},
 		)
 
-		redirect := fmt.Sprintf("%s:%d/api/pocket/auth/received", *callbackURL, *port)
+		redirect := fmt.Sprintf("%s/api/pocket/auth/received", *callbackURL)
 		s := server.New(p, redirect)
 
 		r := router.CreateRouter(s)
