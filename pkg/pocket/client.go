@@ -61,7 +61,7 @@ func (c *Client) ReceieveAuth(key string) (*model.User, error) {
 		return nil, errors.New("Unauthorised user for this app")
 	}
 
-	c.authedUser = user
+	c.authedUser = &user
 
 	// TODO move this logic out of here
 	// date, err := p.dao.GetLastAdded()
