@@ -23,7 +23,7 @@ func CreateRouter(s *server.Server) *mux.Router {
 	router := mux.NewRouter()
 
 	router.NewRoute().
-		Path(route).
+		Path("/").
 		Methods(http.MethodGet).
 		HandlerFunc(
 			func(w http.ResponseWriter, r *http.Request) {
@@ -40,6 +40,11 @@ func CreateRouter(s *server.Server) *mux.Router {
 		Path(route + "auth/received").
 		Methods(http.MethodGet).
 		HandlerFunc(s.ReceiveToken())
+
+	router.NewRoute().
+		Path(route + "auth/authed").
+		Methods(http.MethodGet).
+		HandlerFunc(s.CheckAuthStatus())
 
 	return router
 }

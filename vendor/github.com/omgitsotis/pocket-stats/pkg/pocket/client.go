@@ -15,6 +15,9 @@ var log *logrus.Logger
 
 const pocketURL = "https://getpocket.com/v3"
 
+// The only user that is allowed to use this app. (Me, nwah nwah nwah)
+const Username = "omgitsotis"
+
 func Init(l *logrus.Logger) {
 	log = l
 }
@@ -22,6 +25,7 @@ func Init(l *logrus.Logger) {
 type Client struct {
 	consumerID string
 	client     *http.Client
+	authedUser *model.User
 }
 
 func New(consumerID string, cli *http.Client) *Client {
@@ -53,8 +57,11 @@ func (c *Client) ReceieveAuth(key string) (*model.User, error) {
 		return nil, err
 	}
 
-	// TODO Implement other users
-	user.ID = 1
+	if user.Username != Username {
+		return nil, errors.New("Unauthorised user for this app")
+	}
+
+	c.authedUser = user
 
 	// TODO move this logic out of here
 	// date, err := p.dao.GetLastAdded()
@@ -66,6 +73,12 @@ func (c *Client) ReceieveAuth(key string) (*model.User, error) {
 	// logger.Infof("Last added date: [%d]", date)
 
 	return &user, nil
+}
+
+// IsAppAuthed returns a boolean based on whether the client has an authorised
+// user or not
+func (c *Client) IsAuthed() bool {
+	return c.authedUser != nil
 }
 
 // call makes api requests to the Pocket api and marshal the results.

@@ -73,6 +73,20 @@ func (s *Server) ReceiveToken() http.HandlerFunc {
 	}
 }
 
+func (s *Server) CheckAuthStatus() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		log.Debug("Received request for CheckAuthStatus")
+
+		if s.pocketClient.IsAuthed() {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+}
+
 func respondWithError(w http.ResponseWriter, code int, message string, err error) {
 	log.WithError(err).Error(message)
 	respondWithJSON(w, code, model.APIError{Code: code, Message: message})
