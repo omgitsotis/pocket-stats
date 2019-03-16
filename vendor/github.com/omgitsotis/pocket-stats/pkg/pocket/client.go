@@ -91,6 +91,7 @@ func (c *Client) GetArticles(offset int) (*RetrieveResult, error) {
 		AccessToken: c.authedUser.AccessToken,
 		ConsumerKey: c.consumerID,
 		Offset:      offset,
+		Since:       1422403200,
 	}
 
 	log.Debugf("Params to send %+v", req)
