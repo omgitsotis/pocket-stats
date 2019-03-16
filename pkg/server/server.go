@@ -109,7 +109,7 @@ func (s *Server) GetArticles(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if resp.Status == 1 {
+		if resp.Status == 1 || index == 2 {
 			complete = true
 		}
 
