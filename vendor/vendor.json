@@ -83,38 +83,38 @@
 		{
 			"checksumSHA1": "7vmQ05wfIyoaSl18uFBemaZpAuM=",
 			"path": "github.com/omgitsotis/pocket-stats",
-			"revision": "c4b4d3d8b65db030ecf9aa2ded2605a3d3becbff",
-			"revisionTime": "2019-03-16T11:37:26Z"
+			"revision": "02a7bf9acad9493427924bc80224561bb7ffe711",
+			"revisionTime": "2019-03-16T12:37:09Z"
 		},
 		{
-			"checksumSHA1": "nErFqjE+5CPfW9J2WIO6LJTwkWQ=",
+			"checksumSHA1": "GPVYtiexLukL1y1ZsbSMgUjr3Q4=",
 			"path": "github.com/omgitsotis/pocket-stats/pkg/database",
-			"revision": "c4b4d3d8b65db030ecf9aa2ded2605a3d3becbff",
-			"revisionTime": "2019-03-16T11:37:26Z"
+			"revision": "02a7bf9acad9493427924bc80224561bb7ffe711",
+			"revisionTime": "2019-03-16T12:37:09Z"
 		},
 		{
 			"checksumSHA1": "RQzqG67/PIlIyi0zgryVA6jO3/4=",
 			"path": "github.com/omgitsotis/pocket-stats/pkg/model",
-			"revision": "c4b4d3d8b65db030ecf9aa2ded2605a3d3becbff",
-			"revisionTime": "2019-03-16T11:37:26Z"
+			"revision": "02a7bf9acad9493427924bc80224561bb7ffe711",
+			"revisionTime": "2019-03-16T12:37:09Z"
 		},
 		{
 			"checksumSHA1": "h6qKGIzlkSlnDBUaFNFrLqVJa+s=",
 			"path": "github.com/omgitsotis/pocket-stats/pkg/pocket",
-			"revision": "c4b4d3d8b65db030ecf9aa2ded2605a3d3becbff",
-			"revisionTime": "2019-03-16T11:37:26Z"
+			"revision": "02a7bf9acad9493427924bc80224561bb7ffe711",
+			"revisionTime": "2019-03-16T12:37:09Z"
 		},
 		{
 			"checksumSHA1": "oE/mNkcuPEBmdHBCGizCHvqyMHk=",
 			"path": "github.com/omgitsotis/pocket-stats/pkg/router",
-			"revision": "c4b4d3d8b65db030ecf9aa2ded2605a3d3becbff",
-			"revisionTime": "2019-03-16T11:37:26Z"
+			"revision": "02a7bf9acad9493427924bc80224561bb7ffe711",
+			"revisionTime": "2019-03-16T12:37:09Z"
 		},
 		{
 			"checksumSHA1": "7h80HkbACeGnqxHzLxVzJBFvl/E=",
 			"path": "github.com/omgitsotis/pocket-stats/pkg/server",
-			"revision": "c4b4d3d8b65db030ecf9aa2ded2605a3d3becbff",
-			"revisionTime": "2019-03-16T11:37:26Z"
+			"revision": "02a7bf9acad9493427924bc80224561bb7ffe711",
+			"revisionTime": "2019-03-16T12:37:09Z"
 		},
 		{
 			"checksumSHA1": "DTy0iJ2w5C+FDsN9EnzfhNmvS+o=",

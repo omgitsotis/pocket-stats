@@ -66,6 +66,7 @@ func (p *PostgresClient) SaveArticles(articles []pocket.Article) error {
 
 	_, err = stmt.Exec()
 	if err != nil {
+		stmt.Close()
 		return errors.WithMessage(err, "error executing statement")
 	}
 
