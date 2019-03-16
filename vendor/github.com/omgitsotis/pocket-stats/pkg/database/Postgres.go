@@ -64,12 +64,10 @@ func (p *PostgresClient) SaveArticles(articles []pocket.Article) error {
 		}
 	}
 
-	result, err := stmt.Exec()
+	_, err = stmt.Exec()
 	if err != nil {
 		return errors.WithMessage(err, "error executing statement")
 	}
-
-	log.Infof("Result [%v]", result)
 
 	err = stmt.Close()
 	if err != nil {

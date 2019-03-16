@@ -57,13 +57,15 @@ func ConvertArticles(pa pocket.Article) Article {
 	sAdded := stripTime(added)
 	sRead := stripTime(read)
 
-	// for _, t := range pa.Tags {
-	// 	if t == TagRead || t == TagSport {
-	// 		continue
-	// 	}
-	//
-	// 	tag = t
-	// }
+	var tag string
+	for key := range pa.Tags {
+		if key == TagRead || key == TagSport {
+			continue
+		}
+
+		tag = key
+		break
+	}
 
 	return Article{
 		ID:        pa.ItemID,
@@ -72,6 +74,7 @@ func ConvertArticles(pa pocket.Article) Article {
 		WordCount: pa.WordCount,
 		DateAdded: sAdded,
 		DateRead:  sRead,
+		Tag:       tag,
 	}
 }
 

@@ -93,30 +93,37 @@ func (s *Server) GetArticles(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Run the database update in the background
+	go s.getArticles()
+
+	respondWithJSON(w, http.StatusOK, &pocket.RetrieveResult{Complete: 1})
+}
+
+func (s *Server) getArticles() {
 	complete := false
 	index := 0
 	for !complete {
-		resp, err := s.pocketClient.GetArticles(50 * index)
+		log.Infof("Getting articles [%d]-[%d]", (100 * index), (100 * (index + 1)))
+		resp, err := s.pocketClient.GetArticles(100 * index)
 		if err != nil {
-			respondWithError(w, http.StatusBadRequest, "Error getting articles", err)
+			log.WithError(err).Error("Error getting articles")
 			return
 		}
 
 		articles := resp.GetArticleList()
 
 		if err = s.db.SaveArticles(articles); err != nil {
-			respondWithError(w, http.StatusBadRequest, "Error saving articles", err)
+			log.WithError(err).Error("Error saving articles")
 			return
 		}
 
-		if resp.Status == 1 {
+		if resp.Complete == 1 || index == 2 {
 			complete = true
 		}
 
 		index++
 	}
-
-	respondWithJSON(w, http.StatusOK, &pocket.RetrieveResult{Complete: 1})
+	log.Info("Finished updating database")
 }
 
 func respondWithError(w http.ResponseWriter, code int, message string, err error) {

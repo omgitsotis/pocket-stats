@@ -83,7 +83,7 @@ func (c *Client) IsAuthed() bool {
 
 func (c *Client) GetArticles(offset int) (*RetrieveResult, error) {
 	req := RetrieveOption{
-		Count:       10,
+		Count:       100,
 		Sort:        SortOldest,
 		DetailType:  "complete",
 		ContentType: "article",
@@ -91,7 +91,6 @@ func (c *Client) GetArticles(offset int) (*RetrieveResult, error) {
 		AccessToken: c.authedUser.AccessToken,
 		ConsumerKey: c.consumerID,
 		Offset:      offset,
-		Since:       1551398400,
 	}
 
 	log.Debugf("Params to send %+v", req)
