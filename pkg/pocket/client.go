@@ -81,6 +81,30 @@ func (c *Client) IsAuthed() bool {
 	return c.authedUser != nil
 }
 
+func (c *Client) GetArticles(offset int) (*RetrieveResult, error) {
+	req := RetrieveOption{
+		Count:       10,
+		Sort:        SortOldest,
+		DetailType:  "complete",
+		ContentType: "article",
+		State:       "all",
+		AccessToken: c.authedUser.AccessToken,
+		ConsumerKey: c.consumerID,
+		Offset:      offset,
+		Since:       1551398400,
+	}
+
+	log.Debugf("Params to send %+v", req)
+
+	var resp RetrieveResult
+
+	if err := c.call("/get", req, &resp); err != nil {
+		return nil, err
+	}
+
+	return &resp, nil
+}
+
 // call makes api requests to the Pocket api and marshal the results.
 func (c *Client) call(uri string, body, t interface{}) error {
 	b, err := json.Marshal(body)
@@ -108,7 +132,7 @@ func (c *Client) call(uri string, body, t interface{}) error {
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
-		log.Debugf("Status %s", res.Status)
+		log.Errorf("Status [%s] Error %s", res.Status, res.Header["X-Error"])
 		return errors.New(res.Status)
 	}
 

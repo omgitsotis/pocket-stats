@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"reflect"
 	"sync"
 	"time"
 )
@@ -41,8 +42,11 @@ type Entry struct {
 	// Message passed to Debug, Info, Warn, Error, Fatal or Panic
 	Message string
 
-	// When formatter is called in entry.log(), an Buffer may be set to entry
+	// When formatter is called in entry.log(), a Buffer may be set to entry
 	Buffer *bytes.Buffer
+
+	// err may contain a field formatting error
+	err string
 }
 
 func NewEntry(logger *Logger) *Entry {
@@ -80,10 +84,18 @@ func (entry *Entry) WithFields(fields Fields) *Entry {
 	for k, v := range entry.Data {
 		data[k] = v
 	}
+	var field_err string
 	for k, v := range fields {
-		data[k] = v
+		if t := reflect.TypeOf(v); t != nil && t.Kind() == reflect.Func {
+			field_err = fmt.Sprintf("can not add field %q", k)
+			if entry.err != "" {
+				field_err = entry.err + ", " + field_err
+			}
+		} else {
+			data[k] = v
+		}
 	}
-	return &Entry{Logger: entry.Logger, Data: data, Time: entry.Time}
+	return &Entry{Logger: entry.Logger, Data: data, Time: entry.Time, err: field_err}
 }
 
 // Overrides the time of the Entry.
@@ -186,7 +198,7 @@ func (entry *Entry) Fatal(args ...interface{}) {
 	if entry.Logger.IsLevelEnabled(FatalLevel) {
 		entry.log(FatalLevel, fmt.Sprint(args...))
 	}
-	Exit(1)
+	entry.Logger.Exit(1)
 }
 
 func (entry *Entry) Panic(args ...interface{}) {
@@ -234,7 +246,7 @@ func (entry *Entry) Fatalf(format string, args ...interface{}) {
 	if entry.Logger.IsLevelEnabled(FatalLevel) {
 		entry.Fatal(fmt.Sprintf(format, args...))
 	}
-	Exit(1)
+	entry.Logger.Exit(1)
 }
 
 func (entry *Entry) Panicf(format string, args ...interface{}) {
@@ -281,7 +293,7 @@ func (entry *Entry) Fatalln(args ...interface{}) {
 	if entry.Logger.IsLevelEnabled(FatalLevel) {
 		entry.Fatal(entry.sprintlnn(args...))
 	}
-	Exit(1)
+	entry.Logger.Exit(1)
 }
 
 func (entry *Entry) Panicln(args ...interface{}) {

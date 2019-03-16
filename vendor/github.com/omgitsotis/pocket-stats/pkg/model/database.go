@@ -11,3 +11,9 @@ type User struct {
 	ID          int64  `json:"id"`
 	LastUpdated int64  `json:"last_updated"`
 }
+
+type Article struct {
+	Name     string
+	DateRead int64
+	Tags     []string
+}

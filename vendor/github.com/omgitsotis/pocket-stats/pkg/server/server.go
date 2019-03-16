@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/omgitsotis/pocket-stats/pkg/database"
 	"github.com/omgitsotis/pocket-stats/pkg/model"
 	"github.com/omgitsotis/pocket-stats/pkg/pocket"
 	"github.com/sirupsen/logrus"
@@ -18,77 +19,111 @@ func Init(l *logrus.Logger) {
 
 type Server struct {
 	pocketClient *pocket.Client
+	db           database.DBCLient
 	authURL      string
 	requestToken string
 }
 
-func New(pc *pocket.Client, url string) *Server {
+func New(pc *pocket.Client, url string, db database.DBCLient) *Server {
 	return &Server{
 		pocketClient: pc,
 		authURL:      url,
+		db:           db,
 	}
 }
 
-// GetAuth gets the pocket Authorisation link used to login
-func (s *Server) GetAuthLink() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		code, err := s.pocketClient.GetAuth(s.authURL)
-		if err != nil {
-			respondWithError(
-				w,
-				http.StatusInternalServerError,
-				"error getting pocket auth code",
-				err,
-			)
-			return
-		}
-
-		s.requestToken = code
-
-		u := fmt.Sprintf(
-			"https://getpocket.com/auth/authorize?request_token=%s&redirect_uri=%s",
-			code,
-			s.authURL,
+// GetAuthLink gets the pocket Authorisation link used to login
+func (s *Server) GetAuthLink(w http.ResponseWriter, r *http.Request) {
+	code, err := s.pocketClient.GetAuth(s.authURL)
+	if err != nil {
+		respondWithError(
+			w,
+			http.StatusInternalServerError,
+			"error getting pocket auth code",
+			err,
 		)
-
-		link := model.Link{u}
-		respondWithJSON(w, http.StatusOK, link)
-	}
-}
-
-func (s *Server) ReceiveToken() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		log.Debug("Received request for ReceiveToken")
-		user, err := s.pocketClient.ReceieveAuth(s.requestToken)
-		if err != nil {
-			respondWithError(
-				w,
-				http.StatusBadRequest,
-				"error getting access token for user",
-				err,
-			)
-		}
-
-		respondWithJSON(w, http.StatusOK, user)
-	}
-}
-
-func (s *Server) CheckAuthStatus() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		log.Debug("Received request for CheckAuthStatus")
-
-		if s.pocketClient.IsAuthed() {
-			w.WriteHeader(http.StatusOK)
-			return
-		}
-
-		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
+
+	s.requestToken = code
+
+	u := fmt.Sprintf(
+		"https://getpocket.com/auth/authorize?request_token=%s&redirect_uri=%s",
+		code,
+		s.authURL,
+	)
+
+	link := model.Link{URL: u}
+	respondWithJSON(w, http.StatusOK, link)
+
+}
+
+func (s *Server) ReceiveToken(w http.ResponseWriter, r *http.Request) {
+	log.Debug("Received request for ReceiveToken")
+	user, err := s.pocketClient.ReceieveAuth(s.requestToken)
+	if err != nil {
+		respondWithError(
+			w,
+			http.StatusBadRequest,
+			"error getting access token for user",
+			err,
+		)
+	}
+
+	respondWithJSON(w, http.StatusOK, user)
+}
+
+func (s *Server) CheckAuthStatus(w http.ResponseWriter, r *http.Request) {
+
+	log.Debug("Received request for CheckAuthStatus")
+
+	if s.pocketClient.IsAuthed() {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	w.WriteHeader(http.StatusUnauthorized)
+	return
+}
+
+func (s *Server) GetArticles(w http.ResponseWriter, r *http.Request) {
+	log.Debug("Received request for GetArticles")
+	if !s.pocketClient.IsAuthed() {
+		respondWithError(w, http.StatusForbidden, "User not authorised", nil)
+		return
+	}
+
+	complete := false
+	index := 0
+	for !complete {
+		resp, err := s.pocketClient.GetArticles(50 * index)
+		if err != nil {
+			respondWithError(w, http.StatusBadRequest, "Error getting articles", err)
+			return
+		}
+
+		articles := resp.GetArticleList()
+
+		if err = s.db.SaveArticles(articles); err != nil {
+			respondWithError(w, http.StatusBadRequest, "Error saving articles", err)
+			return
+		}
+
+		if resp.Status == 1 {
+			complete = true
+		}
+
+		index++
+	}
+
+	respondWithJSON(w, http.StatusOK, &pocket.RetrieveResult{Complete: 1})
 }
 
 func respondWithError(w http.ResponseWriter, code int, message string, err error) {
-	log.WithError(err).Error(message)
+	if err != nil {
+		log.WithError(err).Error(message)
+	}
+
 	respondWithJSON(w, code, model.APIError{Code: code, Message: message})
 }
 

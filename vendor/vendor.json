@@ -15,16 +15,10 @@
 			"revisionTime": "2018-10-12T15:33:34Z"
 		},
 		{
-			"checksumSHA1": "STQSdSj2FcpCf0NLfdsKhNutQT0=",
+			"checksumSHA1": "FtCtcD/Ys18frKJyeZLzkPY6J8g=",
 			"path": "github.com/gorilla/mux",
-			"revision": "962c5bed0721b50f2ba42684e9600dfde174770f",
-			"revisionTime": "2018-08-30T14:23:24Z"
-		},
-		{
-			"checksumSHA1": "+1LsRRZKa06yTFg/Tu5NCsyHxOA=",
-			"path": "github.com/gorilla/websocket",
-			"revision": "eb925808374e5ca90c83401a40d711dc08c0c0f6",
-			"revisionTime": "2018-03-06T18:15:48Z"
+			"revision": "deb579d6e030503f430978ee229008b9bc912d40",
+			"revisionTime": "2018-10-12T15:31:51Z"
 		},
 		{
 			"checksumSHA1": "gG0cnlNicre1mOCSk2UriUweXeo=",
@@ -75,88 +69,76 @@
 			"revisionTime": "2018-06-03T09:53:41Z"
 		},
 		{
-			"checksumSHA1": "UXD6iorzeLXDBmLaOGYsAJ/Ls3w=",
-			"path": "github.com/mattn/go-sqlite3",
-			"revision": "d896508f87298565da02ed92730e7065c3de10b8",
-			"revisionTime": "2018-04-04T14:27:34Z"
+			"checksumSHA1": "xxLSo5tKtXc7jGrR70yoEfza8Cw=",
+			"path": "github.com/lib/pq",
+			"revision": "9eb73efc1fcc404148b56765b0d3f61d9a5ef8ee",
+			"revisionTime": "2018-10-16T16:26:27Z"
 		},
 		{
-			"checksumSHA1": "Yvzge1YQcD/wSDXLD5qNHqmI/0s=",
-			"path": "github.com/mitchellh/mapstructure",
-			"revision": "00c29f56e2386353d58c599509e8dc3801b0d716",
-			"revisionTime": "2018-02-20T23:01:11Z"
+			"checksumSHA1": "AU3fA8Sm33Vj9PBoRPSeYfxLRuE=",
+			"path": "github.com/lib/pq/oid",
+			"revision": "9eb73efc1fcc404148b56765b0d3f61d9a5ef8ee",
+			"revisionTime": "2018-10-16T16:26:27Z"
 		},
 		{
-			"checksumSHA1": "mFhXVlHbZZj9+1q/EPvAVMott+c=",
+			"checksumSHA1": "7vmQ05wfIyoaSl18uFBemaZpAuM=",
 			"path": "github.com/omgitsotis/pocket-stats",
-			"revision": "eae82afa721f22ba2ea57c0eebc09b99620e4c01",
-			"revisionTime": "2019-01-14T15:52:06Z"
+			"revision": "ae1d2efa7e0400097efbf2a7e3df2a50d19f796f",
+			"revisionTime": "2019-01-14T15:54:26Z"
 		},
 		{
-			"checksumSHA1": "BL54kuHKISgF9CueETL/AkydXvo=",
-			"path": "github.com/omgitsotis/pocket-stats/cmd",
-			"revision": "ced76d6a5d29573ca7f750ee6b06330c0a225e40",
-			"revisionTime": "2018-10-14T17:28:05Z"
+			"checksumSHA1": "gz9hFcaz2jtMlWTizzAYtSolrJ8=",
+			"path": "github.com/omgitsotis/pocket-stats/pkg/database",
+			"revision": "ae1d2efa7e0400097efbf2a7e3df2a50d19f796f",
+			"revisionTime": "2019-01-14T15:54:26Z"
 		},
 		{
-			"checksumSHA1": "mE2tSprzX/GclQCd2EOij8V5NM8=",
-			"path": "github.com/omgitsotis/pocket-stats/internal/router",
-			"revision": "812982b00b9ec6b0540e480fffffb08e13c8f161",
-			"revisionTime": "2018-10-14T18:27:39Z"
-		},
-		{
-			"checksumSHA1": "kftauLYEPL+Sj8M02+9VVtYonLs=",
+			"checksumSHA1": "RQzqG67/PIlIyi0zgryVA6jO3/4=",
 			"path": "github.com/omgitsotis/pocket-stats/pkg/model",
-			"revision": "eae82afa721f22ba2ea57c0eebc09b99620e4c01",
-			"revisionTime": "2019-01-14T15:52:06Z"
+			"revision": "ae1d2efa7e0400097efbf2a7e3df2a50d19f796f",
+			"revisionTime": "2019-01-14T15:54:26Z"
 		},
 		{
-			"checksumSHA1": "HJTLApW80BkmVySzwnGmcj2SgrE=",
+			"checksumSHA1": "ZC8Xktj99eQMyV0FTrspGjUH1nE=",
 			"path": "github.com/omgitsotis/pocket-stats/pkg/pocket",
-			"revision": "eae82afa721f22ba2ea57c0eebc09b99620e4c01",
-			"revisionTime": "2019-01-14T15:52:06Z"
+			"revision": "ae1d2efa7e0400097efbf2a7e3df2a50d19f796f",
+			"revisionTime": "2019-01-14T15:54:26Z"
 		},
 		{
-			"checksumSHA1": "tiuxs5hlhcV1/jrx7Y++VQ3W6ec=",
+			"checksumSHA1": "oE/mNkcuPEBmdHBCGizCHvqyMHk=",
 			"path": "github.com/omgitsotis/pocket-stats/pkg/router",
-			"revision": "eae82afa721f22ba2ea57c0eebc09b99620e4c01",
-			"revisionTime": "2019-01-14T15:52:06Z"
+			"revision": "ae1d2efa7e0400097efbf2a7e3df2a50d19f796f",
+			"revisionTime": "2019-01-14T15:54:26Z"
 		},
 		{
-			"checksumSHA1": "JICB+9u8QZfhgruEHDG0XhRFLyA=",
+			"checksumSHA1": "5LLPRDB8P0f1y5QaH2Uo5/WSu2c=",
 			"path": "github.com/omgitsotis/pocket-stats/pkg/server",
-			"revision": "eae82afa721f22ba2ea57c0eebc09b99620e4c01",
-			"revisionTime": "2019-01-14T15:52:06Z"
+			"revision": "ae1d2efa7e0400097efbf2a7e3df2a50d19f796f",
+			"revisionTime": "2019-01-14T15:54:26Z"
 		},
 		{
-			"checksumSHA1": "BoXdUBWB8UnSlFlbnuTQaPqfCGk=",
-			"path": "github.com/op/go-logging",
-			"revision": "970db520ece77730c7e4724c61121037378659d9",
-			"revisionTime": "2016-03-15T20:05:05Z"
-		},
-		{
-			"checksumSHA1": "tICW9WtACqNYYw14mOulb1GJaSs=",
+			"checksumSHA1": "IvPH2QFjJjXIxr2l3nTDKA3fOuU=",
 			"path": "github.com/sirupsen/logrus",
-			"revision": "78fa2915c1fa231f62e0438da493688c21ca678e",
-			"revisionTime": "2018-08-30T20:11:51Z"
+			"revision": "458213699411cdceb6fd839a3178be49c01fba54",
+			"revisionTime": "2018-10-10T20:06:18Z"
 		},
 		{
 			"checksumSHA1": "BGm8lKZmvJbf/YOJLeL1rw2WVjA=",
 			"path": "golang.org/x/crypto/ssh/terminal",
-			"revision": "182538f80094b6a8efaade63a8fd8e0d9d5843dd",
-			"revisionTime": "2018-08-30T18:34:03Z"
+			"revision": "0c41d7ab0a0ee717d4590a44bcb987dfd9e183eb",
+			"revisionTime": "2018-10-15T00:23:17Z"
 		},
 		{
-			"checksumSHA1": "5eIKkzDE3MRgbhlo8E67+sO5yZo=",
+			"checksumSHA1": "rm2+rsro/sFr2ucdL0gGBcaBX3o=",
 			"path": "golang.org/x/sys/unix",
-			"revision": "fa5fdf94c78965f1aa8423f0cc50b8b8d728b05a",
-			"revisionTime": "2018-08-31T08:14:39Z"
+			"revision": "fa43e7bc11baaae89f3f902b2b4d832b68234844",
+			"revisionTime": "2018-10-11T14:35:51Z"
 		},
 		{
-			"checksumSHA1": "DssjltU28TeBlMe16egT15lW0VA=",
+			"checksumSHA1": "Y7nctMxT58lRM78VtElPerhcnEs=",
 			"path": "golang.org/x/sys/windows",
-			"revision": "fa5fdf94c78965f1aa8423f0cc50b8b8d728b05a",
-			"revisionTime": "2018-08-31T08:14:39Z"
+			"revision": "fa43e7bc11baaae89f3f902b2b4d832b68234844",
+			"revisionTime": "2018-10-11T14:35:51Z"
 		}
 	],
 	"rootPath": "github.com/omgitsotis/pocket-stats"

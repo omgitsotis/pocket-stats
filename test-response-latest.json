@@ -1,0 +1,287 @@
+{
+    "List": {
+        "2489813374": {
+            "item_id": "2489813374",
+            "resolved_id": "2489813374",
+            "resolved_url": "https://www.theringer.com/movies/2019/2/14/18224036/isnt-it-romantic-romcom-rebel-wilson",
+            "given_title": "‘Isn’t It Romantic’ Is Pretty Romantic, It Turns Out - The Ringer",
+            "resolved_title": "‘Isn’t It Romantic’ Is Pretty Romantic, It Turns Out",
+            "Favorite": "0",
+            "Status": "0",
+            "word_count": "1100",
+            "Tags": {
+                "_read": {
+                    "item_id": "2489813374",
+                    "tag": "_read"
+                }
+            },
+            "Authors": {
+                "73484399": {
+                    "author_id": "73484399",
+                    "item_id": "2489813374",
+                    "name": "Alison Herman",
+                    "url": "https://www.theringer.com/authors/alison-herman"
+                }
+            },
+            "sort_id": 5,
+            "time_added": "1550221987",
+            "time_updated": "1550221993",
+            "time_read": "0"
+        },
+        "2489852424": {
+            "item_id": "2489852424",
+            "resolved_id": "2489852424",
+            "resolved_url": "https://www.theringer.com/nba/2019/2/14/18222040/lockout-1998-99-season-david-stern-david-falk-billy-hunter-patrick-ewing-michael-jordan-oral-history",
+            "given_title": "“It Was All About Money”: An Oral History of the 1998-99 NBA Lockout - The ",
+            "resolved_title": "“It Was All About Money”: An Oral History of the 1998-99 NBA Lockout",
+            "Favorite": "0",
+            "Status": "0",
+            "word_count": "12874",
+            "Tags": {
+                "_read": {
+                    "item_id": "2489852424",
+                    "tag": "_read"
+                }
+            },
+            "Authors": {
+                "79110871": {
+                    "author_id": "79110871",
+                    "item_id": "2489852424",
+                    "name": "Thomas Golianopoulos",
+                    "url": "https://www.theringer.com/authors/thomas-golianopoulos"
+                }
+            },
+            "sort_id": 4,
+            "time_added": "1550221994",
+            "time_updated": "1550221999",
+            "time_read": "0"
+        },
+        "2490118250": {
+            "item_id": "2490118250",
+            "resolved_id": "2490118250",
+            "resolved_url": "https://www.theringer.com/movies/2019/2/14/18224852/yesterday-movie-trailer-beatles-implications",
+            "given_title": "What Would the World Look Like Without the Beatles? - The Ringer",
+            "resolved_title": "Exploring the Confounding Implications of ‘Yesterday’",
+            "Favorite": "0",
+            "Status": "0",
+            "word_count": "2384",
+            "Tags": {
+                "_read": {
+                    "item_id": "2490118250",
+                    "tag": "_read"
+                }
+            },
+            "Authors": {
+                "73484419": {
+                    "author_id": "73484419",
+                    "item_id": "2490118250",
+                    "name": "The Ringer Staff",
+                    "url": "https://www.theringer.com/authors/the-ringer-staff"
+                }
+            },
+            "sort_id": 6,
+            "time_added": "1550221980",
+            "time_updated": "1550221985",
+            "time_read": "0"
+        },
+        "2490173591": {
+            "item_id": "2490173591",
+            "resolved_id": "2490173591",
+            "resolved_url": "https://www.theringer.com/nba/2019/2/14/18224965/pascal-siakam-toronto-raptors-future",
+            "given_title": "Pascal Siakam Isn’t the MVP Right Now, but He Might Be in a Few Years - The",
+            "resolved_title": "Pascal Siakam Isn’t the MVP Right Now, but He Might Be in a Few Years",
+            "Favorite": "0",
+            "Status": "0",
+            "word_count": "1056",
+            "Tags": {
+                "_sport": {
+                    "item_id": "2490173591",
+                    "tag": "_sport"
+                }
+            },
+            "Authors": {
+                "97281032": {
+                    "author_id": "97281032",
+                    "item_id": "2490173591",
+                    "name": "Dan Devine",
+                    "url": "https://www.theringer.com/authors/dan-devine"
+                }
+            },
+            "sort_id": 8,
+            "time_added": "1550221961",
+            "time_updated": "1550221966",
+            "time_read": "0"
+        },
+        "2490281875": {
+            "item_id": "2490281875",
+            "resolved_id": "2490281875",
+            "resolved_url": "https://www.theringer.com/pop-culture/2019/2/14/18225082/bieber-baldwin-purity-culture-2019",
+            "given_title": "Justin Bieber, Hailey Baldwin, & the Return of Celebrity Purity Culture - T",
+            "resolved_title": "Justin Bieber, Hailey Baldwin, and the Return of Celebrity Purity Culture",
+            "Favorite": "0",
+            "Status": "0",
+            "word_count": "1609",
+            "Tags": {
+                "_read": {
+                    "item_id": "2490281875",
+                    "tag": "_read"
+                }
+            },
+            "Authors": {
+                "32590553": {
+                    "author_id": "32590553",
+                    "item_id": "2490281875",
+                    "name": "Britni de",
+                    "url": ""
+                }
+            },
+            "sort_id": 9,
+            "time_added": "1550221955",
+            "time_updated": "1550221960",
+            "time_read": "0"
+        },
+        "2490293396": {
+            "item_id": "2490293396",
+            "resolved_id": "2490293396",
+            "resolved_url": "https://www.theringer.com/nba/2019/2/14/18225150/lebron-james-luka-doncic-nba-storylines",
+            "given_title": "LeBron James and Luka Doncic Have What They Need to Succeed - The Ringer",
+            "resolved_title": "LeBron and Luka Have What They Need to Succeed After the All-Star Break",
+            "Favorite": "0",
+            "Status": "0",
+            "word_count": "1647",
+            "Tags": {
+                "_sport": {
+                    "item_id": "2490293396",
+                    "tag": "_sport"
+                }
+            },
+            "Authors": {
+                "74213109": {
+                    "author_id": "74213109",
+                    "item_id": "2490293396",
+                    "name": "Jonathan Tjarks",
+                    "url": "https://www.theringer.com/authors/jonathan-tjarks"
+                }
+            },
+            "sort_id": 7,
+            "time_added": "1550221966",
+            "time_updated": "1550221978",
+            "time_read": "0"
+        },
+        "2490366684": {
+            "item_id": "2490366684",
+            "resolved_id": "2490132597",
+            "resolved_url": "http://time.com/5528434/daniel-jose-older-spanish/",
+            "given_title": "",
+            "resolved_title": "I Rejected Spanish As a Kid. Now I Wish We’d Embrace Our Native Languages",
+            "Favorite": "0",
+            "Status": "0",
+            "word_count": "1992",
+            "Tags": {
+                "_read": {
+                    "item_id": "2490366684",
+                    "tag": "_read"
+                }
+            },
+            "Authors": {
+                "6472379": {
+                    "author_id": "6472379",
+                    "item_id": "2490366684",
+                    "name": "Daniel José Older",
+                    "url": ""
+                }
+            },
+            "sort_id": 0,
+            "time_added": "1550307111",
+            "time_updated": "1550307118",
+            "time_read": "0"
+        },
+        "2490473273": {
+            "item_id": "2490473273",
+            "resolved_id": "2490473273",
+            "resolved_url": "https://www.theringer.com/nba/2019/2/14/18225496/best-in-house-nba-upgrades",
+            "given_title": "The Best In-House Upgrades That Can Swing the NBA’s Stretch Run - The Ringe",
+            "resolved_title": "The Best In-House Upgrades That Can Swing the NBA’s Stretch Run",
+            "Favorite": "0",
+            "Status": "0",
+            "word_count": "1122",
+            "Tags": {
+                "_sport": {
+                    "item_id": "2490473273",
+                    "tag": "_sport"
+                }
+            },
+            "Authors": {
+                "73484058": {
+                    "author_id": "73484058",
+                    "item_id": "2490473273",
+                    "name": "Paolo Uggetti",
+                    "url": "https://www.theringer.com/authors/paolo-uggetti"
+                }
+            },
+            "sort_id": 3,
+            "time_added": "1550222000",
+            "time_updated": "1550222005",
+            "time_read": "0"
+        },
+        "2490541591": {
+            "item_id": "2490541591",
+            "resolved_id": "2490541591",
+            "resolved_url": "https://www.theringer.com/tech/2019/2/14/18225573/amazon-hq2-location-abandoning-long-island-city-new-york",
+            "given_title": "Amazon Ditching New York City After Getting Burned by Its Own HQ2 Game - Th",
+            "resolved_title": "Amazon Got Burned by Its Own HQ2 Game Show",
+            "Favorite": "0",
+            "Status": "0",
+            "word_count": "1030",
+            "Tags": {
+                "_read": {
+                    "item_id": "2490541591",
+                    "tag": "_read"
+                }
+            },
+            "Authors": {
+                "73698057": {
+                    "author_id": "73698057",
+                    "item_id": "2490541591",
+                    "name": "Victor Luckerson",
+                    "url": "https://www.theringer.com/authors/victor-luckerson"
+                }
+            },
+            "sort_id": 2,
+            "time_added": "1550222005",
+            "time_updated": "1550222010",
+            "time_read": "0"
+        },
+        "2491163665": {
+            "item_id": "2491163665",
+            "resolved_id": "2491163665",
+            "resolved_url": "http://www.espn.com/nba/story/_/id/25995187/10-things-like-including-mvp-race-nba",
+            "given_title": "",
+            "resolved_title": "Lowe: Ten things I like and don't like, including this MVP race",
+            "Favorite": "0",
+            "Status": "0",
+            "word_count": "2740",
+            "Tags": {
+                "_sport": {
+                    "item_id": "2491163665",
+                    "tag": "_sport"
+                }
+            },
+            "Authors": {
+                "100592": {
+                    "author_id": "100592",
+                    "item_id": "2491163665",
+                    "name": "Zach Lowe",
+                    "url": ""
+                }
+            },
+            "sort_id": 1,
+            "time_added": "1550306939",
+            "time_updated": "1550306944",
+            "time_read": "0"
+        }
+    },
+    "Status": 1,
+    "Complete": 1,
+    "Since": 1550322569
+}

@@ -34,17 +34,22 @@ func CreateRouter(s *server.Server) *mux.Router {
 	router.NewRoute().
 		Path(route + "auth").
 		Methods(http.MethodGet).
-		HandlerFunc(s.GetAuthLink())
+		HandlerFunc(s.GetAuthLink)
 
 	router.NewRoute().
 		Path(route + "auth/received").
 		Methods(http.MethodGet).
-		HandlerFunc(s.ReceiveToken())
+		HandlerFunc(s.ReceiveToken)
 
 	router.NewRoute().
 		Path(route + "auth/authed").
 		Methods(http.MethodGet).
-		HandlerFunc(s.CheckAuthStatus())
+		HandlerFunc(s.CheckAuthStatus)
+
+	router.NewRoute().
+		Path(route + "api/v1/articles").
+		Methods(http.MethodGet).
+		HandlerFunc(s.GetArticles)
 
 	return router
 }
