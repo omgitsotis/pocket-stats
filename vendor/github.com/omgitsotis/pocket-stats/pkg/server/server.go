@@ -117,7 +117,7 @@ func (s *Server) getArticles() {
 			return
 		}
 
-		if resp.Complete == 1 || index == 2 {
+		if resp.Complete == 1 {
 			complete = true
 		}
 

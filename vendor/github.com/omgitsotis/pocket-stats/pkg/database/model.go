@@ -46,7 +46,7 @@ func ConvertArticles(pa pocket.Article) Article {
 		read, err = strconv.Atoi(pa.TimeRead)
 		if err != nil {
 			logrus.Errorf(
-				"pocket article [%d] has a bad added time [%s] the fuck?",
+				"pocket article [%d] has a bad read time [%s] the fuck?",
 				pa.ItemID,
 				pa.TimeRead,
 			)
