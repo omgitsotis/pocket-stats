@@ -51,6 +51,11 @@ func CreateRouter(s *server.Server) *mux.Router {
 		Methods(http.MethodGet).
 		HandlerFunc(s.GetArticles)
 
+	router.NewRoute().
+		Path(route + "update").
+		Methods(http.MethodGet).
+		HandlerFunc(s.UpdateArticle)
+
 	return router
 }
 

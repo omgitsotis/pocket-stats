@@ -82,3 +82,24 @@ func (p *PostgresClient) SaveArticles(articles []pocket.Article) error {
 
 	return nil
 }
+
+func (p *PostgresClient) GetArticle(id string) (Article, error) {
+	var article Article
+	stmt := `
+		SELECT id, title, url, tag, word_count, date_added, date_read
+		FROM articles
+		WHERE id=$1;`
+
+	row := p.db.QueryRow(stmt, id)
+	err := row.Scan(
+		&article.ID,
+		&article.Title,
+		&article.URL,
+		&article.Tag,
+		&article.WordCount,
+		&article.DateAdded,
+		&article.DateRead,
+	)
+
+	return article, err
+}

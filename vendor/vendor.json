@@ -81,40 +81,40 @@
 			"revisionTime": "2018-10-16T16:26:27Z"
 		},
 		{
-			"checksumSHA1": "7vmQ05wfIyoaSl18uFBemaZpAuM=",
+			"checksumSHA1": "RYA34Fuf6RIHQRKXchoV1DNceGs=",
 			"path": "github.com/omgitsotis/pocket-stats",
-			"revision": "98e1add198cf17c3a0198cc01bd88c0d5c198ba0",
-			"revisionTime": "2019-03-16T13:02:33Z"
+			"revision": "b485b6b7ee7e888768a0fcfa507cc5c20241ee91",
+			"revisionTime": "2019-03-16T13:09:24Z"
 		},
 		{
-			"checksumSHA1": "frbPxoce6iiLNvC/yqqYL9vT9VA=",
+			"checksumSHA1": "X8XgRNP60ZqlVZgxEy0jXbvF1sQ=",
 			"path": "github.com/omgitsotis/pocket-stats/pkg/database",
-			"revision": "98e1add198cf17c3a0198cc01bd88c0d5c198ba0",
-			"revisionTime": "2019-03-16T13:02:33Z"
+			"revision": "b485b6b7ee7e888768a0fcfa507cc5c20241ee91",
+			"revisionTime": "2019-03-16T13:09:24Z"
 		},
 		{
 			"checksumSHA1": "RQzqG67/PIlIyi0zgryVA6jO3/4=",
 			"path": "github.com/omgitsotis/pocket-stats/pkg/model",
-			"revision": "98e1add198cf17c3a0198cc01bd88c0d5c198ba0",
-			"revisionTime": "2019-03-16T13:02:33Z"
+			"revision": "b485b6b7ee7e888768a0fcfa507cc5c20241ee91",
+			"revisionTime": "2019-03-16T13:09:24Z"
 		},
 		{
 			"checksumSHA1": "ynv7NUEP56Q4T2BEEjSA2EcCUaY=",
 			"path": "github.com/omgitsotis/pocket-stats/pkg/pocket",
-			"revision": "98e1add198cf17c3a0198cc01bd88c0d5c198ba0",
-			"revisionTime": "2019-03-16T13:02:33Z"
+			"revision": "b485b6b7ee7e888768a0fcfa507cc5c20241ee91",
+			"revisionTime": "2019-03-16T13:09:24Z"
 		},
 		{
-			"checksumSHA1": "oE/mNkcuPEBmdHBCGizCHvqyMHk=",
+			"checksumSHA1": "ze+5Iek1hDfQ3nDpPYr2Sw4ti2Q=",
 			"path": "github.com/omgitsotis/pocket-stats/pkg/router",
-			"revision": "98e1add198cf17c3a0198cc01bd88c0d5c198ba0",
-			"revisionTime": "2019-03-16T13:02:33Z"
+			"revision": "b485b6b7ee7e888768a0fcfa507cc5c20241ee91",
+			"revisionTime": "2019-03-16T13:09:24Z"
 		},
 		{
-			"checksumSHA1": "s1DlLVKJKsZ10b6B9Hv6kQfZHUk=",
+			"checksumSHA1": "cZQTO+4lwKkW4TftKcpI8Xxwues=",
 			"path": "github.com/omgitsotis/pocket-stats/pkg/server",
-			"revision": "98e1add198cf17c3a0198cc01bd88c0d5c198ba0",
-			"revisionTime": "2019-03-16T13:02:33Z"
+			"revision": "b485b6b7ee7e888768a0fcfa507cc5c20241ee91",
+			"revisionTime": "2019-03-16T13:09:24Z"
 		},
 		{
 			"checksumSHA1": "DTy0iJ2w5C+FDsN9EnzfhNmvS+o=",

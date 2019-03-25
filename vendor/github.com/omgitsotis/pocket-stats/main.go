@@ -57,7 +57,6 @@ func main() {
 		dbURL := app.String(cli.StringOpt{
 			Name:   "db-url",
 			Desc:   "The url used to connect to the database",
-			Value:  "postgres://lnzigpirpvbhaa:3ed23bbfdacf34260f0282ec003721c0ffe5d8e07d141b001d4ecd9712f06687@ec2-54-235-68-3.compute-1.amazonaws.com:5432/d8r5er79optitn",
 			EnvVar: "DATABASE_URL",
 		})
 

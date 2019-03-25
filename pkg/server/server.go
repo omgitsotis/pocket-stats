@@ -126,6 +126,16 @@ func (s *Server) getArticles() {
 	log.Info("Finished updating database")
 }
 
+func (s *Server) UpdateArticle(w http.ResponseWriter, r *http.Request) {
+	article, err := s.db.GetArticle("827751365")
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "error getting article", err)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, article)
+}
+
 func respondWithError(w http.ResponseWriter, code int, message string, err error) {
 	if err != nil {
 		log.WithError(err).Error(message)
