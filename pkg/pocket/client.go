@@ -15,7 +15,7 @@ var log *logrus.Logger
 
 const pocketURL = "https://getpocket.com/v3"
 
-// The only user that is allowed to use this app. (Me, nwah nwah nwah)
+// Username is the only user that is allowed to use this app. (Me, nwah nwah nwah)
 const Username = "omgitsotis"
 
 func Init(l *logrus.Logger) {
@@ -47,7 +47,7 @@ func (c *Client) GetAuth(uri string) (string, error) {
 	return rt.Code, nil
 }
 
-// RecievedAuth gets the access token from pocket, and returns the user from the
+// ReceieveAuth gets the access token from pocket, and returns the user from the
 // database
 func (c *Client) ReceieveAuth(key string) (*model.User, error) {
 	a := model.AuthRequest{c.consumerID, key}
@@ -63,15 +63,6 @@ func (c *Client) ReceieveAuth(key string) (*model.User, error) {
 
 	c.authedUser = &user
 
-	// TODO move this logic out of here
-	// date, err := p.dao.GetLastAdded()
-	// if err != nil {
-	// 	return nil, err
-	// }
-	//
-	// user.LastUpdated = date
-	// logger.Infof("Last added date: [%d]", date)
-
 	return &user, nil
 }
 
@@ -81,17 +72,15 @@ func (c *Client) IsAuthed() bool {
 	return c.authedUser != nil
 }
 
-func (c *Client) GetArticles(offset int) (*RetrieveResult, error) {
+func (c *Client) GetArticles(since int) (*RetrieveResult, error) {
 	req := RetrieveOption{
-		Count:       100,
 		Sort:        SortOldest,
 		DetailType:  "complete",
 		ContentType: "article",
 		State:       "all",
 		AccessToken: c.authedUser.AccessToken,
 		ConsumerKey: c.consumerID,
-		Offset:      offset,
-		Since:       1422403200,
+		Since:       since,
 	}
 
 	log.Debugf("Params to send %+v", req)

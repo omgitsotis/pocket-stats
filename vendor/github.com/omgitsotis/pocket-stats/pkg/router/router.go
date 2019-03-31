@@ -11,8 +11,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const route = "/api/pocket/"
-
 var log *logrus.Logger
 
 func Init(l *logrus.Logger) {
@@ -31,28 +29,24 @@ func CreateRouter(s *server.Server) *mux.Router {
 			},
 		)
 
-	router.NewRoute().
-		Path(route + "auth").
+	sub := router.PathPrefix("/api/pocket").Subrouter()
+	sub.NewRoute().
+		Path("/auth").
 		Methods(http.MethodGet).
 		HandlerFunc(s.GetAuthLink)
 
-	router.NewRoute().
-		Path(route + "auth/received").
+	sub.NewRoute().
+		Path("/auth/received").
 		Methods(http.MethodGet).
 		HandlerFunc(s.ReceiveToken)
 
-	router.NewRoute().
-		Path(route + "auth/authed").
+	sub.NewRoute().
+		Path("/auth/authed").
 		Methods(http.MethodGet).
 		HandlerFunc(s.CheckAuthStatus)
 
-	router.NewRoute().
-		Path(route + "api/v1/articles").
-		Methods(http.MethodGet).
-		HandlerFunc(s.GetArticles)
-
-	router.NewRoute().
-		Path(route + "update").
+	sub.NewRoute().
+		Path("/update").
 		Methods(http.MethodGet).
 		HandlerFunc(s.UpdateArticle)
 

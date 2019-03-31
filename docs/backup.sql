@@ -8,7 +8,11 @@ create table articles(
 	date_read integer
 );
 
+create table date_updated(
+	date_updated integer
+);
+
 create index article_id on articles(id);
 create index read_time on articles(date_added, date_read);
 
-select id, title, url, tag, word_count, date_added, date_read from articles where 'id' = 
+select id, title, url, tag, word_count, date_added, date_read from articles where 'id' =

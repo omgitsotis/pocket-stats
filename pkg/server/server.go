@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/omgitsotis/pocket-stats/pkg/database"
 	"github.com/omgitsotis/pocket-stats/pkg/model"
@@ -15,6 +16,10 @@ var log *logrus.Logger
 
 func Init(l *logrus.Logger) {
 	log = l
+}
+
+type updateResponse struct {
+	Date int64 `json:"date_updated"`
 }
 
 type Server struct {
@@ -74,7 +79,6 @@ func (s *Server) ReceiveToken(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) CheckAuthStatus(w http.ResponseWriter, r *http.Request) {
-
 	log.Debug("Received request for CheckAuthStatus")
 
 	if s.pocketClient.IsAuthed() {
@@ -86,54 +90,39 @@ func (s *Server) CheckAuthStatus(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func (s *Server) GetArticles(w http.ResponseWriter, r *http.Request) {
-	log.Debug("Received request for GetArticles")
-	if !s.pocketClient.IsAuthed() {
-		respondWithError(w, http.StatusForbidden, "User not authorised", nil)
-		return
-	}
-
-	// Run the database update in the background
-	go s.getArticles()
-
-	respondWithJSON(w, http.StatusOK, &pocket.RetrieveResult{Complete: 1})
-}
-
-func (s *Server) getArticles() {
-	complete := false
-	index := 0
-	for !complete {
-		log.Infof("Getting articles [%d]-[%d]", (100 * index), (100 * (index + 1)))
-		resp, err := s.pocketClient.GetArticles(100 * index)
-		if err != nil {
-			log.WithError(err).Error("Error getting articles")
-			return
-		}
-
-		articles := resp.GetArticleList()
-
-		if err = s.db.SaveArticles(articles); err != nil {
-			log.WithError(err).Error("Error saving articles")
-			return
-		}
-
-		if resp.Complete == 1 {
-			complete = true
-		}
-
-		index++
-	}
-	log.Info("Finished updating database")
-}
-
 func (s *Server) UpdateArticle(w http.ResponseWriter, r *http.Request) {
-	article, err := s.db.GetArticle("827751365")
-	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "error getting article", err)
+	if !s.pocketClient.IsAuthed() {
+		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
-	respondWithJSON(w, http.StatusOK, article)
+	date, err := s.db.GetLastUpdateDate()
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "error getting last update date", err)
+		return
+	}
+
+	logrus.Infof("Updating DB from [%d]", date)
+
+	response, err := s.pocketClient.GetArticles(date)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "error getting articles", err)
+		return
+	}
+
+	if err = s.db.UpdateArticles(response.GetArticleList()); err != nil {
+		respondWithError(w, http.StatusBadRequest, "error updating articles", err)
+		return
+	}
+
+	updateTime := time.Now().Unix()
+	if err = s.db.SaveUpdateDate(updateTime); err != nil {
+		respondWithError(w, http.StatusBadRequest, "error saving last update date", err)
+	}
+
+	logrus.Infof("DB updated to [%d]", updateTime)
+
+	respondWithJSON(w, http.StatusOK, updateResponse{Date: updateTime})
 }
 
 func respondWithError(w http.ResponseWriter, code int, message string, err error) {
