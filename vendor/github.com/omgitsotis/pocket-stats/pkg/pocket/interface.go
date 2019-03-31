@@ -7,4 +7,5 @@ type PocketClient interface {
 	ReceieveAuth(key string) (*model.User, error)
 	IsAuthed() bool
 	GetArticles(since int) (RetrieveResult, error)
+	DebugGetArticles(since int) ([]byte, error)
 }

@@ -110,13 +110,49 @@ func (s *Server) UpdateArticle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err = s.db.UpdateArticles(response.GetArticleList()); err != nil {
+	articleList := response.GetArticleList()
+	if articleList == nil {
+		log.Info("No new entries found")
+		s.setUpdateDate(w)
+		return
+	}
+
+	if err = s.db.UpdateArticles(articleList); err != nil {
 		respondWithError(w, http.StatusBadRequest, "error updating articles", err)
 		return
 	}
 
+	s.setUpdateDate(w)
+	return
+
+}
+
+func (s *Server) DebugGetArticle(w http.ResponseWriter, r *http.Request) {
+	if !s.pocketClient.IsAuthed() {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	date, err := s.db.GetLastUpdateDate()
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "error getting last update date", err)
+		return
+	}
+
+	logrus.Infof("Updating DB from [%d]", date)
+
+	response, err := s.pocketClient.GetArticles(date)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "error getting articles", err)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, response)
+}
+
+func (s *Server) setUpdateDate(w http.ResponseWriter) {
 	updateTime := time.Now().Unix()
-	if err = s.db.SaveUpdateDate(updateTime); err != nil {
+	if err := s.db.SaveUpdateDate(updateTime); err != nil {
 		respondWithError(w, http.StatusBadRequest, "error saving last update date", err)
 	}
 

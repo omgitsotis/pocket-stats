@@ -3,9 +3,11 @@ package pocket
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/http"
+
+	"github.com/pkg/errors"
 
 	"github.com/omgitsotis/pocket-stats/pkg/model"
 	"github.com/sirupsen/logrus"
@@ -102,8 +104,8 @@ func (c *Client) call(uri string, body, t interface{}) error {
 		return err
 	}
 
-	uri = fmt.Sprintf("%s%s", pocketURL, uri)
-	req, err := http.NewRequest("POST", uri, bytes.NewBuffer(b))
+	url := fmt.Sprintf("%s%s", pocketURL, uri)
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(b))
 	if err != nil {
 		log.Errorf("Error creating request: %s", err.Error())
 		return err
@@ -125,11 +127,45 @@ func (c *Client) call(uri string, body, t interface{}) error {
 		return errors.New(res.Status)
 	}
 
-	err = json.NewDecoder(res.Body).Decode(t)
+	data, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		log.Errorf("Error decoding body: %s", err.Error())
-		return err
+		return errors.Wrap(err, "error reading body")
+	}
+
+	err = json.Unmarshal(data, t)
+	if err != nil {
+		if uri == "/get" {
+			log.Warn("Got unmarshal error, trying with empty list")
+			t, err = tryEmptyResponse(data)
+			if err != nil {
+				return errors.Wrap(err, "error decoding body")
+			}
+		}
+
+		return errors.Wrap(err, "error decoding body")
 	}
 
 	return nil
+}
+
+func tryEmptyResponse(data []byte) (interface{}, error) {
+	type emptyResponse struct {
+		List     []Article
+		Status   int
+		Complete int
+		Since    int
+	}
+
+	var er emptyResponse
+
+	if err := json.Unmarshal(data, &er); err != nil {
+		return nil, err
+	}
+
+	return &RetrieveResult{
+		Status:   er.Status,
+		Complete: er.Status,
+		Since:    er.Since,
+		List:     map[string]Article{},
+	}, nil
 }
