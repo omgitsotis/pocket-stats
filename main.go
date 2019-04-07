@@ -25,12 +25,21 @@ func main() {
 	app := cli.App(name, desc)
 
 	app.Before = func() {
+		logLvl := app.String(cli.StringOpt{
+			Name:   "log-level",
+			Desc:   "The log level of the app",
+			EnvVar: "LOG_LEVEL",
+			Value:  "debug",
+		})
+
+		level := convertLogLevel(*logLvl)
+
 		format := new(log.TextFormatter)
 		format.TimestampFormat = "02-01-2006 15:04:05"
 		format.FullTimestamp = true
 		format.ForceColors = true
 		log.SetFormatter(format)
-		log.SetLevel(log.DebugLevel)
+		log.SetLevel(level)
 
 		logger := log.StandardLogger()
 		router.Init(logger)
@@ -87,4 +96,13 @@ func main() {
 	if err := app.Run(os.Args); err != nil {
 		log.WithError(err).Fatal("fatal error in app")
 	}
+}
+
+func convertLogLevel(lvlString string) log.Level {
+	level, err := log.ParseLevel(lvlString)
+	if err != nil {
+		log.WithError(err).Panic("Error parsing logLevel")
+	}
+
+	return level
 }

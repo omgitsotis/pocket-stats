@@ -81,40 +81,40 @@
 			"revisionTime": "2018-10-16T16:26:27Z"
 		},
 		{
-			"checksumSHA1": "RYA34Fuf6RIHQRKXchoV1DNceGs=",
+			"checksumSHA1": "Up21qVmu4Xv7woIUU5u+hu5PlVI=",
 			"path": "github.com/omgitsotis/pocket-stats",
-			"revision": "5bf7f0cceb53f88f764082cb2d8bba952aa1d6c4",
-			"revisionTime": "2019-03-31T15:49:47Z"
+			"revision": "20179994bbbc9feca81b42931171434724383798",
+			"revisionTime": "2019-03-31T16:59:24Z"
 		},
 		{
-			"checksumSHA1": "ljdO/EPfedHoS885D9uY057+8B4=",
+			"checksumSHA1": "MJhkkciTJgcRF/rLZ04tDp5CdAI=",
 			"path": "github.com/omgitsotis/pocket-stats/pkg/database",
-			"revision": "5bf7f0cceb53f88f764082cb2d8bba952aa1d6c4",
-			"revisionTime": "2019-03-31T15:49:47Z"
+			"revision": "20179994bbbc9feca81b42931171434724383798",
+			"revisionTime": "2019-03-31T16:59:24Z"
 		},
 		{
 			"checksumSHA1": "RQzqG67/PIlIyi0zgryVA6jO3/4=",
 			"path": "github.com/omgitsotis/pocket-stats/pkg/model",
-			"revision": "5bf7f0cceb53f88f764082cb2d8bba952aa1d6c4",
-			"revisionTime": "2019-03-31T15:49:47Z"
+			"revision": "20179994bbbc9feca81b42931171434724383798",
+			"revisionTime": "2019-03-31T16:59:24Z"
 		},
 		{
 			"checksumSHA1": "B0qGjBjiR4Gv/9VUfE2ooKgCM/g=",
 			"path": "github.com/omgitsotis/pocket-stats/pkg/pocket",
-			"revision": "5bf7f0cceb53f88f764082cb2d8bba952aa1d6c4",
-			"revisionTime": "2019-03-31T15:49:47Z"
+			"revision": "20179994bbbc9feca81b42931171434724383798",
+			"revisionTime": "2019-03-31T16:59:24Z"
 		},
 		{
 			"checksumSHA1": "lN7/QR4VJ1LOQtzndXNn7gTlnSc=",
 			"path": "github.com/omgitsotis/pocket-stats/pkg/router",
-			"revision": "5bf7f0cceb53f88f764082cb2d8bba952aa1d6c4",
-			"revisionTime": "2019-03-31T15:49:47Z"
+			"revision": "20179994bbbc9feca81b42931171434724383798",
+			"revisionTime": "2019-03-31T16:59:24Z"
 		},
 		{
 			"checksumSHA1": "Io7ORoHWFX2MJUv+w6QN7EUJ4rI=",
 			"path": "github.com/omgitsotis/pocket-stats/pkg/server",
-			"revision": "5bf7f0cceb53f88f764082cb2d8bba952aa1d6c4",
-			"revisionTime": "2019-03-31T15:49:47Z"
+			"revision": "20179994bbbc9feca81b42931171434724383798",
+			"revisionTime": "2019-03-31T16:59:24Z"
 		},
 		{
 			"checksumSHA1": "DTy0iJ2w5C+FDsN9EnzfhNmvS+o=",
