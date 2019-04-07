@@ -23,17 +23,13 @@ func CreateRouter(s *server.Server) *mux.Router {
 	router.NewRoute().
 		Path("/").
 		Methods(http.MethodGet).
-		HandlerFunc(
-			func(w http.ResponseWriter, r *http.Request) {
-				w.Write([]byte("Hit app"))
-			},
-		)
+		HandlerFunc(s.AuthMiddleware(s.Healthcheck))
 
 	sub := router.PathPrefix("/api/pocket").Subrouter()
 	sub.NewRoute().
 		Path("/auth").
 		Methods(http.MethodGet).
-		HandlerFunc(s.GetAuthLink)
+		HandlerFunc(s.AuthMiddleware(s.GetAuthLink))
 
 	sub.NewRoute().
 		Path("/auth/received").
@@ -43,17 +39,17 @@ func CreateRouter(s *server.Server) *mux.Router {
 	sub.NewRoute().
 		Path("/auth/authed").
 		Methods(http.MethodGet).
-		HandlerFunc(s.CheckAuthStatus)
+		HandlerFunc(s.AuthMiddleware(s.CheckAuthStatus))
 
 	sub.NewRoute().
 		Path("/update").
 		Methods(http.MethodGet).
-		HandlerFunc(s.UpdateArticle)
+		HandlerFunc(s.AuthMiddleware(s.UpdateArticle))
 
 	sub.NewRoute().
 		Path("/__/debug").
 		Methods(http.MethodGet).
-		HandlerFunc(s.DebugGetArticle)
+		HandlerFunc(s.AuthMiddleware(s.DebugGetArticle))
 
 	return router
 }

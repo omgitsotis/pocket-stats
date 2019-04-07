@@ -69,6 +69,27 @@ func main() {
 			EnvVar: "DATABASE_URL",
 		})
 
+		pocketConsumerID := app.String(cli.StringOpt{
+			Name:   "pocket-consumer-id",
+			Desc:   "The consumer ID for the API",
+			EnvVar: "POCKET_CONSUMER_ID",
+			Value:  "74935-9d486f66d2999047b61328f3",
+		})
+
+		authUser := app.String(cli.StringOpt{
+			Name:   "auth-user",
+			Desc:   "The authorised user for the app",
+			EnvVar: "AUTH_USER",
+			Value:  "test-user",
+		})
+
+		authPass := app.String(cli.StringOpt{
+			Name:   "db-url",
+			Desc:   "The authorised password for the app",
+			EnvVar: "AUTH_PASSWORD",
+			Value:  "test-password",
+		})
+
 		connStr := fmt.Sprintf("%s?sslmode=require", *dbURL)
 		db, err := sql.Open("postgres", connStr)
 		if err != nil {
@@ -79,14 +100,10 @@ func main() {
 
 		pgClient := database.NewPostgresDB(db)
 
-		// TODO move to env
-		p := pocket.New(
-			"74935-9d486f66d2999047b61328f3",
-			&http.Client{},
-		)
+		p := pocket.New(*pocketConsumerID, &http.Client{})
 
 		redirect := fmt.Sprintf("%s/api/pocket/auth/received", *callbackURL)
-		s := server.New(p, redirect, pgClient)
+		s := server.New(p, redirect, pgClient, *authUser, *authPass)
 
 		r := router.CreateRouter(s)
 		server := router.NewServer(r, *port)

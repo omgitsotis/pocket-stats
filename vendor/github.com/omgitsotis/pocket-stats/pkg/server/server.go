@@ -22,19 +22,31 @@ type updateResponse struct {
 	Date int64 `json:"date_updated"`
 }
 
+type healthcheckResp struct {
+	Status string `json:"status"`
+}
+
 type Server struct {
 	pocketClient *pocket.Client
 	db           database.DBCLient
 	authURL      string
 	requestToken string
+	username     string
+	password     string
 }
 
-func New(pc *pocket.Client, url string, db database.DBCLient) *Server {
+func New(pc *pocket.Client, url string, db database.DBCLient, user, pass string) *Server {
 	return &Server{
 		pocketClient: pc,
 		authURL:      url,
 		db:           db,
+		username:     user,
+		password:     pass,
 	}
+}
+
+func (s *Server) Healthcheck(w http.ResponseWriter, r *http.Request) {
+	respondWithJSON(w, http.StatusOK, healthcheckResp{Status: "running"})
 }
 
 // GetAuthLink gets the pocket Authorisation link used to login
@@ -180,4 +192,23 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 	w.Write(response)
+}
+
+func (s *Server) AuthMiddleware(fn http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		user, pass, ok := r.BasicAuth()
+		if !ok {
+			log.Warn("No authorisation provided")
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		if s.username != user && s.password != pass {
+			log.Warn("Incorrect auth info")
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		fn(w, r)
+	}
 }
