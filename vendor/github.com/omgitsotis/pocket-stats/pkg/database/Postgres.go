@@ -12,20 +12,26 @@ import (
 
 var log *logrus.Logger
 
+// Init sets the logger for this package
 func Init(l *logrus.Logger) {
 	log = l
 }
 
+// PostgresClient is the client used to connect to the Postgres database.
 type PostgresClient struct {
 	db *sql.DB
 }
 
+// NewPostgresDB creates a new PostgresClient from a Postgres connection
 func NewPostgresDB(db *sql.DB) *PostgresClient {
 	return &PostgresClient{
 		db: db,
 	}
 }
 
+// SaveArticles saves a list of articles to the database.
+// This function is deprecated, as it is only used for the initial population of
+// the database.
 func (p *PostgresClient) SaveArticles(articles []pocket.Article) error {
 	entries := make([]Article, 0)
 
@@ -83,6 +89,7 @@ func (p *PostgresClient) SaveArticles(articles []pocket.Article) error {
 	return nil
 }
 
+// GetArticle gets an article for a given ID
 func (p *PostgresClient) GetArticle(id int) (*Article, error) {
 	var article Article
 	stmt := `
@@ -108,7 +115,9 @@ func (p *PostgresClient) GetArticle(id int) (*Article, error) {
 	return &article, nil
 }
 
-func (p *PostgresClient) UpdateArticles(articles []pocket.Article) error {
+// UpsertArticles will loop through a given list of articles and either insert
+// or update the article.
+func (p *PostgresClient) UpsertArticles(articles []pocket.Article) error {
 	for _, article := range articles {
 		a := ConvertArticles(article)
 
@@ -143,7 +152,13 @@ func (p *PostgresClient) UpdateArticles(articles []pocket.Article) error {
 	return nil
 }
 
+// updateArticle updates an article with a new read date and tag
 func (p *PostgresClient) updateArticle(new Article) error {
+	if new.Tag == "" && new.DateRead == 0 {
+		// If the article has no tag or read date, skip it, as it has not been
+		// read.
+		return nil
+	}
 	logrus.Debugf(
 		"UPDATE articles SET date_read = %d, tag = %s WHERE id = %d",
 		new.DateRead,
@@ -156,6 +171,7 @@ func (p *PostgresClient) updateArticle(new Article) error {
 	return err
 }
 
+// insertArticle inserts a new article
 func (p *PostgresClient) insertArticle(a Article) error {
 	logrus.Debugf("INSERT INTO articles %+v", a)
 

@@ -7,6 +7,6 @@ type DBCLient interface {
 	SaveArticles(articles []pocket.Article) error
 	GetArticle(id int) (*Article, error)
 	GetLastUpdateDate() (int, error)
-	UpdateArticles(articles []pocket.Article) error
+	UpsertArticles(articles []pocket.Article) error
 	SaveUpdateDate(int64) error
 }

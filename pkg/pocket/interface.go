@@ -1,10 +1,9 @@
 package pocket
 
-import "github.com/omgitsotis/pocket-stats/pkg/model"
-
+// PocketClient is the interface to talk to the Pocket client
 type PocketClient interface {
 	GetAuth(uri string) (string, error)
-	ReceieveAuth(key string) (*model.User, error)
+	ReceieveAuth(key string) (*User, error)
 	IsAuthed() bool
 	GetArticles(since int) (RetrieveResult, error)
 	DebugGetArticles(since int) ([]byte, error)

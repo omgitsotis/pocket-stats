@@ -8,8 +8,6 @@ import (
 	"net/http"
 
 	"github.com/pkg/errors"
-
-	"github.com/omgitsotis/pocket-stats/pkg/model"
 	"github.com/sirupsen/logrus"
 )
 
@@ -20,16 +18,19 @@ const pocketURL = "https://getpocket.com/v3"
 // Username is the only user that is allowed to use this app. (Me, nwah nwah nwah)
 const Username = "omgitsotis"
 
+// Init sets the logger for this package
 func Init(l *logrus.Logger) {
 	log = l
 }
 
+// Client is the object used to talk to the Pocket API
 type Client struct {
 	consumerID string
 	client     *http.Client
-	authedUser *model.User
+	authedUser *User
 }
 
+// New creates a new Pocket client
 func New(consumerID string, cli *http.Client) *Client {
 	return &Client{
 		consumerID: consumerID,
@@ -39,8 +40,8 @@ func New(consumerID string, cli *http.Client) *Client {
 
 // GetAuth gets the request token from pocket
 func (c *Client) GetAuth(uri string) (string, error) {
-	r := model.AuthLinkRequest{c.consumerID, uri}
-	var rt model.RequestToken
+	r := AuthLinkRequest{ConsumerKey: c.consumerID, RedirectURI: uri}
+	var rt RequestToken
 	if err := c.call("/oauth/request", r, &rt); err != nil {
 		return "", err
 	}
@@ -51,9 +52,9 @@ func (c *Client) GetAuth(uri string) (string, error) {
 
 // ReceieveAuth gets the access token from pocket, and returns the user from the
 // database
-func (c *Client) ReceieveAuth(key string) (*model.User, error) {
-	a := model.AuthRequest{c.consumerID, key}
-	var user model.User
+func (c *Client) ReceieveAuth(key string) (*User, error) {
+	a := AuthRequest{ConsumerKey: c.consumerID, Code: key}
+	var user User
 
 	if err := c.call("/oauth/authorize", a, &user); err != nil {
 		return nil, err
@@ -68,12 +69,13 @@ func (c *Client) ReceieveAuth(key string) (*model.User, error) {
 	return &user, nil
 }
 
-// IsAppAuthed returns a boolean based on whether the client has an authorised
+// IsAuthed returns a boolean based on whether the client has an authorised
 // user or not
 func (c *Client) IsAuthed() bool {
 	return c.authedUser != nil
 }
 
+// GetArticles returns a list of articles from pocket from a specified date
 func (c *Client) GetArticles(since int) (*RetrieveResult, error) {
 	req := RetrieveOption{
 		Sort:        SortOldest,
@@ -148,6 +150,10 @@ func (c *Client) call(uri string, body, t interface{}) error {
 	return nil
 }
 
+// tryEmptyResponse checks to see if the list returned by pocket is empty. This
+// is needed because the pocket api returns an empty list if nothing is found
+// but a map when there are results and if this check is not here, you will get
+// a Unmarshalling error.
 func tryEmptyResponse(data []byte) (interface{}, error) {
 	type emptyResponse struct {
 		List     []Article

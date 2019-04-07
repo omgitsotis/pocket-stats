@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/omgitsotis/pocket-stats/pkg/database"
-	"github.com/omgitsotis/pocket-stats/pkg/model"
 	"github.com/omgitsotis/pocket-stats/pkg/pocket"
 	"github.com/sirupsen/logrus"
 )
@@ -16,14 +15,6 @@ var log *logrus.Logger
 
 func Init(l *logrus.Logger) {
 	log = l
-}
-
-type updateResponse struct {
-	Date int64 `json:"date_updated"`
-}
-
-type healthcheckResp struct {
-	Status string `json:"status"`
 }
 
 type Server struct {
@@ -70,7 +61,7 @@ func (s *Server) GetAuthLink(w http.ResponseWriter, r *http.Request) {
 		s.authURL,
 	)
 
-	link := model.Link{URL: u}
+	link := Link{URL: u}
 	respondWithJSON(w, http.StatusOK, link)
 
 }
@@ -129,7 +120,7 @@ func (s *Server) UpdateArticle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err = s.db.UpdateArticles(articleList); err != nil {
+	if err = s.db.UpsertArticles(articleList); err != nil {
 		respondWithError(w, http.StatusBadRequest, "error updating articles", err)
 		return
 	}
@@ -178,7 +169,7 @@ func respondWithError(w http.ResponseWriter, code int, message string, err error
 		log.WithError(err).Error(message)
 	}
 
-	respondWithJSON(w, code, model.APIError{Code: code, Message: message})
+	respondWithJSON(w, code, APIError{Code: code, Message: message})
 }
 
 func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {

@@ -84,12 +84,13 @@ func main() {
 		})
 
 		authPass := app.String(cli.StringOpt{
-			Name:   "db-url",
+			Name:   "auth-password",
 			Desc:   "The authorised password for the app",
 			EnvVar: "AUTH_PASSWORD",
 			Value:  "test-password",
 		})
 
+		// Create connection to postgres database
 		connStr := fmt.Sprintf("%s?sslmode=require", *dbURL)
 		db, err := sql.Open("postgres", connStr)
 		if err != nil {
@@ -98,15 +99,21 @@ func main() {
 
 		defer db.Close()
 
+		// Create New Postgres client
 		pgClient := database.NewPostgresDB(db)
 
+		// Create new pocket client
 		p := pocket.New(*pocketConsumerID, &http.Client{})
 
+		// Create new server
 		redirect := fmt.Sprintf("%s/api/pocket/auth/received", *callbackURL)
 		s := server.New(p, redirect, pgClient, *authUser, *authPass)
 
+		// Create routes
 		r := router.CreateRouter(s)
 		server := router.NewServer(r, *port)
+
+		// Start server
 		router.StartServer(server)
 	}
 
@@ -115,6 +122,7 @@ func main() {
 	}
 }
 
+// convertLogLevel converts the info level to the logrus level
 func convertLogLevel(lvlString string) log.Level {
 	level, err := log.ParseLevel(lvlString)
 	if err != nil {
