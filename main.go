@@ -84,7 +84,7 @@ func main() {
 		})
 
 		authPass := app.String(cli.StringOpt{
-			Name:   "db-url",
+			Name:   "auth-password",
 			Desc:   "The authorised password for the app",
 			EnvVar: "AUTH_PASSWORD",
 			Value:  "test-password",
