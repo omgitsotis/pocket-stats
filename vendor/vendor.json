@@ -81,16 +81,16 @@
 			"revisionTime": "2018-10-16T16:26:27Z"
 		},
 		{
-			"checksumSHA1": "kwEvpiUVwCbFKT9y+o5faswPaOM=",
+			"checksumSHA1": "wrGRu5ZhBi/+RNT9atwYEUzIWqE=",
 			"path": "github.com/omgitsotis/pocket-stats",
-			"revision": "2aa337d92f0078aa33f871a922c9cc25dce94d84",
-			"revisionTime": "2019-04-07T13:03:02Z"
+			"revision": "b4e1c73063f4e5ff4bd5b76986579757ee40ebd4",
+			"revisionTime": "2019-04-07T15:13:13Z"
 		},
 		{
-			"checksumSHA1": "7cwBUiNXt7mxtOW7C3wMhkDcPHQ=",
+			"checksumSHA1": "wW4Iu0GlRSsYQwiBn9M4RfwOnkU=",
 			"path": "github.com/omgitsotis/pocket-stats/pkg/database",
-			"revision": "2aa337d92f0078aa33f871a922c9cc25dce94d84",
-			"revisionTime": "2019-04-07T13:03:02Z"
+			"revision": "b4e1c73063f4e5ff4bd5b76986579757ee40ebd4",
+			"revisionTime": "2019-04-07T15:13:13Z"
 		},
 		{
 			"checksumSHA1": "RQzqG67/PIlIyi0zgryVA6jO3/4=",
@@ -101,20 +101,20 @@
 		{
 			"checksumSHA1": "xcWcpjDjIJAM2L710ay4YcPfWTs=",
 			"path": "github.com/omgitsotis/pocket-stats/pkg/pocket",
-			"revision": "2aa337d92f0078aa33f871a922c9cc25dce94d84",
-			"revisionTime": "2019-04-07T13:03:02Z"
+			"revision": "b4e1c73063f4e5ff4bd5b76986579757ee40ebd4",
+			"revisionTime": "2019-04-07T15:13:13Z"
 		},
 		{
-			"checksumSHA1": "S7/XuehVg+XsKA4iKQT5kFfdNbU=",
+			"checksumSHA1": "UXOEkJ/K/ePULOZ+eSoujkGj4yk=",
 			"path": "github.com/omgitsotis/pocket-stats/pkg/router",
-			"revision": "2aa337d92f0078aa33f871a922c9cc25dce94d84",
-			"revisionTime": "2019-04-07T13:03:02Z"
+			"revision": "b4e1c73063f4e5ff4bd5b76986579757ee40ebd4",
+			"revisionTime": "2019-04-07T15:13:13Z"
 		},
 		{
-			"checksumSHA1": "Cqx6cK1kfdBjc6PD7VTm54Md4jM=",
+			"checksumSHA1": "vFfVftEW/ELX7qM9y7GWfp+F+jM=",
 			"path": "github.com/omgitsotis/pocket-stats/pkg/server",
-			"revision": "2aa337d92f0078aa33f871a922c9cc25dce94d84",
-			"revisionTime": "2019-04-07T13:03:02Z"
+			"revision": "b4e1c73063f4e5ff4bd5b76986579757ee40ebd4",
+			"revisionTime": "2019-04-07T15:13:13Z"
 		},
 		{
 			"checksumSHA1": "DTy0iJ2w5C+FDsN9EnzfhNmvS+o=",

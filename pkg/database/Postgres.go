@@ -188,7 +188,7 @@ func (p *PostgresClient) insertArticle(a Article) error {
 	return err
 }
 
-func (p *PostgresClient) GetArticlesByDate(start, end int) ([]Article, error) {
+func (p *PostgresClient) GetArticlesByDate(start, end int64) ([]Article, error) {
 	log.Debugf("Getting articles from [%d] to [%d]", start, end)
 	stmt := `
 		SELECT id, title, url, tag, word_count, date_added, date_read

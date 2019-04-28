@@ -9,5 +9,5 @@ type DBCLient interface {
 	GetLastUpdateDate() (int, error)
 	UpsertArticles(articles []pocket.Article) error
 	SaveUpdateDate(int64) error
-	GetArticlesByDate(start, end int) ([]Article, error)
+	GetArticlesByDate(start, end int64) ([]Article, error)
 }

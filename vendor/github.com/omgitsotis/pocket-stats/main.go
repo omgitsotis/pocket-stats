@@ -34,10 +34,8 @@ func main() {
 
 		level := convertLogLevel(*logLvl)
 
-		format := new(log.TextFormatter)
+		format := new(log.JSONFormatter)
 		format.TimestampFormat = "02-01-2006 15:04:05"
-		format.FullTimestamp = true
-		format.ForceColors = true
 		log.SetFormatter(format)
 		log.SetLevel(level)
 

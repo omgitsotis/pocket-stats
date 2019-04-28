@@ -19,7 +19,7 @@ type Article struct {
 	URL       string `json:"url"`
 	Title     string `json:"title"`
 	Tag       string `json:"tag"`
-	WordCount int    `json:"word_count"`
+	WordCount int64  `json:"word_count"`
 	DateAdded int64  `json:"date_added"`
 	DateRead  int64  `json:"date_read"`
 }
@@ -54,8 +54,8 @@ func ConvertArticles(pa pocket.Article) Article {
 	}
 
 	// Remove the time part of the read and added times
-	sAdded := stripTime(added)
-	sRead := stripTime(read)
+	sAdded := StripTime(added)
+	sRead := StripTime(read)
 
 	var tag string
 	for key := range pa.Tags {
@@ -71,15 +71,15 @@ func ConvertArticles(pa pocket.Article) Article {
 		ID:        pa.ItemID,
 		URL:       pa.ResolvedURL,
 		Title:     pa.ResolvedTitle,
-		WordCount: pa.WordCount,
+		WordCount: int64(pa.WordCount),
 		DateAdded: sAdded,
 		DateRead:  sRead,
 		Tag:       tag,
 	}
 }
 
-// stripTime converts the time part of a time stamp into 00:00:00.
-func stripTime(fullTime int) int64 {
+// StripTime converts the time part of a time stamp into 00:00:00.
+func StripTime(fullTime int) int64 {
 	if fullTime == 0 {
 		return 0
 	}
