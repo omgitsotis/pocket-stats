@@ -83,13 +83,13 @@
 		{
 			"checksumSHA1": "e7GAiCYekVSqnyAvOrAAOMxL6W0=",
 			"path": "github.com/omgitsotis/pocket-stats",
-			"revision": "76a001b059f11652c1f50f13267a914e55f9a8c6",
+			"revision": "e63efba38a48b3948e7df5baae7a3fb821d6d5e1",
 			"revisionTime": "2019-06-02T11:56:50Z"
 		},
 		{
 			"checksumSHA1": "wW4Iu0GlRSsYQwiBn9M4RfwOnkU=",
 			"path": "github.com/omgitsotis/pocket-stats/pkg/database",
-			"revision": "76a001b059f11652c1f50f13267a914e55f9a8c6",
+			"revision": "e63efba38a48b3948e7df5baae7a3fb821d6d5e1",
 			"revisionTime": "2019-06-02T11:56:50Z"
 		},
 		{
@@ -101,19 +101,19 @@
 		{
 			"checksumSHA1": "xcWcpjDjIJAM2L710ay4YcPfWTs=",
 			"path": "github.com/omgitsotis/pocket-stats/pkg/pocket",
-			"revision": "76a001b059f11652c1f50f13267a914e55f9a8c6",
+			"revision": "e63efba38a48b3948e7df5baae7a3fb821d6d5e1",
 			"revisionTime": "2019-06-02T11:56:50Z"
 		},
 		{
 			"checksumSHA1": "ZHjFYWjzHQSYmO4ZwEMK+dZSvQM=",
 			"path": "github.com/omgitsotis/pocket-stats/pkg/router",
-			"revision": "76a001b059f11652c1f50f13267a914e55f9a8c6",
+			"revision": "e63efba38a48b3948e7df5baae7a3fb821d6d5e1",
 			"revisionTime": "2019-06-02T11:56:50Z"
 		},
 		{
 			"checksumSHA1": "vFfVftEW/ELX7qM9y7GWfp+F+jM=",
 			"path": "github.com/omgitsotis/pocket-stats/pkg/server",
-			"revision": "76a001b059f11652c1f50f13267a914e55f9a8c6",
+			"revision": "e63efba38a48b3948e7df5baae7a3fb821d6d5e1",
 			"revisionTime": "2019-06-02T11:56:50Z"
 		},
 		{
