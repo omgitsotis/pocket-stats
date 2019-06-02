@@ -60,16 +60,26 @@ func CreateRouter(s *server.Server) *mux.Router {
 }
 
 func NewServer(router *mux.Router, port int) *http.Server {
-	allowedCorsMethods := handlers.AllowedMethods([]string{
+	corsMethods := handlers.AllowedMethods([]string{
 		http.MethodGet,
 		http.MethodPut,
 		http.MethodPost,
 		http.MethodOptions,
 	})
-	allowedCorsOrigins := handlers.AllowedOrigins([]string{"*"})
+
+	corsOrigins := handlers.AllowedOrigins([]string{"*"})
+	corsHeaders := handlers.AllowedHeaders([]string{
+		"Accept",
+		"Accept-Language",
+		"Content-Language",
+		"Origin",
+		"Authorization",
+	})
+
+	cors := handlers.CORS(corsMethods, corsOrigins, corsHeaders)
 
 	return &http.Server{
-		Handler:      handlers.CORS(allowedCorsMethods, allowedCorsOrigins)(router),
+		Handler:      cors(router),
 		Addr:         fmt.Sprintf(":%d", port),
 		WriteTimeout: time.Duration(15) * time.Second,
 		ReadTimeout:  time.Duration(15) * time.Second,
