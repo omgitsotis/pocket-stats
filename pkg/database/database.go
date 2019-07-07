@@ -10,4 +10,5 @@ type DBCLient interface {
 	UpsertArticles(articles []pocket.Article) error
 	SaveUpdateDate(int64) error
 	GetArticlesByDate(start, end int64) ([]Article, error)
+	DeleteArticle(int) error
 }

@@ -50,9 +50,8 @@ func (r *RetrieveResult) GetArticleList() []Article {
 	aList := make([]Article, 0)
 
 	for _, value := range r.List {
-		if value.Status != ItemStatusDeleted {
-			aList = append(aList, value)
-		}
+		aList = append(aList, value)
+
 	}
 
 	return aList
