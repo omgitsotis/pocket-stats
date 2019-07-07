@@ -275,7 +275,11 @@ func createStats(start, end int64, articles []database.Article) (*Stats, error) 
 		log.Debugf("Checking article [%d]", a.ID)
 		// Check to see if the article was added in the date range
 		if wasAddedInRange(start, end, a.DateAdded) {
-			log.Debugf("Article [%d] added [%d]", a.ID, a.DateAdded)
+			log.Debugf(
+				"Article [%d]: Start date [%d] < Article add date [%d] < End date [%d]",
+				a.ID, start, a.DateAdded, end,
+			)
+
 			dayAddedTotal, ok := itemised[a.DateAdded]
 			if !ok {
 				return nil, errors.Errorf(
