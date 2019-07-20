@@ -119,6 +119,14 @@ func (p *PostgresClient) GetArticle(id int) (*Article, error) {
 // or update the article.
 func (p *PostgresClient) UpsertArticles(articles []pocket.Article) error {
 	for _, article := range articles {
+
+		if article.Status == pocket.ItemStatusDeleted {
+			if err := p.DeleteArticle(article.ItemID); err != nil {
+				return err
+			}
+			continue
+		}
+
 		a := ConvertArticles(article)
 
 		dbArticle, err := p.GetArticle(article.ItemID)
@@ -188,6 +196,7 @@ func (p *PostgresClient) insertArticle(a Article) error {
 	return err
 }
 
+// GetArticlesByDate gets the list of articles between two dates
 func (p *PostgresClient) GetArticlesByDate(start, end int64) ([]Article, error) {
 	log.Debugf("Getting articles from [%d] to [%d]", start, end)
 	stmt := `
@@ -244,4 +253,11 @@ func (p *PostgresClient) SaveUpdateDate(date int64) error {
 	stmt := "UPDATE date_updated SET date_updated = $1"
 	_, err := p.db.Exec(stmt, date)
 	return err
+}
+
+// DeleteArticle deletes an article by an ID
+func (p *PostgresClient) DeleteArticle(id int) error {
+	stmt := "DELETE FROM articles WHERE id = $1"
+	_, err := p.db.Exec(stmt, id)
+	return errors.Wrapf(err, "error deleting article [%d]", id)
 }
