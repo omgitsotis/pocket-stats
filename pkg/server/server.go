@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"math"
 	"net/http"
 	"strconv"
@@ -71,7 +72,7 @@ func (s *Server) GetAuthLink(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) ReceiveToken(w http.ResponseWriter, r *http.Request) {
 	log.Debug("Received request for ReceiveToken")
-	user, err := s.pocketClient.ReceieveAuth(s.requestToken)
+	_, err := s.pocketClient.ReceieveAuth(s.requestToken)
 	if err != nil {
 		respondWithError(
 			w,
@@ -81,7 +82,15 @@ func (s *Server) ReceiveToken(w http.ResponseWriter, r *http.Request) {
 		)
 	}
 
-	respondWithJSON(w, http.StatusOK, user)
+	file, err := ioutil.ReadFile("logged_in.html")
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "error reading logged_in.html", err)
+	}
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.WriteHeader(http.StatusOK)
+	w.Write(file)
+	// respondWithJSON(w, http.StatusOK, user)
 }
 
 func (s *Server) CheckAuthStatus(w http.ResponseWriter, r *http.Request) {
