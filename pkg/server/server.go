@@ -348,7 +348,7 @@ func convertWordsToTime(words int64) int64 {
 
 // wasAddedInRange checks to see if the article was added within the date range
 func wasAddedInRange(start, end, added int64) bool {
-	return start < added && added < end
+	return start <= added && added <= end
 }
 
 func respondWithError(w http.ResponseWriter, code int, message string, err error) {
