@@ -284,7 +284,7 @@ func createStats(start, end int64, articles []database.Article) (*Stats, error) 
 	for _, a := range articles {
 		log.Debugf("Checking article [%d]", a.ID)
 		// Check to see if the article was added in the date range
-		if wasAddedInRange(start, end, a.DateAdded) {
+		if isInRange(start, end, a.DateAdded) {
 			log.Debugf(
 				"Article [%d]: Start date [%d] < Article add date [%d] < End date [%d]",
 				a.ID, start, a.DateAdded, end,
@@ -311,7 +311,7 @@ func createStats(start, end int64, articles []database.Article) (*Stats, error) 
 		}
 
 		// Check to see if the article is read
-		if a.DateRead != 0 {
+		if a.DateRead != 0 && isInRange(start, end, a.DateRead) {
 			log.Debugf("Article [%d] read [%d]", a.ID, a.DateRead)
 			dayReadTotal, ok := itemised[a.DateRead]
 			if !ok {
@@ -333,11 +333,18 @@ func createStats(start, end int64, articles []database.Article) (*Stats, error) 
 			st.TimeRead += timeReading
 
 			// Update the tag values
-			tags[a.Tag].ArticlesRead++
-			tags[a.Tag].WordsRead += a.WordCount
-			tags[a.Tag].TimeRead += timeReading
+			if _, ok := tags[a.Tag]; !ok {
+				tags[a.Tag] = &StatTotals{
+					ArticlesRead: 1,
+					WordsRead:    a.WordCount,
+					TimeRead:     timeReading,
+				}
+			} else {
+				tags[a.Tag].ArticlesRead++
+				tags[a.Tag].WordsRead += a.WordCount
+				tags[a.Tag].TimeRead += timeReading
+			}
 		}
-
 	}
 
 	return &Stats{
@@ -353,8 +360,8 @@ func convertWordsToTime(words int64) int64 {
 	return int64(rounded)
 }
 
-// wasAddedInRange checks to see if the article was added within the date range
-func wasAddedInRange(start, end, added int64) bool {
+// isInRange checks to see if the article was added within the date range
+func isInRange(start, end, added int64) bool {
 	return start <= added && added <= end
 }
 
