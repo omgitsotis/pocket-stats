@@ -264,6 +264,7 @@ func (s *Server) AuthMiddleware(fn http.HandlerFunc) http.HandlerFunc {
 
 func createStats(start, end int64, articles []database.Article) (*Stats, error) {
 	itemised := make(ItemisedStats)
+	tags := make(TagStats)
 	st := StatTotals{}
 
 	// Populate the itemised map. We want all the dates in the range, including
@@ -330,6 +331,11 @@ func createStats(start, end int64, articles []database.Article) (*Stats, error) 
 			st.ArticlesRead++
 			st.WordsRead += a.WordCount
 			st.TimeRead += timeReading
+
+			// Update the tag values
+			tags[a.Tag].ArticlesRead++
+			tags[a.Tag].WordsRead += a.WordCount
+			tags[a.Tag].TimeRead += timeReading
 		}
 
 	}
@@ -337,6 +343,7 @@ func createStats(start, end int64, articles []database.Article) (*Stats, error) 
 	return &Stats{
 		Totals:   st,
 		Itemised: itemised,
+		Tags:     tags,
 	}, nil
 }
 

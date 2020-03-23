@@ -25,6 +25,7 @@ const WordsPerMinute = 146
 type Stats struct {
 	Totals   StatTotals    `json:"totals"`
 	Itemised ItemisedStats `json:"itemised"`
+	Tags     TagStats      `json:"tags"`
 }
 
 // StatTotals returns the totals of the articles updated within the time range
@@ -39,3 +40,6 @@ type StatTotals struct {
 
 // ItemisedStats is a map of the day to the totals of the articles updated
 type ItemisedStats map[int64]*StatTotals
+
+// TagStats is a map of the tags to the totals of the articles updated
+type TagStats map[string]*StatTotals
