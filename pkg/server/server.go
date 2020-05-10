@@ -48,12 +48,7 @@ func (s *Server) Healthcheck(w http.ResponseWriter, r *http.Request) {
 func (s *Server) GetAuthLink(w http.ResponseWriter, r *http.Request) {
 	code, err := s.pocketClient.GetAuth(s.authURL)
 	if err != nil {
-		respondWithError(
-			w,
-			http.StatusInternalServerError,
-			"error getting pocket auth code",
-			err,
-		)
+		respondWithError(w, http.StatusInternalServerError, fmt.Errorf("error getting pocket auth code: %w", err))
 		return
 	}
 
@@ -74,23 +69,18 @@ func (s *Server) ReceiveToken(w http.ResponseWriter, r *http.Request) {
 	log.Debug("Received request for ReceiveToken")
 	_, err := s.pocketClient.ReceieveAuth(s.requestToken)
 	if err != nil {
-		respondWithError(
-			w,
-			http.StatusBadRequest,
-			"error getting access token for user",
-			err,
-		)
+		respondWithError(w, http.StatusBadRequest, fmt.Errorf("error getting access token for user: %w", err))
+		return
 	}
 
 	file, err := ioutil.ReadFile("logged_in.html")
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "error reading logged_in.html", err)
+		respondWithError(w, http.StatusInternalServerError, fmt.Errorf("error reading logged_in.html: %w", err))
 	}
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
 	w.Write(file)
-	// respondWithJSON(w, http.StatusOK, user)
 }
 
 func (s *Server) CheckAuthStatus(w http.ResponseWriter, r *http.Request) {
@@ -113,7 +103,7 @@ func (s *Server) UpdateArticle(w http.ResponseWriter, r *http.Request) {
 
 	date, err := s.db.GetLastUpdateDate()
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "error getting last update date", err)
+		respondWithError(w, http.StatusBadRequest, fmt.Errorf("error getting last update date: %w", err))
 		return
 	}
 
@@ -121,7 +111,7 @@ func (s *Server) UpdateArticle(w http.ResponseWriter, r *http.Request) {
 
 	response, err := s.pocketClient.GetArticles(date)
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "error getting articles", err)
+		respondWithError(w, http.StatusBadRequest, fmt.Errorf("error getting articles: %w", err))
 		return
 	}
 
@@ -133,7 +123,7 @@ func (s *Server) UpdateArticle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err = s.db.UpsertArticles(articleList); err != nil {
-		respondWithError(w, http.StatusBadRequest, "error updating articles", err)
+		respondWithError(w, http.StatusBadRequest, fmt.Errorf("error updating articles: %w", err))
 		return
 	}
 
@@ -150,7 +140,7 @@ func (s *Server) DebugGetArticle(w http.ResponseWriter, r *http.Request) {
 
 	date, err := s.db.GetLastUpdateDate()
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "error getting last update date", err)
+		respondWithError(w, http.StatusBadRequest, fmt.Errorf("error getting last update date: %w", err))
 		return
 	}
 
@@ -158,7 +148,7 @@ func (s *Server) DebugGetArticle(w http.ResponseWriter, r *http.Request) {
 
 	response, err := s.pocketClient.GetArticles(date)
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "error getting articles", err)
+		respondWithError(w, http.StatusBadRequest, fmt.Errorf("error getting articles: %w", err))
 		return
 	}
 
@@ -170,34 +160,24 @@ func (s *Server) GetStats(w http.ResponseWriter, r *http.Request) {
 	end := r.URL.Query().Get("end")
 
 	if start == "" {
-		respondWithError(w, http.StatusBadRequest, "No start date provided", nil)
+		respondWithError(w, http.StatusBadRequest, fmt.Errorf("No start date provided"))
 		return
 	}
 
 	if end == "" {
-		respondWithError(w, http.StatusBadRequest, "No end date provided", nil)
+		respondWithError(w, http.StatusBadRequest, fmt.Errorf("No end date provided"))
 		return
 	}
 
 	startInt, err := strconv.Atoi(start)
 	if err != nil {
-		respondWithError(
-			w,
-			http.StatusBadRequest,
-			fmt.Sprintf("Could not convert start date [%s]", start),
-			err,
-		)
+		respondWithError(w, http.StatusBadRequest, fmt.Errorf("Could not convert start date [%s]: %w", start, err))
 		return
 	}
 
 	endInt, err := strconv.Atoi(end)
 	if err != nil {
-		respondWithError(
-			w,
-			http.StatusBadRequest,
-			fmt.Sprintf("Could not convert end date [%s]", end),
-			err,
-		)
+		respondWithError(w, http.StatusBadRequest, fmt.Errorf("Could not convert end date [%s]: %w", end, err))
 		return
 	}
 
@@ -207,24 +187,14 @@ func (s *Server) GetStats(w http.ResponseWriter, r *http.Request) {
 	log.Infof("Getting articles between %d - %d", dbStartTime, dbEndTime)
 	articles, err := s.db.GetArticlesByDate(dbStartTime, dbEndTime)
 	if err != nil {
-		respondWithError(
-			w,
-			http.StatusInternalServerError,
-			"unable to get articles from the DB",
-			err,
-		)
+		respondWithError(w, http.StatusInternalServerError, fmt.Errorf("unable to get articles from the DB: %w", err))
 		return
 	}
 
 	log.Infof("Creating stats for dates %d - %d", dbStartTime, dbEndTime)
 	stats, err := createStats(dbStartTime, dbEndTime, articles)
 	if err != nil {
-		respondWithError(
-			w,
-			http.StatusBadRequest,
-			"Error converting articles to stats",
-			err,
-		)
+		respondWithError(w, http.StatusBadRequest, fmt.Errorf("error converting articles to stats: %w", err))
 		return
 	}
 
@@ -235,7 +205,8 @@ func (s *Server) GetStats(w http.ResponseWriter, r *http.Request) {
 func (s *Server) setUpdateDate(w http.ResponseWriter) {
 	updateTime := time.Now().Unix()
 	if err := s.db.SaveUpdateDate(updateTime); err != nil {
-		respondWithError(w, http.StatusBadRequest, "error saving last update date", err)
+		respondWithError(w, http.StatusBadRequest, fmt.Errorf("error saving last update date: %w", err))
+		return
 	}
 
 	logrus.Infof("DB updated to [%d]", updateTime)
@@ -365,12 +336,8 @@ func isInRange(start, end, added int64) bool {
 	return start <= added && added <= end
 }
 
-func respondWithError(w http.ResponseWriter, code int, message string, err error) {
-	if err != nil {
-		log.WithError(err).Error(message)
-	}
-
-	respondWithJSON(w, code, APIError{Code: code, Message: message})
+func respondWithError(w http.ResponseWriter, code int, err error) {
+	respondWithJSON(w, code, APIError{Code: code, Message: err.Error()})
 }
 
 func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {

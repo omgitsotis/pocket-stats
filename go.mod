@@ -1,8 +1,8 @@
 module github.com/omgitsotis/pocket-stats
 
-go 1.12
+go 1.13
 
-// +heroku goVersion 1.12
+// +heroku goVersion 1.13
 
 require (
 	github.com/gorilla/handlers v0.0.0-20181012153334-350d97a79266
