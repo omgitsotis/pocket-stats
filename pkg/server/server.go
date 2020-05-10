@@ -11,7 +11,6 @@ import (
 
 	"github.com/omgitsotis/pocket-stats/pkg/database"
 	"github.com/omgitsotis/pocket-stats/pkg/pocket"
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
@@ -156,49 +155,37 @@ func (s *Server) DebugGetArticle(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) GetStats(w http.ResponseWriter, r *http.Request) {
-	start := r.URL.Query().Get("start")
-	end := r.URL.Query().Get("end")
+	startParam := r.URL.Query().Get("start")
+	endParam := r.URL.Query().Get("end")
 
-	if start == "" {
-		respondWithError(w, http.StatusBadRequest, fmt.Errorf("No start date provided"))
-		return
-	}
-
-	if end == "" {
-		respondWithError(w, http.StatusBadRequest, fmt.Errorf("No end date provided"))
-		return
-	}
-
-	startInt, err := strconv.Atoi(start)
+	start, end, err := createDBTime(startParam, endParam)
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, fmt.Errorf("Could not convert start date [%s]: %w", start, err))
+		respondWithError(w, http.StatusBadRequest, err)
 		return
 	}
 
-	endInt, err := strconv.Atoi(end)
-	if err != nil {
-		respondWithError(w, http.StatusBadRequest, fmt.Errorf("Could not convert end date [%s]: %w", end, err))
-		return
-	}
-
-	dbStartTime := database.StripTime(startInt)
-	dbEndTime := database.StripTime(endInt)
-
-	log.Infof("Getting articles between %d - %d", dbStartTime, dbEndTime)
-	articles, err := s.db.GetArticlesByDate(dbStartTime, dbEndTime)
+	log.Infof("Getting articles between %d - %d", start, end)
+	articles, err := s.db.GetArticlesByDate(start, end)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, fmt.Errorf("unable to get articles from the DB: %w", err))
 		return
 	}
 
-	log.Infof("Creating stats for dates %d - %d", dbStartTime, dbEndTime)
-	stats, err := createStats(dbStartTime, dbEndTime, articles)
+	log.Infof("Creating stats for dates %d - %d", start, end)
+	stats, err := createStats(start, end, articles)
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, fmt.Errorf("error converting articles to stats: %w", err))
+		respondWithError(w, http.StatusInternalServerError, fmt.Errorf("error converting articles to stats: %w", err))
 		return
 	}
 
-	log.Infof("Created stats for dates %d - %d", dbStartTime, dbEndTime)
+	log.Infof("Created stats for dates %d - %d", start, end)
+
+	ps, err := s.getPreviousStats(start, end)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err)
+	}
+
+	stats.PreviousStats = ps
 	respondWithJSON(w, http.StatusOK, stats)
 }
 
@@ -233,6 +220,28 @@ func (s *Server) AuthMiddleware(fn http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
+func (s *Server) getPreviousStats(start, end int64) (*PreviousStats, error) {
+	pStart, pEnd := getPreviousDate(start, end)
+
+	log.Infof("getting previous articles between %d - %d", pStart, pEnd)
+	articles, err := s.db.GetArticlesByDate(pStart, pEnd)
+	if err != nil {
+		return nil, fmt.Errorf("unable to get previous articles from the DB: %w", err)
+	}
+
+	stats, err := createStats(pStart, pEnd, articles)
+	if err != nil {
+		return nil, fmt.Errorf("unable to create previous stats: %w", err)
+	}
+
+	ps := &PreviousStats{
+		Totals: stats.Totals,
+		Tags:   stats.Tags,
+	}
+
+	return ps, nil
+}
+
 func createStats(start, end int64, articles []database.Article) (*Stats, error) {
 	itemised := make(ItemisedStats)
 	tags := make(TagStats)
@@ -253,7 +262,7 @@ func createStats(start, end int64, articles []database.Article) (*Stats, error) 
 	}
 
 	for _, a := range articles {
-		log.Debugf("Checking article [%d]", a.ID)
+		log.Debugf("checking article [%d]", a.ID)
 		// Check to see if the article was added in the date range
 		if isInRange(start, end, a.DateAdded) {
 			log.Debugf(
@@ -263,13 +272,11 @@ func createStats(start, end int64, articles []database.Article) (*Stats, error) 
 
 			dayAddedTotal, ok := itemised[a.DateAdded]
 			if !ok {
-				return nil, errors.Errorf(
-					"What the fuck, date [%d] not created",
-					a.DateAdded,
-				)
+				return nil, fmt.Errorf("what the fuck, date [%d] not created", a.DateAdded)
 			}
 
 			timeReading := convertWordsToTime(a.WordCount)
+
 			// Update itemised values
 			dayAddedTotal.ArticlesAdded++
 			dayAddedTotal.WordsAdded += a.WordCount
@@ -286,13 +293,11 @@ func createStats(start, end int64, articles []database.Article) (*Stats, error) 
 			log.Debugf("Article [%d] read [%d]", a.ID, a.DateRead)
 			dayReadTotal, ok := itemised[a.DateRead]
 			if !ok {
-				return nil, errors.Errorf(
-					"What the fuck, date [%d] not created",
-					a.DateRead,
-				)
+				return nil, fmt.Errorf("what the fuck, date [%d] not created", a.DateRead)
 			}
 
 			timeReading := convertWordsToTime(a.WordCount)
+
 			// Update itemised values
 			dayReadTotal.ArticlesRead++
 			dayReadTotal.WordsRead += a.WordCount
@@ -305,7 +310,7 @@ func createStats(start, end int64, articles []database.Article) (*Stats, error) 
 
 			// Update the tag values
 			if _, ok := tags[a.Tag]; !ok {
-				tags[a.Tag] = &StatTotals{
+				tags[a.Tag] = &TagTotals{
 					ArticlesRead: 1,
 					WordsRead:    a.WordCount,
 					TimeRead:     timeReading,
@@ -319,9 +324,9 @@ func createStats(start, end int64, articles []database.Article) (*Stats, error) 
 	}
 
 	return &Stats{
-		Totals:   st,
-		Itemised: itemised,
-		Tags:     tags,
+		Totals:   &st,
+		Itemised: &itemised,
+		Tags:     &tags,
 	}, nil
 }
 
@@ -351,4 +356,41 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 	w.Write(response)
+}
+
+// createDBTime takes two date strings, converts them to Time objects and normalises them todo
+// the start of the day
+func createDBTime(start, end string) (int64, int64, error) {
+	if start == "" {
+		return 0, 0, fmt.Errorf("no start date provided")
+	}
+
+	if end == "" {
+		return 0, 0, fmt.Errorf("no end date provided")
+	}
+
+	startInt, err := strconv.Atoi(start)
+	if err != nil {
+		return 0, 0, fmt.Errorf("Could not convert start date [%s]: %w", start, err)
+	}
+
+	endInt, err := strconv.Atoi(end)
+	if err != nil {
+		return 0, 0, fmt.Errorf("Could not convert end date [%s]: %w", end, err)
+	}
+
+	return database.StripTime(startInt), database.StripTime(endInt), nil
+}
+
+func getPreviousDate(s, e int64) (int64, int64) {
+	st := time.Unix(s, 0)
+	et := time.Unix(e, 0)
+
+	dur := st.Sub(et)
+	log.Debugf("calculated duration is [%s]", dur.String())
+
+	start := st.Add(dur).Unix()
+	end := et.Add(dur).Unix()
+
+	return database.StripTime(int(start)), database.StripTime(int(end))
 }

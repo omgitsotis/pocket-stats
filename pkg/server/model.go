@@ -23,9 +23,10 @@ const WordsPerMinute = 146
 
 // Stats is the response to the GetStats call
 type Stats struct {
-	Totals   StatTotals    `json:"totals"`
-	Itemised ItemisedStats `json:"itemised"`
-	Tags     TagStats      `json:"tags"`
+	Totals        *StatTotals    `json:"totals"`
+	Itemised      *ItemisedStats `json:"itemised"`
+	Tags          *TagStats      `json:"tags"`
+	PreviousStats *PreviousStats `json:previous`
 }
 
 // StatTotals returns the totals of the articles updated within the time range
@@ -38,8 +39,19 @@ type StatTotals struct {
 	TimeAdded     int64 `json:"time_added"`
 }
 
+type TagTotals struct {
+	ArticlesRead int64 `json:"articles_read"`
+	WordsRead    int64 `json:"words_read"`
+	TimeRead     int64 `json:"time_read"`
+}
+
+type PreviousStats struct {
+	Totals *StatTotals `json:"totals"`
+	Tags   *TagStats   `json:"tags"`
+}
+
 // ItemisedStats is a map of the day to the totals of the articles updated
 type ItemisedStats map[int64]*StatTotals
 
 // TagStats is a map of the tags to the totals of the articles updated
-type TagStats map[string]*StatTotals
+type TagStats map[string]*TagTotals
