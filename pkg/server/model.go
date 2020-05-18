@@ -26,7 +26,7 @@ type Stats struct {
 	Totals        *StatTotals    `json:"totals"`
 	Itemised      *ItemisedStats `json:"itemised"`
 	Tags          *TagStats      `json:"tags"`
-	PreviousStats *PreviousStats `json:previous`
+	PreviousStats *PreviousStats `json:"previous"`
 }
 
 // StatTotals returns the totals of the articles updated within the time range
