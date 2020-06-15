@@ -11,6 +11,7 @@ import (
 const (
 	TagRead  = "_read"
 	TagSport = "_sport"
+	TagNews  = "_news"
 )
 
 // Article is the object that will be saved in the database
@@ -59,7 +60,7 @@ func ConvertArticles(pa pocket.Article) Article {
 
 	var tag string
 	for key := range pa.Tags {
-		if key == TagRead || key == TagSport {
+		if key == TagRead || key == TagSport || key == TagNews {
 			continue
 		}
 
