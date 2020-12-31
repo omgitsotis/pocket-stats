@@ -52,6 +52,21 @@ func CreateRouter(s *server.Server) *mux.Router {
 		HandlerFunc(s.AuthMiddleware(s.GetStats))
 
 	sub.NewRoute().
+		Path("/stats/total").
+		Methods(http.MethodGet).
+		HandlerFunc(s.AuthMiddleware(s.GetTotalStats))
+
+	sub.NewRoute().
+		Path("/stats/tag").
+		Methods(http.MethodGet).
+		HandlerFunc(s.AuthMiddleware(s.GetTagStats))
+
+	sub.NewRoute().
+		Path("/stats/itemised").
+		Methods(http.MethodGet).
+		HandlerFunc(s.AuthMiddleware(s.GetItemisedStats))
+
+	sub.NewRoute().
 		Path("/__/debug").
 		Methods(http.MethodGet).
 		HandlerFunc(s.AuthMiddleware(s.DebugGetArticle))

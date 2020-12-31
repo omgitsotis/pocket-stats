@@ -4,9 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"math"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/omgitsotis/pocket-stats/pkg/database"
@@ -172,33 +170,174 @@ func (s *Server) GetStats(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Infof("Creating stats for dates %d - %d", start, end)
-	stats, err := createStats(start, end, articles)
+	totals, err := createTotalStats(start, end, articles)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, fmt.Errorf("error converting articles to stats: %w", err))
+		respondWithError(w, http.StatusInternalServerError, fmt.Errorf("error getting total stats from articles: %w", err))
 		return
 	}
 
-	log.Infof("Created stats for dates %d - %d", start, end)
-
-	ps, err := s.getPreviousStats(start, end)
+	itemised, err := createItemisedStats(start, end, articles)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err)
+		respondWithError(w, http.StatusInternalServerError, fmt.Errorf("error getting itemised stats from articles: %w", err))
+		return
 	}
 
-	stats.PreviousStats = ps
+	stats := Stats{
+		Totals:   totals,
+		Itemised: itemised,
+	}
+
 	respondWithJSON(w, http.StatusOK, stats)
 }
 
-func (s *Server) setUpdateDate(w http.ResponseWriter) {
-	updateTime := time.Now().Unix()
-	if err := s.db.SaveUpdateDate(updateTime); err != nil {
-		respondWithError(w, http.StatusBadRequest, fmt.Errorf("error saving last update date: %w", err))
+func (s *Server) GetTotalStats(w http.ResponseWriter, r *http.Request) {
+	startParam := r.URL.Query().Get("start")
+	endParam := r.URL.Query().Get("end")
+
+	start, end, err := createDBTime(startParam, endParam)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, err)
 		return
 	}
 
-	logrus.Infof("DB updated to [%d]", updateTime)
+	log.Infof("Getting articles between %d - %d", start, end)
+	articles, err := s.db.GetArticlesByDate(start, end)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, fmt.Errorf("unable to get articles from the DB: %w", err))
+		return
+	}
 
-	respondWithJSON(w, http.StatusOK, updateResponse{Date: updateTime})
+	log.Infof("Creating stats for dates %d - %d", start, end)
+	totals, err := createTotalStats(start, end, articles)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, fmt.Errorf("error getting total stats from articles: %w", err))
+		return
+	}
+
+	pStart, pEnd := getPreviousDate(start, end)
+	log.Infof("Getting previous articles between %d - %d", start, end)
+	articles, err = s.db.GetArticlesByDate(pStart, pEnd)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, fmt.Errorf("unable to get previous articles from the DB: %w", err))
+		return
+	}
+
+	log.Infof("Creating previous stats for dates %d - %d", pStart, pEnd)
+	previousTotals, err := createTotalStats(pStart, pEnd, articles)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, fmt.Errorf("error getting total stats from articles: %w", err))
+		return
+	}
+
+	stats := Stats{
+		Totals: totals,
+		PreviousStats: &PreviousStats{
+			Totals: previousTotals,
+		},
+	}
+
+	respondWithJSON(w, http.StatusOK, stats)
+}
+
+func (s *Server) GetTagStats(w http.ResponseWriter, r *http.Request) {
+	startParam := r.URL.Query().Get("start")
+	endParam := r.URL.Query().Get("end")
+	tagParam := r.URL.Query().Get("tags")
+
+	start, end, err := createDBTime(startParam, endParam)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	var articles []database.Article
+
+	if tagParam != "" {
+		log.Infof("Getting articles between [%d] - [%d] for tag [%s]", start, end, tagParam)
+		articles, err = s.db.GetArticlesByTag(start, end, tagParam)
+		if err != nil {
+			respondWithError(w, http.StatusInternalServerError, fmt.Errorf("unable to get articles from the DB: %w", err))
+			return
+		}
+	} else {
+		log.Infof("Getting articles between [%d] - [%d]", start, end)
+		articles, err = s.db.GetArticlesByDate(start, end)
+		if err != nil {
+			respondWithError(w, http.StatusInternalServerError, fmt.Errorf("unable to get articles from the DB: %w", err))
+			return
+		}
+	}
+
+	log.Infof("Creating stats for dates [%d] - [%d] tag [%s]", start, end, tagParam)
+	tags, err := createTagStats(start, end, articles)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, fmt.Errorf("unable to create tag stats: %w", err))
+		return
+	}
+
+	pStart, pEnd := getPreviousDate(start, end)
+	if tagParam != "" {
+		log.Infof("Getting previous articles between [%d] - [%d] for tag [%s]", pStart, pEnd, tagParam)
+		articles, err = s.db.GetArticlesByTag(pStart, pEnd, tagParam)
+		if err != nil {
+			respondWithError(w, http.StatusInternalServerError, fmt.Errorf("unable to get previous articles from the DB: %w", err))
+			return
+		}
+	} else {
+		log.Infof("Getting previous articles between [%d] - [%d]", pStart, pEnd)
+		articles, err = s.db.GetArticlesByDate(pStart, end)
+		if err != nil {
+			respondWithError(w, http.StatusInternalServerError, fmt.Errorf("unable to get previous articles from the DB: %w", err))
+			return
+		}
+	}
+
+	log.Infof("Creating previous stats for dates [%d] - [%d] tag [%s]", pStart, pEnd, tagParam)
+	previousTags, err := createTagStats(pStart, pEnd, articles)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, fmt.Errorf("error getting total stats from articles: %w", err))
+		return
+	}
+
+	stats := Stats{
+		Tags: tags,
+		PreviousStats: &PreviousStats{
+			Tags: previousTags,
+		},
+	}
+
+	respondWithJSON(w, http.StatusOK, stats)
+}
+
+func (s *Server) GetItemisedStats(w http.ResponseWriter, r *http.Request) {
+	startParam := r.URL.Query().Get("start")
+	endParam := r.URL.Query().Get("end")
+
+	start, end, err := createDBTime(startParam, endParam)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	log.Infof("Getting articles between [%d] - [%d]", start, end)
+	articles, err := s.db.GetArticlesByDate(start, end)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, fmt.Errorf("unable to get articles from the DB: %w", err))
+		return
+	}
+
+	log.Infof("Creating itemised stats for dates [%d] - [%d]", start, end)
+	itemised, err := createItemisedStats(start, end, articles)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, fmt.Errorf("unable to create tag stats: %w", err))
+		return
+	}
+
+	stats := Stats{
+		Itemised: itemised,
+	}
+
+	respondWithJSON(w, http.StatusOK, stats)
 }
 
 func (s *Server) AuthMiddleware(fn http.HandlerFunc) http.HandlerFunc {
@@ -220,126 +359,49 @@ func (s *Server) AuthMiddleware(fn http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-func (s *Server) getPreviousStats(start, end int64) (*PreviousStats, error) {
-	pStart, pEnd := getPreviousDate(start, end)
-
-	log.Infof("getting previous articles between %d - %d", pStart, pEnd)
-	articles, err := s.db.GetArticlesByDate(pStart, pEnd)
-	if err != nil {
-		return nil, fmt.Errorf("unable to get previous articles from the DB: %w", err)
+func (s *Server) setUpdateDate(w http.ResponseWriter) {
+	updateTime := time.Now().Unix()
+	if err := s.db.SaveUpdateDate(updateTime); err != nil {
+		respondWithError(w, http.StatusBadRequest, fmt.Errorf("error saving last update date: %w", err))
+		return
 	}
 
-	stats, err := createStats(pStart, pEnd, articles)
-	if err != nil {
-		return nil, fmt.Errorf("unable to create previous stats: %w", err)
-	}
+	logrus.Infof("DB updated to [%d]", updateTime)
 
-	ps := &PreviousStats{
-		Totals: stats.Totals,
-		Tags:   stats.Tags,
-	}
-
-	return ps, nil
+	respondWithJSON(w, http.StatusOK, updateResponse{Date: updateTime})
 }
 
-func createStats(start, end int64, articles []database.Article) (*Stats, error) {
-	itemised := make(ItemisedStats)
-	tags := make(TagStats)
-	st := StatTotals{}
+// func (s *Server) getPreviousStats(start, end int64, tag string) (*PreviousStats, error) {
+// 	pStart, pEnd := getPreviousDate(start, end)
 
-	// Populate the itemised map. We want all the dates in the range, including
-	// the days with no updates
-	t := time.Unix(start, 0)
-	endTime := time.Unix(end, 0)
+// 	if tag != "" {
+// 		log.Infof("Getting previous articles between [%d] - [%d] for [%s]", start, end, tag)
+// 		articles, err := s.db.GetArticlesByTag(start, end, tag)
+// 		if err != nil {
+// 			return nil, fmt.Errorf("unable to get previous articles from the DB: %w", err)
+// 		}
 
-	for {
-		itemised[t.Unix()] = &StatTotals{}
-		t = t.AddDate(0, 0, 1)
-		log.Debugf("%d greater than %d", t.Unix(), endTime.Unix())
-		if t.Unix() > endTime.Unix() {
-			break
-		}
-	}
+// 		tags, err := createTagsStats(pStart, pEnd, articles)
+// 		if err != nil {
+// 			return nil, fmt.Errorf("unable to create previous tags: %w", err)
+// 		}
 
-	for _, a := range articles {
-		log.Debugf("checking article [%d]", a.ID)
-		// Check to see if the article was added in the date range
-		if isInRange(start, end, a.DateAdded) {
-			log.Debugf(
-				"Article [%d]: Start date [%d] < Article add date [%d] < End date [%d]",
-				a.ID, start, a.DateAdded, end,
-			)
+// 		return &PreviousStats{Tags: tags}, nil
+// 	}
 
-			dayAddedTotal, ok := itemised[a.DateAdded]
-			if !ok {
-				return nil, fmt.Errorf("what the fuck, date [%d] not created", a.DateAdded)
-			}
+// 	log.Infof("Getting previous articles between %d - %d", start, end)
+// 	articles, err := s.db.GetArticlesByDate(start, end)
+// 	if err != nil {
+// 		return nil, fmt.Errorf("unable to get previous articles from the DB: %w", err)
+// 	}
 
-			timeReading := convertWordsToTime(a.WordCount)
+// 	stats, err := createStats(pStart, pEnd, articles)
+// 	if err != nil {
+// 		return nil, fmt.Errorf("unable to create previous stats: %w", err)
+// 	}
 
-			// Update itemised values
-			dayAddedTotal.ArticlesAdded++
-			dayAddedTotal.WordsAdded += a.WordCount
-			dayAddedTotal.TimeAdded += timeReading
-
-			// Update total values
-			st.ArticlesAdded++
-			st.WordsAdded += a.WordCount
-			st.TimeAdded += timeReading
-		}
-
-		// Check to see if the article is read
-		if a.DateRead != 0 && isInRange(start, end, a.DateRead) {
-			log.Debugf("Article [%d] read [%d]", a.ID, a.DateRead)
-			dayReadTotal, ok := itemised[a.DateRead]
-			if !ok {
-				return nil, fmt.Errorf("what the fuck, date [%d] not created", a.DateRead)
-			}
-
-			timeReading := convertWordsToTime(a.WordCount)
-
-			// Update itemised values
-			dayReadTotal.ArticlesRead++
-			dayReadTotal.WordsRead += a.WordCount
-			dayReadTotal.TimeRead += timeReading
-
-			// Update total values
-			st.ArticlesRead++
-			st.WordsRead += a.WordCount
-			st.TimeRead += timeReading
-
-			// Update the tag values
-			if _, ok := tags[a.Tag]; !ok {
-				tags[a.Tag] = &TagTotals{
-					ArticlesRead: 1,
-					WordsRead:    a.WordCount,
-					TimeRead:     timeReading,
-				}
-			} else {
-				tags[a.Tag].ArticlesRead++
-				tags[a.Tag].WordsRead += a.WordCount
-				tags[a.Tag].TimeRead += timeReading
-			}
-		}
-	}
-
-	return &Stats{
-		Totals:   &st,
-		Itemised: &itemised,
-		Tags:     &tags,
-	}, nil
-}
-
-func convertWordsToTime(words int64) int64 {
-	timeReading := float64(words / WordsPerMinute)
-	rounded := math.Round(timeReading)
-	return int64(rounded)
-}
-
-// isInRange checks to see if the article was added within the date range
-func isInRange(start, end, added int64) bool {
-	return start <= added && added <= end
-}
+// 	return &PreviousStats{Totals: stats.Totals}, nil
+// }
 
 func respondWithError(w http.ResponseWriter, code int, err error) {
 	respondWithJSON(w, code, APIError{Code: code, Message: err.Error()})
@@ -356,41 +418,4 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 	w.Write(response)
-}
-
-// createDBTime takes two date strings, converts them to Time objects and normalises them todo
-// the start of the day
-func createDBTime(start, end string) (int64, int64, error) {
-	if start == "" {
-		return 0, 0, fmt.Errorf("no start date provided")
-	}
-
-	if end == "" {
-		return 0, 0, fmt.Errorf("no end date provided")
-	}
-
-	startInt, err := strconv.Atoi(start)
-	if err != nil {
-		return 0, 0, fmt.Errorf("Could not convert start date [%s]: %w", start, err)
-	}
-
-	endInt, err := strconv.Atoi(end)
-	if err != nil {
-		return 0, 0, fmt.Errorf("Could not convert end date [%s]: %w", end, err)
-	}
-
-	return database.StripTime(startInt), database.StripTime(endInt), nil
-}
-
-func getPreviousDate(s, e int64) (int64, int64) {
-	st := time.Unix(s, 0)
-	et := time.Unix(e, 0)
-
-	dur := st.Sub(et)
-	log.Debugf("calculated duration is [%s]", dur.String())
-
-	start := st.Add(dur).Unix()
-	end := et.Add(dur).Unix()
-
-	return database.StripTime(int(start)), database.StripTime(int(end))
 }

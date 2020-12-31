@@ -239,6 +239,49 @@ func (p *PostgresClient) GetArticlesByDate(start, end int64) ([]Article, error) 
 	return articles, nil
 }
 
+// GetArticlesByTag gets the list of articles between two dates for a given tag
+func (p *PostgresClient) GetArticlesByTag(start, end int64, tag string) ([]Article, error) {
+	log.Debugf("Getting articles from [%d] to [%d]", start, end)
+	stmt := `
+		SELECT id, title, url, tag, word_count, date_added, date_read
+		FROM articles
+		WHERE (date_added >= $1 and date_added <= $2 OR date_read >= $1 and date_read <= $2)
+		AND tag = $3;
+	`
+	articles := make([]Article, 0)
+
+	rows, err := p.db.Query(stmt, start, end, tag)
+	if err != nil {
+		return nil, errors.Wrap(err, "error executing query")
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		var article Article
+		sErr := rows.Scan(
+			&article.ID,
+			&article.Title,
+			&article.URL,
+			&article.Tag,
+			&article.WordCount,
+			&article.DateAdded,
+			&article.DateRead,
+		)
+
+		if sErr != nil {
+			return nil, errors.Wrap(sErr, "Error scanning row")
+		}
+
+		articles = append(articles, article)
+	}
+
+	if rows.Err() != nil {
+		return nil, errors.Wrap(rows.Err(), "error iterating results")
+	}
+
+	return articles, nil
+}
+
 // GetLastUpdateDate returns the date the database is updated to.
 func (p *PostgresClient) GetLastUpdateDate() (int, error) {
 	var date int
