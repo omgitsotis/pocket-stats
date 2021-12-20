@@ -50,13 +50,28 @@ func createTagStats(start, end int64, articles []database.Article) (*TagStats, e
 	for _, a := range articles {
 		log.Debugf("checking article [%d]", a.ID)
 
+		if isInRange(start, end, a.DateAdded) {
+			timeReading := convertWordsToTime(a.WordCount)
+			if _, ok := tags[a.Tag]; !ok {
+				tags[a.Tag] = &StatTotals{
+					ArticlesAdded: 1,
+					WordsRead:     a.WordCount,
+					TimeAdded:     timeReading,
+				}
+			} else {
+				tags[a.Tag].WordsAdded += a.WordCount
+				tags[a.Tag].TimeAdded += timeReading
+				tags[a.Tag].ArticlesAdded++
+			}
+		}
+
 		// Check to see if the article is read
 		if a.DateRead != 0 && isInRange(start, end, a.DateRead) {
 			// Update the tag values
 			timeReading := convertWordsToTime(a.WordCount)
 
 			if _, ok := tags[a.Tag]; !ok {
-				tags[a.Tag] = &TagTotals{
+				tags[a.Tag] = &StatTotals{
 					ArticlesRead: 1,
 					WordsRead:    a.WordCount,
 					TimeRead:     timeReading,

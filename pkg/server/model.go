@@ -54,4 +54,4 @@ type PreviousStats struct {
 type ItemisedStats map[int64]*StatTotals
 
 // TagStats is a map of the tags to the totals of the articles updated
-type TagStats map[string]*TagTotals
+type TagStats map[string]*StatTotals
