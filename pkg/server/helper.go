@@ -9,7 +9,7 @@ import (
 	"github.com/omgitsotis/pocket-stats/pkg/database"
 )
 
-func createTotalStats(start, end int64, articles []database.Article) (*StatTotals, error) {
+func createTotalStats(start, end int64, articles []*database.Article) (*StatTotals, error) {
 	st := StatTotals{}
 
 	for _, a := range articles {
@@ -44,7 +44,7 @@ func createTotalStats(start, end int64, articles []database.Article) (*StatTotal
 	return &st, nil
 }
 
-func createTagStats(start, end int64, articles []database.Article) (*TagStats, error) {
+func createTagStats(start, end int64, articles []*database.Article) (*TagStats, error) {
 	tags := make(TagStats)
 
 	for _, a := range articles {
@@ -87,7 +87,7 @@ func createTagStats(start, end int64, articles []database.Article) (*TagStats, e
 	return &tags, nil
 }
 
-func createItemisedStats(start, end int64, articles []database.Article) (*ItemisedStats, error) {
+func createItemisedStats(start, end int64, articles []*database.Article) (*ItemisedStats, error) {
 	itemised := make(ItemisedStats)
 
 	// Populate the itemised map. We want all the dates in the range, including
@@ -178,7 +178,7 @@ func createDBTime(start, end string) (int64, int64, error) {
 		return 0, 0, fmt.Errorf("Could not convert end date [%s]: %w", end, err)
 	}
 
-	return database.StripTime(startInt), database.StripTime(endInt), nil
+	return stripTime(startInt), stripTime(endInt), nil
 }
 
 func getPreviousDate(s, e int64) (int64, int64) {
@@ -191,5 +191,5 @@ func getPreviousDate(s, e int64) (int64, int64) {
 	start := st.Add(dur).Unix()
 	end := et.Add(dur).Unix()
 
-	return database.StripTime(int(start)), database.StripTime(int(end))
+	return stripTime(int(start)), stripTime(int(end))
 }
