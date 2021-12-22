@@ -1,10 +1,12 @@
 package server
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/omgitsotis/pocket-stats/pkg/database"
@@ -18,17 +20,39 @@ func Init(l *logrus.Logger) {
 	log = l
 }
 
+const (
+	TagRead  = "_read"
+	TagSport = "_sport"
+	TagNews  = "_news"
+)
+
+type Store interface {
+	BeginBatch()
+	CommitBatch(ctx context.Context) error
+	SaveArticle(a *database.Article)
+	DeleteArticle(id string)
+
+	GetArticle(ctx context.Context, id string) (*database.Article, error)
+	GetArticlesByDate(ctx context.Context, start, end int64) ([]*database.Article, error)
+	GetArticlesByDateAndTag(ctx context.Context, start, end int64, tag string) ([]*database.Article, error)
+
+	GetLastUpdateDate(ctx context.Context) (int, error)
+	SaveLastUpdateDate(ctx context.Context, date int) error
+}
+
 type Server struct {
+	ctx          context.Context
 	pocketClient *pocket.Client
-	db           database.DBCLient
+	db           Store
 	authURL      string
 	requestToken string
 	username     string
 	password     string
 }
 
-func New(pc *pocket.Client, url string, db database.DBCLient, user, pass string) *Server {
+func New(ctx context.Context, pc *pocket.Client, url string, db Store, user, pass string) *Server {
 	return &Server{
+		ctx:          ctx,
 		pocketClient: pc,
 		authURL:      url,
 		db:           db,
@@ -98,13 +122,13 @@ func (s *Server) UpdateArticle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	date, err := s.db.GetLastUpdateDate()
+	date, err := s.db.GetLastUpdateDate(s.ctx)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, fmt.Errorf("error getting last update date: %w", err))
 		return
 	}
 
-	logrus.Infof("Updating DB from [%d]", date)
+	logrus.Debugf("updating database from [%d]", date)
 
 	response, err := s.pocketClient.GetArticles(date)
 	if err != nil {
@@ -119,8 +143,20 @@ func (s *Server) UpdateArticle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err = s.db.UpsertArticles(articleList); err != nil {
-		respondWithError(w, http.StatusBadRequest, fmt.Errorf("error updating articles: %w", err))
+	s.db.BeginBatch()
+	for _, article := range articleList {
+		// If the article has a status of deleted, then delete it in the DB
+		if article.Status == pocket.ItemStatusDeleted {
+			s.db.DeleteArticle(fmt.Sprintf("%d", article.ItemID))
+			continue
+		}
+
+		// Otherwise do an upsert
+		s.db.SaveArticle(convertArticle(article))
+	}
+
+	if err = s.db.CommitBatch(s.ctx); err != nil {
+		respondWithError(w, http.StatusInternalServerError, fmt.Errorf("error updating database: %w", err))
 		return
 	}
 
@@ -135,7 +171,7 @@ func (s *Server) DebugGetArticle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	date, err := s.db.GetLastUpdateDate()
+	date, err := s.db.GetLastUpdateDate(s.ctx)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, fmt.Errorf("error getting last update date: %w", err))
 		return
@@ -163,7 +199,7 @@ func (s *Server) GetStats(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Infof("Getting articles between %d - %d", start, end)
-	articles, err := s.db.GetArticlesByDate(start, end)
+	articles, err := s.db.GetArticlesByDate(s.ctx, start, end)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, fmt.Errorf("unable to get articles from the DB: %w", err))
 		return
@@ -201,7 +237,7 @@ func (s *Server) GetTotalStats(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Infof("Getting articles between %d - %d", start, end)
-	articles, err := s.db.GetArticlesByDate(start, end)
+	articles, err := s.db.GetArticlesByDate(s.ctx, start, end)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, fmt.Errorf("unable to get articles from the DB: %w", err))
 		return
@@ -216,7 +252,7 @@ func (s *Server) GetTotalStats(w http.ResponseWriter, r *http.Request) {
 
 	pStart, pEnd := getPreviousDate(start, end)
 	log.Infof("Getting previous articles between %d - %d", start, end)
-	articles, err = s.db.GetArticlesByDate(pStart, pEnd)
+	articles, err = s.db.GetArticlesByDate(s.ctx, pStart, pEnd)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, fmt.Errorf("unable to get previous articles from the DB: %w", err))
 		return
@@ -250,18 +286,18 @@ func (s *Server) GetTagStats(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var articles []database.Article
+	var articles []*database.Article
 
 	if tagParam != "" {
 		log.Infof("Getting articles between [%d] - [%d] for tag [%s]", start, end, tagParam)
-		articles, err = s.db.GetArticlesByTag(start, end, tagParam)
+		articles, err = s.db.GetArticlesByDateAndTag(s.ctx, start, end, tagParam)
 		if err != nil {
 			respondWithError(w, http.StatusInternalServerError, fmt.Errorf("unable to get articles from the DB: %w", err))
 			return
 		}
 	} else {
 		log.Infof("Getting articles between [%d] - [%d]", start, end)
-		articles, err = s.db.GetArticlesByDate(start, end)
+		articles, err = s.db.GetArticlesByDate(s.ctx, start, end)
 		if err != nil {
 			respondWithError(w, http.StatusInternalServerError, fmt.Errorf("unable to get articles from the DB: %w", err))
 			return
@@ -278,14 +314,14 @@ func (s *Server) GetTagStats(w http.ResponseWriter, r *http.Request) {
 	pStart, pEnd := getPreviousDate(start, end)
 	if tagParam != "" {
 		log.Infof("Getting previous articles between [%d] - [%d] for tag [%s]", pStart, pEnd, tagParam)
-		articles, err = s.db.GetArticlesByTag(pStart, pEnd, tagParam)
+		articles, err = s.db.GetArticlesByDateAndTag(s.ctx, pStart, pEnd, tagParam)
 		if err != nil {
 			respondWithError(w, http.StatusInternalServerError, fmt.Errorf("unable to get previous articles from the DB: %w", err))
 			return
 		}
 	} else {
 		log.Infof("Getting previous articles between [%d] - [%d]", pStart, pEnd)
-		articles, err = s.db.GetArticlesByDate(pStart, end)
+		articles, err = s.db.GetArticlesByDate(s.ctx, pStart, end)
 		if err != nil {
 			respondWithError(w, http.StatusInternalServerError, fmt.Errorf("unable to get previous articles from the DB: %w", err))
 			return
@@ -320,7 +356,7 @@ func (s *Server) GetItemisedStats(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Infof("Getting articles between [%d] - [%d]", start, end)
-	articles, err := s.db.GetArticlesByDate(start, end)
+	articles, err := s.db.GetArticlesByDate(s.ctx, start, end)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, fmt.Errorf("unable to get articles from the DB: %w", err))
 		return
@@ -361,7 +397,7 @@ func (s *Server) AuthMiddleware(fn http.HandlerFunc) http.HandlerFunc {
 
 func (s *Server) setUpdateDate(w http.ResponseWriter) {
 	updateTime := time.Now().Unix()
-	if err := s.db.SaveUpdateDate(updateTime); err != nil {
+	if err := s.db.SaveLastUpdateDate(s.ctx, int(updateTime)); err != nil {
 		respondWithError(w, http.StatusBadRequest, fmt.Errorf("error saving last update date: %w", err))
 		return
 	}
@@ -371,37 +407,71 @@ func (s *Server) setUpdateDate(w http.ResponseWriter) {
 	respondWithJSON(w, http.StatusOK, updateResponse{Date: updateTime})
 }
 
-// func (s *Server) getPreviousStats(start, end int64, tag string) (*PreviousStats, error) {
-// 	pStart, pEnd := getPreviousDate(start, end)
+// ConvertArticle converts the pocket article to the database article
+func convertArticle(pa pocket.Article) *database.Article {
+	var (
+		added, read int
+		err         error
+	)
 
-// 	if tag != "" {
-// 		log.Infof("Getting previous articles between [%d] - [%d] for [%s]", start, end, tag)
-// 		articles, err := s.db.GetArticlesByTag(start, end, tag)
-// 		if err != nil {
-// 			return nil, fmt.Errorf("unable to get previous articles from the DB: %w", err)
-// 		}
+	// Convert the added time to a number
+	added, err = strconv.Atoi(pa.TimeAdded)
+	if err != nil {
+		logrus.Errorf(
+			"pocket article [%d] has a bad added time [%s]",
+			pa.ItemID,
+			pa.TimeAdded,
+		)
+	}
 
-// 		tags, err := createTagsStats(pStart, pEnd, articles)
-// 		if err != nil {
-// 			return nil, fmt.Errorf("unable to create previous tags: %w", err)
-// 		}
+	// Check we have a read time, and then convert that to a number
+	if pa.TimeRead != "" {
+		read, err = strconv.Atoi(pa.TimeRead)
+		if err != nil {
+			logrus.Errorf(
+				"pocket article [%d] has a bad read time [%s]",
+				pa.ItemID,
+				pa.TimeRead,
+			)
+		}
+	}
 
-// 		return &PreviousStats{Tags: tags}, nil
-// 	}
+	// Remove the time part of the read and added times
+	sAdded := stripTime(added)
+	sRead := stripTime(read)
 
-// 	log.Infof("Getting previous articles between %d - %d", start, end)
-// 	articles, err := s.db.GetArticlesByDate(start, end)
-// 	if err != nil {
-// 		return nil, fmt.Errorf("unable to get previous articles from the DB: %w", err)
-// 	}
+	var tag string
+	for key := range pa.Tags {
+		if key == TagRead || key == TagSport || key == TagNews {
+			continue
+		}
 
-// 	stats, err := createStats(pStart, pEnd, articles)
-// 	if err != nil {
-// 		return nil, fmt.Errorf("unable to create previous stats: %w", err)
-// 	}
+		tag = key
+		break
+	}
 
-// 	return &PreviousStats{Totals: stats.Totals}, nil
-// }
+	return &database.Article{
+		ID:        fmt.Sprintf("%d", pa.ItemID),
+		URL:       pa.ResolvedURL,
+		Title:     pa.ResolvedTitle,
+		WordCount: int64(pa.WordCount),
+		DateAdded: sAdded,
+		DateRead:  sRead,
+		Tag:       tag,
+	}
+}
+
+// StripTime converts the time part of a time stamp into 00:00:00.
+func stripTime(fullTime int) int64 {
+	if fullTime == 0 {
+		return 0
+	}
+
+	t := time.Unix(int64(fullTime), 0)
+	stripped := time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, time.UTC)
+
+	return stripped.Unix()
+}
 
 func respondWithError(w http.ResponseWriter, code int, err error) {
 	respondWithJSON(w, code, APIError{Code: code, Message: err.Error()})
