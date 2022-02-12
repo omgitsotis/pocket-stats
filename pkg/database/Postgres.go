@@ -193,3 +193,79 @@ func (s *Store) SaveLastUpdateDate(ctx context.Context, date int) error {
 	_, err := s.db.Exec(ctx, q, date)
 	return err
 }
+
+func (s *Store) GetArticles(ctx context.Context, limit, offset int, emptyTags bool) ([]*Article, error) {
+	prefix := `
+		SELECT 		id, 
+					title, 
+					url, 
+					tag, 
+					word_count, 
+					date_added, 
+					date_read
+		FROM 		articles
+		
+	`
+
+	suffix := `
+		ORDER BY 	date_added
+		LIMIT 		$1
+		OFFSET 		$2
+	`
+	var q string
+	if emptyTags {
+		from := `WHERE tag = ''`
+		q = fmt.Sprintf("%s%s%s", prefix, from, suffix)
+	} else {
+		q = fmt.Sprintf("%s%s", prefix, suffix)
+	}
+
+	articles := make([]*Article, 0)
+
+	rows, err := s.db.Query(ctx, q, limit, offset)
+	if err != nil {
+		return nil, fmt.Errorf("error executing query: %w", err)
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var article Article
+		err = rows.Scan(
+			&article.ID,
+			&article.Title,
+			&article.URL,
+			&article.Tag,
+			&article.WordCount,
+			&article.DateAdded,
+			&article.DateRead,
+		)
+
+		if err != nil {
+			return nil, fmt.Errorf("error scanning row: %w", err)
+		}
+
+		articles = append(articles, &article)
+	}
+
+	if rows.Err() != nil {
+		return nil, fmt.Errorf("error reading results: %w", err)
+	}
+
+	return articles, nil
+}
+
+func (s *Store) UpdateArticleTag(ctx context.Context, id, tag string) error {
+	q := `
+		UPDATE 	articles 
+		SET		tag = $1
+		WHERE	id = $2
+	`
+
+	_, err := s.db.Exec(ctx, q, tag, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

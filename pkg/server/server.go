@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -33,8 +34,10 @@ type Store interface {
 	DeleteArticle(id string)
 
 	GetArticle(ctx context.Context, id string) (*database.Article, error)
+	GetArticles(ctx context.Context, limit, offset int, emptyTags bool) ([]*database.Article, error)
 	GetArticlesByDate(ctx context.Context, start, end int64) ([]*database.Article, error)
 	GetArticlesByDateAndTag(ctx context.Context, start, end int64, tag string) ([]*database.Article, error)
+	UpdateArticleTag(ctx context.Context, id, tag string) error
 
 	GetLastUpdateDate(ctx context.Context) (int, error)
 	SaveLastUpdateDate(ctx context.Context, date int) error
@@ -374,6 +377,59 @@ func (s *Server) GetItemisedStats(w http.ResponseWriter, r *http.Request) {
 	}
 
 	respondWithJSON(w, http.StatusOK, stats)
+}
+
+func (s *Server) GetArticles(w http.ResponseWriter, r *http.Request) {
+	limitParam := r.URL.Query().Get("limit")
+	offsetParam := r.URL.Query().Get("offset")
+	emptyTagParam := r.URL.Query().Get("empty")
+
+	limit, err := strconv.Atoi(limitParam)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	offset, err := strconv.Atoi(offsetParam)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	emptyTag := false
+	if emptyTagParam != "" {
+		emptyTag = true
+	}
+
+	articles, err := s.db.GetArticles(s.ctx, limit, offset, emptyTag)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, articles)
+}
+
+func (s *Server) UpdateArticleTag(w http.ResponseWriter, r *http.Request) {
+	id := r.URL.Query().Get("id")
+	tag := r.URL.Query().Get("tag")
+
+	if id == "" {
+		respondWithError(w, http.StatusBadRequest, errors.New("no ID parameter provided"))
+		return
+	}
+
+	if tag == "" {
+		respondWithError(w, http.StatusBadRequest, errors.New("no tag parameter provided"))
+		return
+	}
+
+	if err := s.db.UpdateArticleTag(s.ctx, id, tag); err != nil {
+		respondWithError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }
 
 func (s *Server) AuthMiddleware(fn http.HandlerFunc) http.HandlerFunc {

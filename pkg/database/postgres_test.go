@@ -284,3 +284,112 @@ func TestGetByDateRange(t *testing.T) {
 		t.Errorf("GetArticleByDateAndTag() mismatch: (-want +got):\n%s", diff)
 	}
 }
+
+func TestGetArticles(t *testing.T) {
+	ctx := context.Background()
+
+	db := database.MustConnect(ctx, postgresURL)
+	defer db.Close()
+
+	s := database.NewStore(db)
+	defer dropMigrations(db)
+
+	s.BeginBatch()
+
+	// Article read in our date range
+	s.SaveArticle(&database.Article{
+		ID:        "1",
+		URL:       "test-url",
+		Title:     "test-title",
+		Tag:       "tag",
+		WordCount: 123,
+		DateAdded: 1640044800,
+		DateRead:  1640174400,
+	})
+
+	// Article added in our date range
+	s.SaveArticle(&database.Article{
+		ID:        "2",
+		URL:       "test-url",
+		Title:     "test-title",
+		Tag:       "tag",
+		WordCount: 123,
+		DateAdded: 1640174400,
+		DateRead:  0,
+	})
+
+	// Article read in our date range (differnt tag)
+	s.SaveArticle(&database.Article{
+		ID:        "3",
+		URL:       "test-url",
+		Title:     "test-title",
+		Tag:       "",
+		WordCount: 123,
+		DateAdded: 1640044800,
+		DateRead:  1640174400,
+	})
+
+	if err := s.CommitBatch(ctx); err != nil {
+		t.Fatal(err)
+	}
+
+	want := []*database.Article{
+		{
+			ID:        "1",
+			URL:       "test-url",
+			Title:     "test-title",
+			Tag:       "tag",
+			WordCount: 123,
+			DateAdded: 1640044800,
+			DateRead:  1640174400,
+		},
+		{
+			ID:        "3",
+			URL:       "test-url",
+			Title:     "test-title",
+			Tag:       "",
+			WordCount: 123,
+			DateAdded: 1640044800,
+			DateRead:  1640174400,
+		},
+		{
+			ID:        "2",
+			URL:       "test-url",
+			Title:     "test-title",
+			Tag:       "tag",
+			WordCount: 123,
+			DateAdded: 1640174400,
+			DateRead:  0,
+		},
+	}
+
+	got, err := s.GetArticles(ctx, 10, 0, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("GetArticles() without empty tags mismatch: (-want +got):\n%s", diff)
+	}
+
+	want = []*database.Article{
+		{
+			ID:        "3",
+			URL:       "test-url",
+			Title:     "test-title",
+			Tag:       "",
+			WordCount: 123,
+			DateAdded: 1640044800,
+			DateRead:  1640174400,
+		},
+	}
+
+	got, err = s.GetArticles(ctx, 10, 0, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("GetArticles() with empty tags  mismatch: (-want +got):\n%s", diff)
+	}
+}
