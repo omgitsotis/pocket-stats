@@ -6,7 +6,7 @@ go 1.17
 
 require (
 	github.com/google/go-cmp v0.4.0
-	github.com/gorilla/handlers v0.0.0-20181012153334-350d97a79266
+	github.com/gorilla/handlers v1.3.0
 	github.com/gorilla/mux v0.0.0-20181012153151-deb579d6e030
 	github.com/jackc/pgx/v4 v4.14.1
 	github.com/pkg/errors v0.8.1
